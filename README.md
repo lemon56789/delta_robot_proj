@@ -26,19 +26,16 @@
 ---
 
 ## 🧩 시스템 구조
-Target Trajectory
-↓
-Controller (Arduino)
-↓
-Real Robot (Hardware)
-↓
-Measured Data
-↓
-Virtual Sensor (AI Model)
-↓
-Correction Value
-↓
-Feedback to Controller
+```mermaid
+flowchart LR
+    A[Target Trajectory] --> B[Controller<br/>Arduino]
+    B --> C[Real Robot<br/>Hardware]
+    C --> D[Measured Data]
+    D --> E[Virtual Sensor<br/>AI Model]
+    E --> F[Correction Value]
+    F --> G[Feedback to Controller]
+    G --> B
+```
 
 ---
 
@@ -81,6 +78,51 @@ delta-robot-virtual-sensing/
 ---
 
 ## 🚀 진행 단계
+
+```mermaid
+flowchart LR
+    subgraph A["1. 설계"]
+        A0["Status: Planned"]
+        A1["[ ] 기구 규격 정의"]
+        A2["[ ] 역기구학 수식 정리"]
+        A3["[ ] 모터 및 재료 선정"]
+    end
+
+    subgraph B["2. 시뮬레이션"]
+        B0["Status: Planned"]
+        B1["[ ] 구조 해석"]
+        B2["[ ] 동역학 해석"]
+        B3["[ ] 디지털 트윈 구축"]
+    end
+
+    subgraph C["3. 제작"]
+        C0["Status: Planned"]
+        C1["[ ] 3D 프린팅 및 조립"]
+        C2["[ ] 아두이노 제어 구현"]
+    end
+
+    subgraph D["4. 가상센싱"]
+        D0["Status: Planned"]
+        D1["[ ] 데이터 비교 및 학습"]
+        D2["[ ] 오차 보정"]
+    end
+
+    subgraph E["5. 검증"]
+        E0["Status: Planned"]
+        E1["[ ] 궤적 오차 분석"]
+        E2["[ ] 시스템 신뢰성 평가"]
+    end
+
+    A --> B --> C --> D --> E
+```
+
+진행 현황은 아래 체크박스로 바로 갱신할 수 있습니다.
+
+- [ ] 1단계 설계 완료
+- [ ] 2단계 시뮬레이션 완료
+- [ ] 3단계 제작 완료
+- [ ] 4단계 가상센싱 완료
+- [ ] 5단계 검증 완료
 
 ### 1단계: 설계
 - 기구 규격 정의
