@@ -19,7 +19,7 @@
 - +z direction: direction coming out through the base
 - workspace direction: `-z`
 - right-hand rule 사용 여부: `yes`
-- 비고: 모든 position-related fields는 `base_frame` 기준으로 기록한다. `sB`는 base motor를 vertex로 갖는 정삼각형, `sP`는 platform의 정삼각형, `uB`는 base 중심에서 꼭짓점까지의 길이, `uP`는 platform 중심에서 꼭짓점까지의 길이, `wB`는 base 중심에서 변까지의 길이, `wP`는 platform 중심에서 변까지의 길이, `L`은 link arm length, `l`은 crank의 parallelogram length를 의미한다. `B1`, `B2`, `B3`는 `sB` 각 변의 중심에 위치한 step motor 위치이며, `B1`은 `O`에서 `-y` 방향으로 향할 때 만나는 점이고 이후 반시계방향으로 `B2`, `B3`가 배치된다. `P1`, `P2`, `P3`는 각각 `B1`, `B2`, `B3`에 연결된 platform 점이며 `sP`의 꼭짓점이다.
+- 비고: 모든 position-related fields는 `base_frame` 기준으로 기록한다. `sB`는 base 정삼각형의 변 길이, `sP`는 platform 정삼각형의 변 길이, `uB`는 base 중심에서 꼭짓점까지의 길이, `uP`는 platform 중심에서 꼭짓점까지의 길이, `wB`는 base 중심에서 변까지의 길이, `wP`는 platform 중심에서 변까지의 길이, `L`은 link arm length, `l`은 crank의 parallelogram length를 의미한다. `B1`, `B2`, `B3`는 `sB` 각 변의 중심에 위치한 step motor 위치이며, `B1`은 `O`에서 `-y` 방향으로 향할 때 만나는 점이고 이후 반시계방향으로 `B2`, `B3`가 배치된다. `P1`, `P2`, `P3`는 각각 `B1`, `B2`, `B3`에 연결된 platform 점이며 `sP`의 꼭짓점이다.
 
 ## 2. Timestamp Policy
 - timestamp field name: `time`
@@ -42,7 +42,7 @@
 - input range limits:
 - output angle limits:
 - fail behavior: `reject`
-- notes: 입력 position은 `base_frame` 기준이며 unit은 `mm`이다. 출력 angle unit은 `deg`이다.
+- notes: 입력 position은 `base_frame` 기준이며 unit은 `mm`이다. 출력 angle unit은 `deg`이다. `theta_i`는 arm `i`의 local actuation plane에서 정의되는 upper arm 회전각이다. `theta_i = 0 deg`는 upper arm이 `base plane`에 놓인 자세이고, `theta_i = +90 deg`는 upper arm이 workspace direction인 `-z` 방향과 평행한 자세다. `theta_i`의 양의 방향은 upper arm이 `base plane`에서 workspace 방향으로 내려가는 회전 방향이다.
 
 ## 4. Real Measurement Definition
 - theta_meas source: (`encoder` / `estimation`)

@@ -71,6 +71,8 @@ delta-robot-virtual-sensing/
 ├─ hardware/
 ├─ cad/
 ├─ data/
+│  └─ vision/
+│     └─ raw/
 ├─ control/
 ├─ virtual_sensor/
 └─ experiments/
@@ -78,6 +80,8 @@ delta-robot-virtual-sensing/
 ---
 
 ## 🚀 진행 단계
+
+상세 실행 계획과 현재 우선순위는 `docs/roadmap.md`를 기준으로 관리한다.
 
 ```mermaid
 flowchart LR
@@ -141,6 +145,8 @@ flowchart LR
 ### 4단계: 가상센싱
 - 데이터 비교 및 학습
 - 오차 보정
+
+초기 학습 및 검증 단계에서는 외부 비전 기반 `XY ground-truth` 측정계를 사용해 엔드이펙터의 실제 위치 기준값을 확보할 수 있다. 운영 단계에서는 해당 외부 측정계를 제거하고, 모터 각도 실측값과 시뮬레이션 데이터를 활용한 가상센싱 기반 보정만 사용한다.
 
 ### 5단계: 검증
 - 궤적 오차 분석
