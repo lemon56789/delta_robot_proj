@@ -259,15 +259,22 @@ root selection:
 
 현재 상태 요약:
 - Stage 1 설계 기준 확정: 완료
-- Stage 2 운동학 정의 및 구현: nominal geometry 및 IK 최소 구현 완료, FK/정식 검증은 미완료
-- Stage 3 FK 검증 및 기본 해석: 미착수
+- Stage 2 운동학 정의 및 구현: nominal geometry, IK, workspace/angle range 진단까지 1차 완료
+- Stage 3 FK 검증 및 기본 해석: FK 최소 구현 및 round-trip/workspace 검증 진행 중
 - Stage 4 시뮬레이션 및 데이터 경로 정리: 부분 완료
 - Stage 5 외부 ground-truth 측정계 구축: 문서화 완료, 구현 미착수
-- Stage 6 fake pipeline 구성: 미착수
+- Stage 6 fake pipeline 구성: 최소 end-to-end 데이터 경로 구현 완료
 - Stage 7 실제 데이터 수집: 미착수
 - Stage 8 가상센서 학습 및 보정: 미착수
 - Stage 9 폐루프 적용 및 성능 검증: 미착수
 - Stage 10 외부 측정계 제거 후 운영 검증: 미착수
+
+현재 구현 기준 핵심 상태:
+- `kinematics/geometry.py`, `kinematics/inverse_kinematics.py`에 nominal geometry와 IK가 반영되어 있다.
+- `kinematics/forward_kinematics.py`, `kinematics/validate_roundtrip.py`, `kinematics/workspace_sweep.py`로 FK, 왕복 검증, workspace sweep이 가능하다.
+- 현재 angle range는 `hardware-safe provisional: 0..90 deg`, `nominal-analysis candidate: -10..90 deg`로 분리해 관리한다.
+- `experiments/fake_pipeline.py`가 현재 CSV 계약을 따르는 fake dataset CSV/JSON을 생성한다.
+- `virtual_sensor/dataset.py`, `virtual_sensor/check_dataset.py`로 fake pipeline CSV를 읽고 feature/target shape와 NaN 여부를 확인할 수 있다.
 
 ## 10) 개발 및 변경 원칙
 AGENTS.md 기준 핵심 원칙:
@@ -289,11 +296,11 @@ AGENTS.md 기준 핵심 원칙:
 
 ## 12) 바로 다음 작업
 우선순위:
-1. FK 최소 구현을 추가하고 IK→FK 왕복 검증을 붙인다.
-2. sample/workspace 검증 스크립트를 추가해 reachable 영역과 branch 선택을 점검한다.
+1. `virtual_sensor/`에 baseline model 학습/추론 뼈대를 추가하고 현재 fake dataset을 실제 입력으로 연결한다.
+2. fake pipeline dataset에 대해 train/validation split, sequence windowing, metadata 기록 기준을 정한다.
 3. `theta_cmd`와 실제 모터 구동축 명령 매핑을 하드웨어 기준으로 정리한다.
-4. fake pipeline 범위와 출력 형식을 계획서로 고정한다.
-5. 현재 CSV 계약에 맞는 fake dataset 생성 스크립트를 구현한다.
+4. 실제 hardware/vision 데이터 수집 전 필요한 logging path와 alignment 규칙을 다시 점검한다.
+5. workspace 경계와 특이점 근처 검증을 넓혀 nominal range와 hardware 허용 범위 연결 근거를 더 확보한다.
 
 BLOCKER 가능성이 있는 항목:
 - 모터 축과 `theta_cmd`의 실제 연결이 확정되지 않으면 hardware-level command mapping은 보류해야 한다.

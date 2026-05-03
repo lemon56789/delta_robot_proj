@@ -32,13 +32,13 @@
 10. 외부 측정계 제거 후 운영 검증
 
 ## 4-A. Current Status Snapshot
-- 기준일: `2026-05-03`
+- 기준일: `2026-05-04`
 - Stage 1 설계 기준 확정: 완료
 - Stage 2 운동학 정의 및 구현: 진행 중
-- Stage 3 FK 검증 및 기본 해석: 미착수
+- Stage 3 FK 검증 및 기본 해석: 진행 중
 - Stage 4 시뮬레이션 및 데이터 경로 정리: 부분 완료
 - Stage 5 외부 ground-truth 측정계 구축: 문서화 완료, 구현 미착수
-- Stage 6 fake pipeline 구성: 미착수
+- Stage 6 fake pipeline 구성: 진행 중
 - Stage 7 실제 데이터 수집: 미착수
 - Stage 8 가상센서 학습 및 보정: 미착수
 - Stage 9 폐루프 적용 및 성능 검증: 미착수
@@ -48,8 +48,11 @@
 - `docs/system_data_flow.md`, `docs/ik_structure_note.md`, `docs/vision_tracking.md`가 현재 SoT 역할을 수행한다.
 - nominal geometry parameter `L=125.0 mm`, `l=300.0 mm`, `wB=24.051 mm`, `uP=27.177 mm`가 코드 기준값으로 반영되었다.
 - `kinematics/geometry.py`에 geometry dataclass와 nominal parameter가 추가되었다.
-- `kinematics/inverse_kinematics.py`에 `delta_ik(x_mm, y_mm, z_mm)` 최소 구현이 추가되었다.
-- sample point에 대해 IK 결과가 계산되는 최소 실행 검증을 수행했다.
+- `kinematics/inverse_kinematics.py`에 `delta_ik(x_mm, y_mm, z_mm)` 최소 구현과 arm별 reject 진단이 추가되었다.
+- `kinematics/forward_kinematics.py`, `kinematics/validate_roundtrip.py`, `kinematics/workspace_sweep.py`가 추가되어 IK↔FK round-trip 검증과 workspace sweep이 가능해졌다.
+- `0..90 deg`를 `hardware-safe provisional range`, `-10..90 deg`를 `nominal-analysis candidate range`로 분리해 문서화했다.
+- `experiments/fake_pipeline.py`가 current CSV 계약을 따르는 end-to-end fake dataset CSV/JSON을 생성한다.
+- `virtual_sensor/dataset.py`, `virtual_sensor/check_dataset.py`로 fake pipeline CSV를 읽는 최소 loader와 shape check 경로를 확보했다.
 
 ## 5. Stage 1. 설계 기준 확정
 ### Goal
@@ -102,9 +105,10 @@
 - nominal geometry parameter는 현재 `L=125.0 mm`, `l=300.0 mm`, `wB=24.051 mm`, `uP=27.177 mm`로 정의되어 있다.
 - `kinematics/geometry.py`에서 geometry dataclass와 nominal parameter 상수를 제공한다.
 - `kinematics/inverse_kinematics.py`에서 문서 기준 `E/F/G + 2atan(t)` 구조의 IK가 구현되어 있다.
-- `reject` 처리, 임시 working range `0 deg <= theta_i <= 90 deg`, `previous_theta_deg` 기반 연속성 선택이 코드에 반영되어 있다.
+- `reject` 처리, arm별 failure diagnostic, `previous_theta_deg` 기반 연속성 선택이 코드에 반영되어 있다.
 - 간단한 sample point 실행 검증은 완료되었다.
-- 아직 FK, 정식 테스트 스크립트, workspace sweep 검증은 없다.
+- workspace sweep과 angle range 진단을 통해 현재 nominal analysis 기준 range 후보 `-10 deg <= theta_i <= 90 deg`를 확보했다.
+- 하드웨어 확정 전까지는 `0 deg <= theta_i <= 90 deg`를 hardware-safe provisional range로 유지한다.
 
 ## 7. Stage 3. FK 검증 및 기본 해석
 ### Goal
@@ -128,8 +132,11 @@ FK를 정리하고, IK↔FK 왕복 검증으로 운동학 일관성을 확인한
 - 주요 workspace 점에서 큰 모순이 없다
 
 ### Current Status
-- 아직 구현되지 않았다.
-- 다음 우선순위는 FK 최소 구현과 IK→FK 왕복 검증이다.
+- `kinematics/forward_kinematics.py`에 수치해석 기반 FK 최소 구현이 추가되었다.
+- `kinematics/validate_roundtrip.py`에서 sample point 기준 IK→FK 왕복 검증이 가능하다.
+- `kinematics/workspace_sweep.py`에서 coarse sweep, `z=-260 mm` band sweep, IK reject cause 진단, `theta_min` sweep을 수행할 수 있다.
+- 현재 coarse sweep과 band sweep에서는 FK 미수렴보다 angle range 제약이 주요 경계 요인으로 관찰된다.
+- 남은 작업은 더 넓은 workspace 검증, 특이점/경계 근처 해석, 하드웨어 허용 범위와 nominal analysis 범위의 연결이다.
 
 ## 8. Stage 4. 시뮬레이션 및 데이터 경로 정리
 ### Goal
@@ -195,6 +202,13 @@ FK를 정리하고, IK↔FK 왕복 검증으로 운동학 일관성을 확인한
 - CSV 형식이 현재 계약과 일치한다
 - virtual sensor 학습/추론 입출력 구조를 점검할 수 있다
 
+### Current Status
+- `experiments/fake_pipeline.py`가 deterministic trajectory, IK, fake `theta_meas`, FK 기반 `sim_x/y/z`, `error_x/y/z`를 생성한다.
+- 결과는 `data/fake_pipeline/fake_pipeline_sample_2026-05-04.csv`와 sidecar JSON으로 저장된다.
+- 현재 목적은 realistic sensor model이 아니라 CSV 계약과 end-to-end wiring 검증이다.
+- `virtual_sensor/dataset.py`와 `virtual_sensor/check_dataset.py`로 해당 CSV를 읽어 feature/target shape, NaN 여부, 기초 통계를 확인할 수 있다.
+- correction model 자체는 아직 없으므로 Stage 6은 최소 데이터 경로 확보까지 진행된 상태다.
+
 ## 11. Stage 7. 실제 데이터 수집
 ### Goal
 실제 로봇, 시뮬레이션, 외부 ground-truth를 연결한 학습/검증용 데이터셋을 구축한다.
@@ -236,6 +250,10 @@ FK를 정리하고, IK↔FK 왕복 검증으로 운동학 일관성을 확인한
 ### Exit Criteria
 - baseline 대비 오차 감소가 수치로 확인된다
 - 모델 입출력이 현재 시스템 계약과 맞는다
+
+### Current Status
+- 아직 baseline model, training code, evaluation metric 구현은 없다.
+- 다만 `virtual_sensor/`에는 fake pipeline CSV를 읽는 최소 loader와 shape check 경로가 추가되어 모델 입력 구조는 선행 검증 가능하다.
 
 ## 13. Stage 9. 폐루프 적용 및 성능 검증
 ### Goal

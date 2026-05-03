@@ -1,0 +1,58 @@
+{
+  "row_count": 180,
+  "time": {
+    "dt_ms": 20,
+    "start_ms": 0,
+    "end_ms": 3580
+  },
+  "trajectory": {
+    "type": "deterministic_lissajous_like",
+    "x_min_mm": -15.0,
+    "x_max_mm": 15.0,
+    "y_min_mm": -11.998458736039522,
+    "y_max_mm": 11.99845873603952,
+    "z_min_mm": -228.0,
+    "z_max_mm": -212.0
+  },
+  "angle_limits": {
+    "theta_min_deg": 0.0,
+    "theta_max_deg": 90.0,
+    "range_type": "hardware-safe provisional"
+  },
+  "fake_measurement_model": {
+    "theta_bias_deg": [
+      0.8,
+      -0.6,
+      0.4
+    ],
+    "theta_lag_alpha": 0.82,
+    "theta_wobble_deg": [
+      0.35,
+      0.25,
+      -0.3
+    ]
+  },
+  "csv_columns": [
+    "time",
+    "target_x",
+    "target_y",
+    "target_z",
+    "theta1_cmd",
+    "theta2_cmd",
+    "theta3_cmd",
+    "theta1_meas",
+    "theta2_meas",
+    "theta3_meas",
+    "sim_x",
+    "sim_y",
+    "sim_z",
+    "error_x",
+    "error_y",
+    "error_z"
+  ],
+  "error_summary": {
+    "max_abs_error_x_mm": 17.803965987066174,
+    "max_abs_error_y_mm": 17.794101332838352,
+    "max_abs_error_z_mm": 48.59315502854179
+  }
+}
