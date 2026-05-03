@@ -41,8 +41,11 @@
   3. `theta3_cmd`
 - input range limits:
 - output angle limits:
+  - hardware-confirmed angle limits: not yet finalized
+  - hardware-safe provisional limits: `0 deg <= theta_i <= 90 deg`
+  - nominal-analysis angle limits: `-10 deg <= theta_i <= 90 deg`
 - fail behavior: `reject`
-- notes: 입력 position은 `base_frame` 기준이며 unit은 `mm`이다. 출력 angle unit은 `deg`이다. `theta_i`는 arm `i`의 local actuation plane에서 정의되는 upper arm 회전각이다. `theta_i = 0 deg`는 upper arm이 `base plane`에 놓인 자세이고, `theta_i = +90 deg`는 upper arm이 workspace direction인 `-z` 방향과 평행한 자세다. `theta_i`의 양의 방향은 upper arm이 `base plane`에서 workspace 방향으로 내려가는 회전 방향이다.
+- notes: 입력 position은 `base_frame` 기준이며 unit은 `mm`이다. 출력 angle unit은 `deg`이다. `theta_i`는 arm `i`의 local actuation plane에서 정의되는 upper arm 회전각이다. `theta_i = 0 deg`는 upper arm이 `base plane`에 놓인 자세이고, `theta_i = +90 deg`는 upper arm이 workspace direction인 `-z` 방향과 평행한 자세다. `theta_i`의 양의 방향은 upper arm이 `base plane`에서 workspace 방향으로 내려가는 회전 방향이다. 현재 `0 deg <= theta_i <= 90 deg`는 hardware-safe provisional limit로 유지하고, nominal geometry + workspace sweep 기준 분석용 후보 범위는 `-10 deg <= theta_i <= 90 deg`로 둔다. 최종 hardware-confirmed range는 실제 조립, 간섭, 구동 제약 확인 후 확정한다.
 
 ## 4. Real Measurement Definition
 - theta_meas source: (`encoder` / `estimation`)

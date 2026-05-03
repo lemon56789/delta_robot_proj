@@ -31,6 +31,26 @@
 9. 폐루프 적용 및 성능 검증
 10. 외부 측정계 제거 후 운영 검증
 
+## 4-A. Current Status Snapshot
+- 기준일: `2026-05-03`
+- Stage 1 설계 기준 확정: 완료
+- Stage 2 운동학 정의 및 구현: 진행 중
+- Stage 3 FK 검증 및 기본 해석: 미착수
+- Stage 4 시뮬레이션 및 데이터 경로 정리: 부분 완료
+- Stage 5 외부 ground-truth 측정계 구축: 문서화 완료, 구현 미착수
+- Stage 6 fake pipeline 구성: 미착수
+- Stage 7 실제 데이터 수집: 미착수
+- Stage 8 가상센서 학습 및 보정: 미착수
+- Stage 9 폐루프 적용 및 성능 검증: 미착수
+- Stage 10 외부 측정계 제거 후 운영 검증: 미착수
+
+현재 구현 기준 핵심 상태:
+- `docs/system_data_flow.md`, `docs/ik_structure_note.md`, `docs/vision_tracking.md`가 현재 SoT 역할을 수행한다.
+- nominal geometry parameter `L=125.0 mm`, `l=300.0 mm`, `wB=24.051 mm`, `uP=27.177 mm`가 코드 기준값으로 반영되었다.
+- `kinematics/geometry.py`에 geometry dataclass와 nominal parameter가 추가되었다.
+- `kinematics/inverse_kinematics.py`에 `delta_ik(x_mm, y_mm, z_mm)` 최소 구현이 추가되었다.
+- sample point에 대해 IK 결과가 계산되는 최소 실행 검증을 수행했다.
+
 ## 5. Stage 1. 설계 기준 확정
 ### Goal
 전체 구현이 동일한 기준 위에서 돌아가도록 좌표계, 기구 변수, 인터페이스, CSV 계약을 먼저 고정한다.
@@ -78,6 +98,14 @@
 - reject 조건과 해 선택 규칙이 코드에 반영된다
 - sample point에 대해 일관된 결과가 나온다
 
+### Current Status
+- nominal geometry parameter는 현재 `L=125.0 mm`, `l=300.0 mm`, `wB=24.051 mm`, `uP=27.177 mm`로 정의되어 있다.
+- `kinematics/geometry.py`에서 geometry dataclass와 nominal parameter 상수를 제공한다.
+- `kinematics/inverse_kinematics.py`에서 문서 기준 `E/F/G + 2atan(t)` 구조의 IK가 구현되어 있다.
+- `reject` 처리, 임시 working range `0 deg <= theta_i <= 90 deg`, `previous_theta_deg` 기반 연속성 선택이 코드에 반영되어 있다.
+- 간단한 sample point 실행 검증은 완료되었다.
+- 아직 FK, 정식 테스트 스크립트, workspace sweep 검증은 없다.
+
 ## 7. Stage 3. FK 검증 및 기본 해석
 ### Goal
 FK를 정리하고, IK↔FK 왕복 검증으로 운동학 일관성을 확인한다.
@@ -98,6 +126,10 @@ FK를 정리하고, IK↔FK 왕복 검증으로 운동학 일관성을 확인한
 ### Exit Criteria
 - IK 결과를 FK에 넣었을 때 위치가 허용 오차 안에서 복원된다
 - 주요 workspace 점에서 큰 모순이 없다
+
+### Current Status
+- 아직 구현되지 않았다.
+- 다음 우선순위는 FK 최소 구현과 IK→FK 왕복 검증이다.
 
 ## 8. Stage 4. 시뮬레이션 및 데이터 경로 정리
 ### Goal

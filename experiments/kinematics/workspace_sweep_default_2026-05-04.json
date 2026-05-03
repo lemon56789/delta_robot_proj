@@ -1,0 +1,88 @@
+{
+  "sweep_config": {
+    "x_min_mm": -30.0,
+    "x_max_mm": 30.0,
+    "x_step_mm": 15.0,
+    "y_min_mm": -30.0,
+    "y_max_mm": 30.0,
+    "y_step_mm": 15.0,
+    "z_min_mm": -260.0,
+    "z_max_mm": -180.0,
+    "z_step_mm": 20.0,
+    "roundtrip_tolerance_mm": 0.001
+  },
+  "total_points": 125,
+  "ok_points": 114,
+  "fail_points": 11,
+  "reason_counts": {
+    "ik_reject": 11,
+    "ok": 114
+  },
+  "ok_metrics": {
+    "max_roundtrip_error_mm": 1.6084207798391108e-09,
+    "avg_roundtrip_error_mm": 2.6269284932998285e-10,
+    "max_fk_iterations": 5
+  },
+  "sample_failures": [
+    {
+      "x_mm": -30.0,
+      "y_mm": -30.0,
+      "z_mm": -260.0,
+      "reason": "ik_reject"
+    },
+    {
+      "x_mm": -15.0,
+      "y_mm": -30.0,
+      "z_mm": -260.0,
+      "reason": "ik_reject"
+    },
+    {
+      "x_mm": 15.0,
+      "y_mm": -30.0,
+      "z_mm": -260.0,
+      "reason": "ik_reject"
+    },
+    {
+      "x_mm": 30.0,
+      "y_mm": -30.0,
+      "z_mm": -260.0,
+      "reason": "ik_reject"
+    },
+    {
+      "x_mm": -30.0,
+      "y_mm": -15.0,
+      "z_mm": -260.0,
+      "reason": "ik_reject"
+    },
+    {
+      "x_mm": 30.0,
+      "y_mm": -15.0,
+      "z_mm": -260.0,
+      "reason": "ik_reject"
+    },
+    {
+      "x_mm": -30.0,
+      "y_mm": 30.0,
+      "z_mm": -260.0,
+      "reason": "ik_reject"
+    },
+    {
+      "x_mm": -15.0,
+      "y_mm": 30.0,
+      "z_mm": -260.0,
+      "reason": "ik_reject"
+    },
+    {
+      "x_mm": 0.0,
+      "y_mm": 30.0,
+      "z_mm": -260.0,
+      "reason": "ik_reject"
+    },
+    {
+      "x_mm": 15.0,
+      "y_mm": 30.0,
+      "z_mm": -260.0,
+      "reason": "ik_reject"
+    }
+  ]
+}
