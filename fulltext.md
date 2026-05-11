@@ -1,7 +1,7 @@
 # Delta Robot Virtual Sensing - Full Context
 
 문서 목적: 외부 AI 모델이 이 리포지토리를 빠르게 이해하고, 분석/코드 지원을 수행할 수 있도록 프로젝트 전반을 한 파일로 요약한다.
-갱신일: 2026-05-03
+갱신일: 2026-05-11
 
 주의: 이 파일은 요약본이다. 상충 시 Source of Truth는 `docs/*` -> `AGENTS.md` -> `README.md` -> 코드 순서를 따른다.
 
@@ -42,6 +42,7 @@ Target Trajectory
 - `docs/daily_notes/`: 날짜별 변경 기록
 - `docs/templates/`: 계획서와 Daily Note 템플릿
 - `docs/references/`: 참고 논문 및 외부 자료 보관 경로. SoT나 채택안을 의미하지 않는다.
+- `docs/workspace_envelope.md`: 설치 높이와 `XY` 작업공간 관계를 정리한 설계 참고 문서
 - `kinematics/`: 역기구학/순기구학 구현 및 검증 예정 위치
 - `simulation/`: RecurDyn, Nastran, Simscape 기반 시뮬레이션 자산 예정 위치
 - `hardware/`: 실물 제작, 배선, BOM, 조립 자료
@@ -224,7 +225,7 @@ arm 1 예시:
 
 root selection:
 - 판별식 `E_i^2 + F_i^2 - G_i^2 < 0`이면 reject
-- 현재 hardware-safe provisional range는 `0 deg <= theta_i <= 90 deg`
+- 현재 hardware-safe provisional range는 `-45 deg <= theta_i <= 90 deg`
 - downward-working branch에 속하는 해만 유효 후보로 둔다.
 - 후보가 둘이면 `previous_theta_i`와 가장 가까운 해를 선택한다.
 - 후보가 없으면 reject한다.
@@ -240,7 +241,7 @@ root selection:
 - 구현은 각 arm별 일반화된 `E_i`, `F_i`, `G_i` 식, 판별식 기반 reject, 임시 각도 범위, `previous_theta_deg` 기반 해 선택을 사용한다.
 - 반각 해를 프로젝트 `+theta = downward` 정의에 맞추기 위해 코드에서 각도 부호 보정을 적용한다.
 - 간단한 sample point에 대해 실제 각도 계산이 수행되는 최소 실행 검증은 완료되었다.
-- 현재 nominal-analysis candidate range는 `-10 deg <= theta_i <= 90 deg`이고, hardware-safe provisional range는 `0 deg <= theta_i <= 90 deg`로 분리해 관리한다.
+- 현재 nominal-analysis candidate range와 hardware-safe provisional range는 모두 `-45 deg <= theta_i <= 90 deg`로 관리하고, hardware-confirmed range는 별도 미확정 상태로 둔다.
 
 ## 9) 프로젝트 로드맵
 현재 기준 문서: `docs/roadmap.md`
@@ -263,7 +264,7 @@ root selection:
 - Stage 3 FK 검증 및 기본 해석: FK 최소 구현 및 round-trip/workspace 검증 진행 중
 - Stage 4 시뮬레이션 및 데이터 경로 정리: 부분 완료
 - Stage 5 외부 ground-truth 측정계 구축: 문서화 완료, 구현 미착수
-- Stage 6 fake pipeline 구성: 최소 end-to-end 데이터 경로 구현 완료
+- Stage 6 fake pipeline 구성: 진행 중
 - Stage 7 실제 데이터 수집: 미착수
 - Stage 8 가상센서 학습 및 보정: 미착수
 - Stage 9 폐루프 적용 및 성능 검증: 미착수
@@ -272,9 +273,11 @@ root selection:
 현재 구현 기준 핵심 상태:
 - `kinematics/geometry.py`, `kinematics/inverse_kinematics.py`에 nominal geometry와 IK가 반영되어 있다.
 - `kinematics/forward_kinematics.py`, `kinematics/validate_roundtrip.py`, `kinematics/workspace_sweep.py`로 FK, 왕복 검증, workspace sweep이 가능하다.
-- 현재 angle range는 `hardware-safe provisional: 0..90 deg`, `nominal-analysis candidate: -10..90 deg`로 분리해 관리한다.
+- 현재 angle range는 `hardware-safe provisional: -45..90 deg`, `nominal-analysis candidate: -45..90 deg`로 관리하고, `hardware-confirmed`는 별도 확정 전 상태로 둔다.
+- `docs/workspace_envelope.md`에 설치 높이와 `XY` reachable area 참고 결과가 정리되어 있으며, 현재 기준 추천 설치 높이는 일반적인 pick-and-place 기준 `H = 255 mm`, 대안은 `H = 265 mm`다.
 - `experiments/fake_pipeline.py`가 현재 CSV 계약을 따르는 fake dataset CSV/JSON을 생성한다.
 - `virtual_sensor/dataset.py`, `virtual_sensor/check_dataset.py`로 fake pipeline CSV를 읽고 feature/target shape와 NaN 여부를 확인할 수 있다.
+- 다만 SoT 로드맵 기준으로는 fake pipeline 단계가 아직 baseline model, train/validation split, metadata 기준 정리 전이므로 Stage 6은 `진행 중`으로 둔다.
 
 ## 10) 개발 및 변경 원칙
 AGENTS.md 기준 핵심 원칙:
@@ -310,4 +313,4 @@ BLOCKER 가능성이 있는 항목:
 ## 13) 유지보수 규칙
 - 이 파일은 외부 AI 분석용 요약본이다.
 - 구조, 규약, 데이터 계약, 로드맵 상태가 바뀌면 함께 갱신한다.
-- 상세 근거는 `docs/system_data_flow.md`, `docs/vision_tracking.md`, `docs/ik_structure_note.md`, `docs/roadmap.md`, `AGENTS.md`를 우선 참조한다.
+- 상세 근거는 `docs/system_data_flow.md`, `docs/vision_tracking.md`, `docs/ik_structure_note.md`, `docs/workspace_envelope.md`, `docs/roadmap.md`, `AGENTS.md`를 우선 참조한다.

@@ -50,7 +50,7 @@
 - `kinematics/geometry.py`에 geometry dataclass와 nominal parameter가 추가되었다.
 - `kinematics/inverse_kinematics.py`에 `delta_ik(x_mm, y_mm, z_mm)` 최소 구현과 arm별 reject 진단이 추가되었다.
 - `kinematics/forward_kinematics.py`, `kinematics/validate_roundtrip.py`, `kinematics/workspace_sweep.py`가 추가되어 IK↔FK round-trip 검증과 workspace sweep이 가능해졌다.
-- `0..90 deg`를 `hardware-safe provisional range`, `-10..90 deg`를 `nominal-analysis candidate range`로 분리해 문서화했다.
+- `-45..90 deg`를 현재 `hardware-safe provisional range`이자 `nominal-analysis candidate range`로 문서화했다.
 - `experiments/fake_pipeline.py`가 current CSV 계약을 따르는 end-to-end fake dataset CSV/JSON을 생성한다.
 - `virtual_sensor/dataset.py`, `virtual_sensor/check_dataset.py`로 fake pipeline CSV를 읽는 최소 loader와 shape check 경로를 확보했다.
 
@@ -107,8 +107,8 @@
 - `kinematics/inverse_kinematics.py`에서 문서 기준 `E/F/G + 2atan(t)` 구조의 IK가 구현되어 있다.
 - `reject` 처리, arm별 failure diagnostic, `previous_theta_deg` 기반 연속성 선택이 코드에 반영되어 있다.
 - 간단한 sample point 실행 검증은 완료되었다.
-- workspace sweep과 angle range 진단을 통해 현재 nominal analysis 기준 range 후보 `-10 deg <= theta_i <= 90 deg`를 확보했다.
-- 하드웨어 확정 전까지는 `0 deg <= theta_i <= 90 deg`를 hardware-safe provisional range로 유지한다.
+- workspace sweep과 설치 높이/workspace envelope 검토를 통해 현재 provisional/analysis 기준 range `-45 deg <= theta_i <= 90 deg`를 사용한다.
+- hardware-confirmed range는 실제 조립, 반복 구동, 간섭 및 구동 제약 확인 후 별도 확정한다.
 
 ## 7. Stage 3. FK 검증 및 기본 해석
 ### Goal

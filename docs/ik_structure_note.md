@@ -33,7 +33,7 @@
 4. 판별식 `D_i = E_i^2 + F_i^2 - G_i^2`를 계산하고, `D_i < 0`이면 `reject`한다.
 5. `t_i = (-F_i ± sqrt(D_i)) / (G_i - E_i)`로 두 해를 계산한다.
 6. `theta_i = 2 atan(t_i)`로 각도를 복원한다.
-7. 현재 hardware-safe provisional range `0 deg <= theta_i <= 90 deg`와 `downward-working branch` 조건으로 유효한 해만 남긴다.
+7. 현재 hardware-safe provisional range `-45 deg <= theta_i <= 90 deg`와 `downward-working branch` 조건으로 유효한 해만 남긴다.
 8. 유효 후보가 둘이면 `previous_theta_i`와 가장 가까운 해를 선택한다.
 9. 세 arm 모두 유효하면 `(theta1, theta2, theta3)`를 반환하고, 하나라도 실패하면 `reject`한다.
 
@@ -207,8 +207,8 @@ platform center를 `(x, y, z)`라고 두고, platform triangle `sP`가 base와 �
 
 - `theta_cmd`와 실제 모터 구동축/드라이버 명령의 정확한 연결
 - `downward-working branch`의 구현 판정식을 더 엄밀하게 둘지 여부
-- hardware-safe provisional range `0 deg <= theta_i <= 90 deg`의 최종 하드웨어 범위 갱신
-- nominal-analysis range `-10 deg <= theta_i <= 90 deg`를 최종 채택할지 여부
+- hardware-safe provisional range `-45 deg <= theta_i <= 90 deg`의 최종 hardware-confirmed 범위 검증
+- 현재 provisional/analysis range를 실제 조립 및 반복 구동 결과와 어떻게 연결할지 여부
 - FK 기반 역검증 절차
 
 ## 12. Arm 1 Expansion Note
@@ -306,7 +306,7 @@ arm 1 기준 좌표식은 다음과 같다.
 
 1. 판별식 `E_i^2 + F_i^2 - G_i^2`가 `0`보다 작으면 해당 목표점은 도달 불가능으로 보고 `reject`한다.
 2. 판별식을 통과하면 두 해 `theta_i^(+)`, `theta_i^(-)`를 계산한다.
-3. 현재 단계의 hardware-safe provisional range인 `0 deg <= theta_i <= 90 deg`를 만족하는 해만 유효 후보로 남긴다. 다만 nominal geometry 기준 workspace sweep에서는 `theta_min`을 음수로 완화했을 때 reject가 크게 줄어들었으므로, 분석용 후보 범위는 `-10 deg <= theta_i <= 90 deg`로 별도 유지한다. 최종 `theta_min`, `theta_max`는 기구 파라미터와 하드웨어 제약 확정 후 갱신한다.
+3. 현재 단계의 hardware-safe provisional range인 `-45 deg <= theta_i <= 90 deg`를 만족하는 해만 유효 후보로 남긴다. 현재 문서 기준에서는 nominal-analysis range도 동일하게 `-45 deg <= theta_i <= 90 deg`로 둔다. 최종 `theta_min`, `theta_max`는 실제 조립, 반복 구동, 간섭 및 구동 제약 확인 후 hardware-confirmed 범위로 별도 확정한다.
 4. `theta_i = 0 deg`가 upper arm이 `base plane`에 놓인 자세이고, `theta_i = +90 deg`가 upper arm이 workspace direction인 `-z` 방향과 평행한 자세라는 정의에 따라, upper arm이 workspace 방향으로 내려가는 `downward-working branch`에 속하는 해만 남긴다.
 5. 유효 후보가 없으면 `reject`한다.
 6. 유효 후보가 하나면 그 해를 선택한다.
