@@ -66,17 +66,17 @@
   1. `sim_x`
   2. `sim_y`
   3. `sim_z`
-- simulation step/sampling rate:
+- simulation step/sampling rate: current fake pipeline comparison export uses `20 ms` (`50 Hz`) row spacing; final real/sim logging rate is to be fixed later
 - parameter source (geometry, mass, friction):
-- notes: `RecurDyn` result may be used later as a secondary reference for cross-checking, but the current system data flow is defined around `Simscape`.
+- notes: `RecurDyn` result may be used later as a secondary reference for cross-checking, but the current system data flow is defined around `Simscape`. Current comparison against `data/fake_pipeline/fake_pipeline_sample_2026-05-04_recomputed.csv` and `data/fake_pipeline/fake_pipeline_sample_2026-05-25_positive_theta.csv` shows that `theta*_cmd` and `theta*_meas` match the Python reference directly, while `sim_x`, `sim_y`, `sim_z` align after a provisional `1 sample = 20 ms` `post-alignment` shift. The current `Simscape` CSV export writes `error_x`, `error_y`, `error_z` as diagnostic `target_position - sim_position` values, which do not match the SoT correction-field meaning and must be updated later when `measured_position` becomes available.
 
 ## 6. Real-Sim Alignment Policy
 - alignment reference clock: `PC logger`
 - resampling method: `linear interpolation`
-- delay compensation method: `post-alignment`
-- comparison window:
+- delay compensation method: `post-alignment`; current fake pipeline `Simscape` comparison uses provisional `1 sample = 20 ms` lag compensation
+- comparison window: same trajectory rows after lag compensation; re-validate for real hardware logs later
 - outlier handling: rows marked as `invalid` are excluded from alignment and comparison
-- notes: `PC logger` time is used as the alignment reference for merged dataset generation, but it may include serial communication delay.
+- notes: `PC logger` time is used as the alignment reference for merged dataset generation, but it may include serial communication delay. The current `20 ms` lag record is valid for the fake pipeline comparison dataset only and should be treated as provisional until real logging is available.
 
 ## 7. Correction Injection Point (Single Policy)
 - correction target: `target_position`
@@ -87,7 +87,7 @@
 - application timing: (예: each control tick)
 - safety limits/clamps:
 - fallback when correction unavailable: use uncorrected target position
-- notes: `error_x`, `error_y`, `error_z` are the estimated position-domain correction terms applied to the target position.
+- notes: `error_x`, `error_y`, `error_z` are the estimated position-domain correction terms applied to the target position. Their SoT meaning is `measured_position - sim_position` in `base_frame`, not `target_position - sim_position`. Until hardware or estimator-side `measured_position` becomes available, `Simscape` CSV exports that contain `target_position - sim_position` should be treated as temporary diagnostics only and not as contract-compliant correction labels.
 
 ## 8. CSV Contract (Final)
 - file path convention:

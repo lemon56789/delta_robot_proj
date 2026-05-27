@@ -65,7 +65,7 @@ def delta_ik(
     *,
     geometry: DeltaGeometry = NOMINAL_DELTA_GEOMETRY,
     previous_theta_deg: Iterable[float] | None = None,
-    theta_min_deg: float = 0.0,
+    theta_min_deg: float = -45.0,
     theta_max_deg: float = 90.0,
 ) -> InverseKinematicsResult:
     """Solve inverse kinematics for the project delta robot.
@@ -95,7 +95,7 @@ def diagnose_delta_ik(
     *,
     geometry: DeltaGeometry = NOMINAL_DELTA_GEOMETRY,
     previous_theta_deg: Iterable[float] | None = None,
-    theta_min_deg: float = 0.0,
+    theta_min_deg: float = -45.0,
     theta_max_deg: float = 90.0,
 ) -> InverseKinematicsDiagnostic:
     previous = tuple(previous_theta_deg) if previous_theta_deg is not None else None
@@ -229,7 +229,7 @@ def _diagnose_single_arm(
         )
 
     theta_candidates_deg = tuple(
-        -math.degrees(2.0 * math.atan(t_value))
+        math.degrees(2.0 * math.atan(t_value))
         for t_value in t_candidates
     )
     valid_thetas = _filter_valid_thetas(
@@ -285,10 +285,7 @@ def _filter_valid_thetas(
 ) -> list[float]:
     valid: list[float] = []
     for t_value in t_candidates:
-        # The algebraic half-angle form yields the opposite sign of the
-        # project-facing `theta_i` convention, so we flip it here before
-        # applying the documented working range.
-        theta_deg = -math.degrees(2.0 * math.atan(t_value))
+        theta_deg = math.degrees(2.0 * math.atan(t_value))
         if theta_deg < theta_min_deg - 1e-9 or theta_deg > theta_max_deg + 1e-9:
             continue
         if any(math.isclose(theta_deg, existing, abs_tol=1e-9) for existing in valid):

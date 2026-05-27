@@ -32,7 +32,7 @@
 10. 외부 측정계 제거 후 운영 검증
 
 ## 4-A. Current Status Snapshot
-- 기준일: `2026-05-04`
+- 기준일: `2026-05-25`
 - Stage 1 설계 기준 확정: 완료
 - Stage 2 운동학 정의 및 구현: 진행 중
 - Stage 3 FK 검증 및 기본 해석: 진행 중
@@ -158,6 +158,13 @@ FK를 정리하고, IK↔FK 왕복 검증으로 운동학 일관성을 확인한
 - 동일 target 기준으로 real/sim 비교가 가능하다
 - timestamp alignment 정책이 문서화되어 있다
 - 실험별 데이터 저장 구조가 재현 가능하다
+
+### Current Status
+- `data/fake_pipeline/fake_pipeline_sample_2026-05-04_recomputed.csv`와 `data/fake_pipeline/fake_pipeline_sample_2026-05-04_recomputed_simscape.csv`, `data/fake_pipeline/fake_pipeline_sample_2026-05-25_positive_theta.csv`와 `data/fake_pipeline/fake_pipeline_sample_2026-05-25_positive_theta_simscape.csv`를 기준으로 Python/Simscape CSV 비교가 가능하다.
+- 현재 comparison 기준에서 `theta*_cmd`와 `theta*_meas`는 Python 기준과 직접 일치한다.
+- `sim_x`, `sim_y`, `sim_z`는 provisional `1 sample = 20 ms` lag 보정 후 Python 기준과 매우 가깝게 정렬된다.
+- 다만 현재 `Simscape` CSV의 `error_x`, `error_y`, `error_z`는 `target_position - sim_position` diagnostic 값이며, SoT correction field 의미인 `measured_position - sim_position`과 다르다.
+- 하드웨어 또는 estimator 경로에서 `measured_position`을 확보한 뒤 `Simulink/Simscape` export의 `error_*` 계산을 SoT 기준으로 수정해야 한다.
 
 ## 9. Stage 5. 외부 Ground-Truth 측정계 구축
 ### Goal

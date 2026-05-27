@@ -1,7 +1,7 @@
 # Delta Robot Virtual Sensing - Full Context
 
 문서 목적: 외부 AI 모델이 이 리포지토리를 빠르게 이해하고, 분석/코드 지원을 수행할 수 있도록 프로젝트 전반을 한 파일로 요약한다.
-갱신일: 2026-05-11
+갱신일: 2026-05-26
 
 주의: 이 파일은 요약본이다. 상충 시 Source of Truth는 `docs/*` -> `AGENTS.md` -> `README.md` -> 코드 순서를 따른다.
 
@@ -137,12 +137,14 @@ Alignment:
 - 기준 clock: `PC logger`
 - resampling: `linear interpolation`
 - delay compensation: `post-alignment`
+- 현재 fake pipeline 기준 `Simscape` 비교에서는 provisional `1 sample = 20 ms` lag 보정을 사용한다.
 - `invalid` row는 alignment와 비교에서 제외한다.
 
 Correction:
 - correction target: `target_position`
 - correction fields: `error_x`, `error_y`, `error_z`
 - correction unavailable fallback: uncorrected target position 사용
+- SoT 의미는 `measured_position - sim_position`이며, 현재 `Simscape` CSV의 `target_position - sim_position` 값은 임시 diagnostic으로만 해석한다.
 - safety clamp 범위는 아직 미정이다.
 
 ## 7) 비전 기반 Ground-Truth 측정계
@@ -239,7 +241,7 @@ root selection:
 - `kinematics/geometry.py`에 `DeltaGeometry` dataclass와 `NOMINAL_DELTA_GEOMETRY`가 정의되어 있다.
 - `kinematics/inverse_kinematics.py`에 `delta_ik(x_mm, y_mm, z_mm)`가 구현되어 있다.
 - 구현은 각 arm별 일반화된 `E_i`, `F_i`, `G_i` 식, 판별식 기반 reject, 임시 각도 범위, `previous_theta_deg` 기반 해 선택을 사용한다.
-- 반각 해를 프로젝트 `+theta = downward` 정의에 맞추기 위해 코드에서 각도 부호 보정을 적용한다.
+- 현재 구현은 `theta_i = 2 atan(t_i)`와 `J_i/FK z = -L sin(theta_i)` 정의를 문서 SoT와 같은 부호 체계로 사용한다.
 - 간단한 sample point에 대해 실제 각도 계산이 수행되는 최소 실행 검증은 완료되었다.
 - 현재 nominal-analysis candidate range와 hardware-safe provisional range는 모두 `-45 deg <= theta_i <= 90 deg`로 관리하고, hardware-confirmed range는 별도 미확정 상태로 둔다.
 
@@ -273,11 +275,14 @@ root selection:
 현재 구현 기준 핵심 상태:
 - `kinematics/geometry.py`, `kinematics/inverse_kinematics.py`에 nominal geometry와 IK가 반영되어 있다.
 - `kinematics/forward_kinematics.py`, `kinematics/validate_roundtrip.py`, `kinematics/workspace_sweep.py`로 FK, 왕복 검증, workspace sweep이 가능하다.
+- `2026-05-25` 기준 `IK/FK`의 `theta` 및 `z` 부호 정의가 문서 SoT와 정렬되었고, representative `IK -> FK` roundtrip 검증이 다시 통과했다.
 - 현재 angle range는 `hardware-safe provisional: -45..90 deg`, `nominal-analysis candidate: -45..90 deg`로 관리하고, `hardware-confirmed`는 별도 확정 전 상태로 둔다.
 - `docs/workspace_envelope.md`에 설치 높이와 `XY` reachable area 참고 결과가 정리되어 있으며, 현재 기준 추천 설치 높이는 일반적인 pick-and-place 기준 `H = 255 mm`, 대안은 `H = 265 mm`다.
 - `experiments/fake_pipeline.py`가 현재 CSV 계약을 따르는 fake dataset CSV/JSON을 생성한다.
 - `virtual_sensor/dataset.py`, `virtual_sensor/check_dataset.py`로 fake pipeline CSV를 읽고 feature/target shape와 NaN 여부를 확인할 수 있다.
-- 다만 SoT 로드맵 기준으로는 fake pipeline 단계가 아직 baseline model, train/validation split, metadata 기준 정리 전이므로 Stage 6은 `진행 중`으로 둔다.
+- `data/fake_pipeline/fake_pipeline_sample_2026-05-04_recomputed.csv`와 `data/fake_pipeline/fake_pipeline_sample_2026-05-25_positive_theta.csv`를 기준으로 Python/Simscape 비교를 진행할 수 있다.
+- 현재 fake pipeline `Simscape` 비교에서는 `sim_*`가 provisional `20 ms` lag 보정 후 Python 기준과 정렬되고, `Simscape` CSV의 `error_*`는 아직 diagnostic 값이므로 SoT correction field로 직접 사용하지 않는다.
+- 다만 SoT 로드맵 기준으로는 simulation alignment와 metadata 기준 정리가 남아 있으므로 Stage 4와 Stage 6은 모두 `진행 중`으로 둔다.
 
 ## 10) 개발 및 변경 원칙
 AGENTS.md 기준 핵심 원칙:
@@ -299,11 +304,11 @@ AGENTS.md 기준 핵심 원칙:
 
 ## 12) 바로 다음 작업
 우선순위:
-1. `virtual_sensor/`에 baseline model 학습/추론 뼈대를 추가하고 현재 fake dataset을 실제 입력으로 연결한다.
-2. fake pipeline dataset에 대해 train/validation split, sequence windowing, metadata 기록 기준을 정한다.
-3. `theta_cmd`와 실제 모터 구동축 명령 매핑을 하드웨어 기준으로 정리한다.
-4. 실제 hardware/vision 데이터 수집 전 필요한 logging path와 alignment 규칙을 다시 점검한다.
-5. workspace 경계와 특이점 근처 검증을 넓혀 nominal range와 hardware 허용 범위 연결 근거를 더 확보한다.
+1. `Simscape` CSV와 Python 기준 CSV의 alignment를 먼저 더 정교하게 검증하고, provisional `20 ms` lag가 실제 logging path에서도 유지되는지 확인한다.
+2. `measured_position` 확보 전후를 구분해 `error_*` 의미와 `Simulink/Simscape` export 수정 범위를 정리한다.
+3. fake pipeline dataset에 대해 train/validation split, sequence windowing, metadata 기록 기준을 정한다.
+4. `virtual_sensor/` baseline model 학습/추론 뼈대는 simulation path 의미가 정리된 뒤 추가한다.
+5. `theta_cmd`와 실제 모터 구동축 명령 매핑, workspace 경계/특이점 근처 검증을 이어서 정리한다.
 
 BLOCKER 가능성이 있는 항목:
 - 모터 축과 `theta_cmd`의 실제 연결이 확정되지 않으면 hardware-level command mapping은 보류해야 한다.

@@ -15,7 +15,7 @@
     "z_max_mm": -212.0
   },
   "angle_limits": {
-    "theta_min_deg": 0.0,
+    "theta_min_deg": -45.0,
     "theta_max_deg": 90.0,
     "range_type": "hardware-safe provisional"
   },
@@ -51,8 +51,8 @@
     "error_z"
   ],
   "error_summary": {
-    "max_abs_error_x_mm": 17.803965987066174,
-    "max_abs_error_y_mm": 17.794101332838352,
-    "max_abs_error_z_mm": 48.59315502854179
+    "max_abs_error_x_mm": 22.42318364704181,
+    "max_abs_error_y_mm": 21.47882378791616,
+    "max_abs_error_z_mm": 49.20516303174256
   }
 }

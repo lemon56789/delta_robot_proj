@@ -18,7 +18,7 @@ OUTPUT_CSV = Path("data/fake_pipeline/fake_pipeline_sample_2026-05-04.csv")
 OUTPUT_JSON = Path("data/fake_pipeline/fake_pipeline_sample_2026-05-04.json")
 DT_MS = 20
 NUM_SAMPLES = 180
-THETA_MIN_DEG = 0.0
+THETA_MIN_DEG = -45.0
 THETA_MAX_DEG = 90.0
 
 THETA_BIAS_DEG = (0.8, -0.6, 0.4)

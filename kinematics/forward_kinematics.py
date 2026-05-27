@@ -90,7 +90,7 @@ def _constraint_sphere_centers(
     for angle_deg, arm_vector in zip(theta_deg, ARM_OUTWARD_UNIT_VECTORS, strict=True):
         angle_rad = math.radians(angle_deg)
         radial_component = geometry.L * math.cos(angle_rad) - delta_offset
-        z_component = geometry.L * math.sin(angle_rad)
+        z_component = -geometry.L * math.sin(angle_rad)
         centers.append(
             (
                 radial_component * arm_vector[0],
@@ -127,7 +127,13 @@ def _initial_guess_from_spheres(
         1.0 / line_direction_norm_sq,
     )
 
-    return line_point
+    line_direction_norm = math.sqrt(line_direction_norm_sq)
+    line_direction_unit = _vector_scale(line_direction, 1.0 / line_direction_norm)
+    candidates = (
+        _vector_add(line_point, _vector_scale(line_direction_unit, link_length_mm)),
+        _vector_add(line_point, _vector_scale(line_direction_unit, -link_length_mm)),
+    )
+    return min(candidates, key=lambda point: point[2])
 
 
 def _residuals(
