@@ -91,11 +91,13 @@
 ## 9. Output Definition
 비전 시스템의 기본 출력은 다음과 같다.
 
+- `run_id`
 - `vision_time`
 - `vision_x`
 - `vision_y`
 - `marker_detected`
 - `frame_id`
+- `valid`
 
 필요 시 품질 진단용 필드를 추가할 수 있다.
 
@@ -121,11 +123,13 @@
 - `data/vision/raw/vision_2026-04-06_run001.mp4`
 
 최소 CSV 필드:
+- `run_id`
 - `vision_time`
 - `vision_x`
 - `vision_y`
 - `marker_detected`
 - `frame_id`
+- `valid`
 
 선택 필드:
 - `marker_id`
