@@ -1,7 +1,7 @@
 # Delta Robot Virtual Sensing - Full Context
 
 문서 목적: 외부 AI 모델이 이 리포지토리를 빠르게 이해하고, 분석/코드 지원을 수행할 수 있도록 프로젝트 전반을 한 파일로 요약한다.
-갱신일: 2026-05-26
+갱신일: 2026-05-28
 
 주의: 이 파일은 요약본이다. 상충 시 Source of Truth는 `docs/*` -> `AGENTS.md` -> `README.md` -> 코드 순서를 따른다.
 
@@ -37,12 +37,13 @@ Target Trajectory
 - 보정값은 현재 정책상 `target_position`에 주입한다.
 
 ## 3) 주요 폴더 역할
-- `docs/`: 프로젝트 문서, 시스템 설계, 운동학 메모, 비전 측정계 문서, 로드맵
+- `docs/`: 프로젝트 문서, 시스템 설계, 운동학 메모, 비전 측정계 문서, measured data 구조 문서, 로드맵
 - `docs/plans/`: 작업 전 승인용 계획서
 - `docs/daily_notes/`: 날짜별 변경 기록
 - `docs/templates/`: 계획서와 Daily Note 템플릿
 - `docs/references/`: 참고 논문 및 외부 자료 보관 경로. SoT나 채택안을 의미하지 않는다.
 - `docs/workspace_envelope.md`: 설치 높이와 `XY` 작업공간 관계를 정리한 설계 참고 문서
+- `docs/measured_data_structure.md`: real main log, vision raw log, angle-derived measured position, processed merged dataset 구조
 - `kinematics/`: 역기구학/순기구학 구현 및 검증 예정 위치
 - `simulation/`: RecurDyn, Nastran, Simscape 기반 시뮬레이션 자산 예정 위치
 - `hardware/`: 실물 제작, 배선, BOM, 조립 자료
@@ -86,7 +87,7 @@ Target Trajectory
 - `uP = 27.177 mm`
 
 ## 5) 데이터 계약과 시간 정책
-현재 기준 문서: `docs/system_data_flow.md`
+현재 기준 문서: `docs/system_data_flow.md`, `docs/measured_data_structure.md`
 
 Timestamp:
 - field name: `time`
@@ -96,7 +97,7 @@ Timestamp:
 - 이후 `post-alignment`로 정렬한다.
 - 누락 timestamp row는 `invalid`로 표기하고 후처리에서 제외한다.
 
-현재 CSV 고정 컬럼 순서:
+현재 final processed CSV 고정 컬럼 순서:
 1. `time`
 2. `target_x`
 3. `target_y`
@@ -118,6 +119,22 @@ Timestamp:
 - 기존 초기 예시의 `motor*_cmd`, `motor*_meas` 대신 현재 문서에서는 `theta*_cmd`, `theta*_meas`를 사용한다.
 - correction 관련 필드는 `corr_*`가 아니라 `error_*`를 사용한다.
 - CSV 구조 변경은 Contract Change로 취급한다.
+- 위 16개 컬럼은 raw log가 아니라 학습/평가용 processed merged dataset의 fixed column order다.
+- real main log, vision raw log, angle-derived measured position은 별도 raw/auxiliary 계층으로 관리한다.
+- contract-compliant `error_*`는 measured data, simulation output, vision data가 post-alignment된 processed merged dataset 단계에서만 생성한다.
+
+Measured data 계층:
+- Real main log: `run_id`, `time`, `target_*`, `theta*_cmd`, `theta*_meas`, `valid`를 기록한다.
+- Vision raw log: `run_id`, `vision_time`, `vision_x`, `vision_y`, `marker_detected`, `frame_id`, `valid`를 기록한다.
+- Angle-derived measured position: `theta*_meas` 기반 FK 또는 estimator로 `measured_x_est`, `measured_y_est`, `measured_z_est`를 생성한다.
+- Processed merged dataset: real main log, Simscape output, vision raw log, angle-derived measured position을 정렬해 16개 final CSV 컬럼을 만든다.
+
+`error_*` 생성 기준:
+- `error_x = measured_x_vision - sim_x`
+- `error_y = measured_y_vision - sim_y`
+- `error_z = measured_z_est - sim_z`
+- `error_x/y`는 vision 기반 XY ground-truth에서 생성한다.
+- `error_z`는 angle-derived estimate 기반이므로 외부 ground-truth 기반 3D 성능 수치로 해석하지 않는다.
 
 ## 6) 인터페이스 계약
 IK:
@@ -145,6 +162,7 @@ Correction:
 - correction fields: `error_x`, `error_y`, `error_z`
 - correction unavailable fallback: uncorrected target position 사용
 - SoT 의미는 `measured_position - sim_position`이며, 현재 `Simscape` CSV의 `target_position - sim_position` 값은 임시 diagnostic으로만 해석한다.
+- `error_*`는 raw Simscape export에서 확정하지 않고, measured data 구조가 정렬된 processed merged dataset 단계에서 생성한다.
 - safety clamp 범위는 아직 미정이다.
 
 ## 7) 비전 기반 Ground-Truth 측정계
@@ -171,7 +189,7 @@ Correction:
 비전 로그 저장 기준:
 - 기본 경로: `data/vision/raw/`
 - 최소 파일명 규칙: `vision_<run_id>.csv`
-- 최소 필드: `vision_time`, `vision_x`, `vision_y`, `marker_detected`, `frame_id`
+- 최소 필드: `run_id`, `vision_time`, `vision_x`, `vision_y`, `marker_detected`, `frame_id`, `valid`
 - 선택 필드: `marker_id`, `reprojection_error`, `confidence`, `video_file`
 
 ## 8) IK 구조 정리 상태
@@ -282,7 +300,10 @@ root selection:
 - `virtual_sensor/dataset.py`, `virtual_sensor/check_dataset.py`로 fake pipeline CSV를 읽고 feature/target shape와 NaN 여부를 확인할 수 있다.
 - `data/fake_pipeline/fake_pipeline_sample_2026-05-04_recomputed.csv`와 `data/fake_pipeline/fake_pipeline_sample_2026-05-25_positive_theta.csv`를 기준으로 Python/Simscape 비교를 진행할 수 있다.
 - 현재 fake pipeline `Simscape` 비교에서는 `sim_*`가 provisional `20 ms` lag 보정 후 Python 기준과 정렬되고, `Simscape` CSV의 `error_*`는 아직 diagnostic 값이므로 SoT correction field로 직접 사용하지 않는다.
-- 다만 SoT 로드맵 기준으로는 simulation alignment와 metadata 기준 정리가 남아 있으므로 Stage 4와 Stage 6은 모두 `진행 중`으로 둔다.
+- `docs/measured_data_structure.md`가 추가되어 real main log, vision raw log, angle-derived measured position, processed merged dataset의 네 계층이 정리되었다.
+- 초기 `error_x/y`는 vision 기반 XY에서 생성하고, `error_z`는 `theta*_meas` 기반 `measured_z_est`에서 생성한다. `error_z`는 외부 ground-truth 기반 3D 성능 수치로 해석하지 않는다.
+- `error_*`는 raw Simscape export가 아니라 processed merged dataset 단계에서 생성한다.
+- 다만 SoT 로드맵 기준으로는 measured data 저장 경로, processed merged dataset 파일명 규칙, `theta*_meas` 출처, `estimator_method` 기록 규칙이 남아 있으므로 Stage 4와 Stage 7 준비는 계속 진행 중으로 둔다.
 
 ## 10) 개발 및 변경 원칙
 AGENTS.md 기준 핵심 원칙:
@@ -304,18 +325,20 @@ AGENTS.md 기준 핵심 원칙:
 
 ## 12) 바로 다음 작업
 우선순위:
-1. `Simscape` CSV와 Python 기준 CSV의 alignment를 먼저 더 정교하게 검증하고, provisional `20 ms` lag가 실제 logging path에서도 유지되는지 확인한다.
-2. `measured_position` 확보 전후를 구분해 `error_*` 의미와 `Simulink/Simscape` export 수정 범위를 정리한다.
-3. fake pipeline dataset에 대해 train/validation split, sequence windowing, metadata 기록 기준을 정한다.
-4. `virtual_sensor/` baseline model 학습/추론 뼈대는 simulation path 의미가 정리된 뒤 추가한다.
-5. `theta_cmd`와 실제 모터 구동축 명령 매핑, workspace 경계/특이점 근처 검증을 이어서 정리한다.
+1. processed merged dataset의 저장 경로와 파일명 규칙을 정한다.
+2. 실제 `theta*_meas` 출처를 encoder로 둘지, 초기 estimation으로 둘지 정한다.
+3. `theta*_meas` 기반 FK 또는 estimator-derived position의 `estimator_method` 기록 규칙을 정한다.
+4. real main log, vision raw log, Simscape output의 post-alignment 절차를 실제 실험 로그 기준으로 구체화한다.
+5. `Simscape` CSV와 Python 기준 CSV의 alignment를 계속 검증하고, provisional `20 ms` lag가 실제 logging path에서도 유지되는지 확인한다.
+6. `virtual_sensor/` baseline model 학습/추론 뼈대는 processed dataset 규칙이 정리된 뒤 추가한다.
 
 BLOCKER 가능성이 있는 항목:
 - 모터 축과 `theta_cmd`의 실제 연결이 확정되지 않으면 hardware-level command mapping은 보류해야 한다.
 - nominal parameter와 실제 조립 치수 차이가 크면 FK/validation 결과 해석이 흔들릴 수 있다.
 - vision calibration 데이터가 없으면 비전 ground-truth는 문서 기준만 있고 실제 측정 정확도 검증은 할 수 없다.
+- measured data 구조가 실제 logger 구현과 다르면 processed dataset 생성 규칙을 다시 조정해야 한다.
 
 ## 13) 유지보수 규칙
 - 이 파일은 외부 AI 분석용 요약본이다.
 - 구조, 규약, 데이터 계약, 로드맵 상태가 바뀌면 함께 갱신한다.
-- 상세 근거는 `docs/system_data_flow.md`, `docs/vision_tracking.md`, `docs/ik_structure_note.md`, `docs/workspace_envelope.md`, `docs/roadmap.md`, `AGENTS.md`를 우선 참조한다.
+- 상세 근거는 `docs/system_data_flow.md`, `docs/measured_data_structure.md`, `docs/vision_tracking.md`, `docs/ik_structure_note.md`, `docs/workspace_envelope.md`, `docs/roadmap.md`, `AGENTS.md`를 우선 참조한다.

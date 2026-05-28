@@ -7,7 +7,7 @@
 - 작성일: 2026-03-26
 - 작성자: 이진성(L)
 - 버전: v0.1-draft
-- 관련 문서(SoT): AGENTS.md, README.md
+- 관련 문서(SoT): AGENTS.md, README.md, `docs/measured_data_structure.md`
 
 ## 1. Units & Coordinate Frame
 - position unit: `mm`
@@ -54,7 +54,7 @@
 - expected noise level:
 - calibration method:
 - dropout handling:
-- notes:
+- notes: 실제 measured data는 `docs/measured_data_structure.md`의 계층을 따른다. 초기 XY measured position은 vision raw log에서 post-alignment 후 얻고, 초기 Z measured position은 `theta*_meas` 기반 FK 또는 estimator-derived `measured_z_est`를 사용한다.
 
 ## 5. Simulation Path Definition
 - primary simulation source: `Simscape`
@@ -68,7 +68,7 @@
   3. `sim_z`
 - simulation step/sampling rate: current fake pipeline comparison export uses `20 ms` (`50 Hz`) row spacing; final real/sim logging rate is to be fixed later
 - parameter source (geometry, mass, friction):
-- notes: `RecurDyn` result may be used later as a secondary reference for cross-checking, but the current system data flow is defined around `Simscape`. Current comparison against `data/fake_pipeline/fake_pipeline_sample_2026-05-04_recomputed.csv` and `data/fake_pipeline/fake_pipeline_sample_2026-05-25_positive_theta.csv` shows that `theta*_cmd` and `theta*_meas` match the Python reference directly, while `sim_x`, `sim_y`, `sim_z` align after a provisional `1 sample = 20 ms` `post-alignment` shift. The current `Simscape` CSV export writes `error_x`, `error_y`, `error_z` as diagnostic `target_position - sim_position` values, which do not match the SoT correction-field meaning and must be updated later when `measured_position` becomes available.
+- notes: `RecurDyn` result may be used later as a secondary reference for cross-checking, but the current system data flow is defined around `Simscape`. Current comparison against `data/fake_pipeline/fake_pipeline_sample_2026-05-04_recomputed.csv` and `data/fake_pipeline/fake_pipeline_sample_2026-05-25_positive_theta.csv` shows that `theta*_cmd` and `theta*_meas` match the Python reference directly, while `sim_x`, `sim_y`, `sim_z` align after a provisional `1 sample = 20 ms` `post-alignment` shift. The current `Simscape` CSV export writes `error_x`, `error_y`, `error_z` as diagnostic `target_position - sim_position` values, which do not match the SoT correction-field meaning. Contract-compliant `error_*` values are generated only after measured data is aligned with simulation data in a processed/merged dataset.
 
 ## 6. Real-Sim Alignment Policy
 - alignment reference clock: `PC logger`
@@ -76,7 +76,7 @@
 - delay compensation method: `post-alignment`; current fake pipeline `Simscape` comparison uses provisional `1 sample = 20 ms` lag compensation
 - comparison window: same trajectory rows after lag compensation; re-validate for real hardware logs later
 - outlier handling: rows marked as `invalid` are excluded from alignment and comparison
-- notes: `PC logger` time is used as the alignment reference for merged dataset generation, but it may include serial communication delay. The current `20 ms` lag record is valid for the fake pipeline comparison dataset only and should be treated as provisional until real logging is available.
+- notes: `PC logger` time is used as the alignment reference for merged dataset generation, but it may include serial communication delay. The current `20 ms` lag record is valid for the fake pipeline comparison dataset only and should be treated as provisional until real logging is available. Raw/auxiliary log fields and processed merged dataset generation are defined in `docs/measured_data_structure.md`.
 
 ## 7. Correction Injection Point (Single Policy)
 - correction target: `target_position`
@@ -87,7 +87,7 @@
 - application timing: (예: each control tick)
 - safety limits/clamps:
 - fallback when correction unavailable: use uncorrected target position
-- notes: `error_x`, `error_y`, `error_z` are the estimated position-domain correction terms applied to the target position. Their SoT meaning is `measured_position - sim_position` in `base_frame`, not `target_position - sim_position`. Until hardware or estimator-side `measured_position` becomes available, `Simscape` CSV exports that contain `target_position - sim_position` should be treated as temporary diagnostics only and not as contract-compliant correction labels.
+- notes: `error_x`, `error_y`, `error_z` are the estimated position-domain correction terms applied to the target position. Their SoT meaning is `measured_position - sim_position` in `base_frame`, not `target_position - sim_position`. Until hardware or estimator-side `measured_position` becomes available, `Simscape` CSV exports that contain `target_position - sim_position` should be treated as temporary diagnostics only and not as contract-compliant correction labels. The next required step is to define the measured data structure first, then compute `error_*` during post-aligned processed dataset generation.
 
 ## 8. CSV Contract (Final)
 - file path convention:
@@ -115,6 +115,7 @@
 - optional columns:
 - current SoT 대비 변경 여부: `contract_change`
 - contract change detail (if any): 기존 AGENTS 예시의 `motor*_cmd`, `motor*_meas` 명명 대신 `theta*_cmd`, `theta*_meas`를 사용하고, correction-related field는 `corr_*` 대신 `error_*`를 사용한다.
+- notes: 위 16개 컬럼은 processed merged dataset의 fixed column order다. real main log, vision raw log, angle-derived measured position은 별도 raw/auxiliary 계층으로 관리하며 `docs/measured_data_structure.md`를 따른다.
 
 ## 9. Owner Mapping
 - S = dynamics analysis, vibration analysis
