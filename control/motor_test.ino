@@ -1,7 +1,7 @@
 #include <Servo.h>
 
 // =====================
-// Servo object bhjkfj
+// Servo object
 // =====================
 Servo servo1;
 Servo servo2;
@@ -24,6 +24,24 @@ const int SERVO3_PIN = 11;
 const int SERVO_MIN = 50;
 const int SERVO_MAX = 130;
 const int SERVO_CENTER = 90;
+
+// =====================
+// Kinematic theta to servo angle mapping
+// 기구학 기준 theta = 0 deg일 때 서보 명령각은 90 deg
+// sign은 실제 장착 방향에 따라 +1 또는 -1로 수정
+// offset은 조립 오차 보정용
+// =====================
+const int SERVO1_CENTER_CMD = 90;
+const int SERVO2_CENTER_CMD = 90;
+const int SERVO3_CENTER_CMD = 90;
+
+const int SERVO1_SIGN = 1;
+const int SERVO2_SIGN = 1;
+const int SERVO3_SIGN = 1;
+
+const int SERVO1_OFFSET = 0;
+const int SERVO2_OFFSET = 0;
+const int SERVO3_OFFSET = 0;
 
 // =====================
 // Last commanded angles
@@ -69,26 +87,41 @@ void setupServos() { // Initial posture for all motors
   delay(1000);
 }
 
+int thetaToServoAngle(int id, int theta) {
+  if (id == 1) {
+    return SERVO1_CENTER_CMD + SERVO1_SIGN * theta + SERVO1_OFFSET;
+  }
+  else if (id == 2) {
+    return SERVO2_CENTER_CMD + SERVO2_SIGN * theta + SERVO2_OFFSET;
+  }
+  else if (id == 3) {
+    return SERVO3_CENTER_CMD + SERVO3_SIGN * theta + SERVO3_OFFSET;
+  }
+
+  return 90;
+}
+
 int limitAngle(int angle) { // Limit the angle for all motors
   if (angle < SERVO_MIN) return SERVO_MIN;
   if (angle > SERVO_MAX) return SERVO_MAX;
   return angle;
 }
 
-void moveServo(int id, int angle) { // Motor angle control
-  angle = limitAngle(angle);
+void moveServo(int id, int theta) {
+  int servoAngle = thetaToServoAngle(id, theta);
+  servoAngle = limitAngle(servoAngle);
 
   if (id == 1) {
-    servo1.write(angle);
-    current1 = angle;
+    servo1.write(servoAngle);
+    current1 = servoAngle;
   } 
   else if (id == 2) {
-    servo2.write(angle);
-    current2 = angle;
+    servo2.write(servoAngle);
+    current2 = servoAngle;
   } 
   else if (id == 3) {
-    servo3.write(angle);
-    current3 = angle;
+    servo3.write(servoAngle);
+    current3 = servoAngle;
   } 
   else {
     Serial.println("Invalid servo id. Use 1, 2, or 3.");
@@ -97,11 +130,17 @@ void moveServo(int id, int angle) { // Motor angle control
 
   Serial.print("Servo ");
   Serial.print(id);
-  Serial.print(" -> ");
-  Serial.println(angle);
+  Serial.print(" theta=");
+  Serial.print(theta);
+  Serial.print(" deg -> servo command=");
+  Serial.println(servoAngle);
 }
 
-void moveAllServos(int a1, int a2, int a3) {
+void moveAllServos(int theta1, int theta2, int theta3) {
+  int a1 = thetaToServoAngle(1, theta1);
+  int a2 = thetaToServoAngle(2, theta2);
+  int a3 = thetaToServoAngle(3, theta3);
+
   a1 = limitAngle(a1);
   a2 = limitAngle(a2);
   a3 = limitAngle(a3);
@@ -114,7 +153,14 @@ void moveAllServos(int a1, int a2, int a3) {
   current2 = a2;
   current3 = a3;
 
-  Serial.print("ALL -> ");
+  Serial.print("ALL theta -> ");
+  Serial.print(theta1);
+  Serial.print(", ");
+  Serial.print(theta2);
+  Serial.print(", ");
+  Serial.print(theta3);
+
+  Serial.print(" | servo cmd -> ");
   Serial.print(a1);
   Serial.print(", ");
   Serial.print(a2);
@@ -122,7 +168,11 @@ void moveAllServos(int a1, int a2, int a3) {
   Serial.println(a3);
 }
 
-void moveAllServosSmooth(int target1, int target2, int target3, int stepDelay) {
+void moveAllServosSmooth(int theta1, int theta2, int theta3, int stepDelay) {
+  int target1 = thetaToServoAngle(1, theta1);
+  int target2 = thetaToServoAngle(2, theta2);
+  int target3 = thetaToServoAngle(3, theta3);
+
   target1 = limitAngle(target1);
   target2 = limitAngle(target2);
   target3 = limitAngle(target3);
@@ -151,7 +201,14 @@ void moveAllServosSmooth(int target1, int target2, int target3, int stepDelay) {
   current2 = target2;
   current3 = target3;
 
-  Serial.print("SMOOTH ALL -> ");
+  Serial.print("SMOOTH theta -> ");
+  Serial.print(theta1);
+  Serial.print(", ");
+  Serial.print(theta2);
+  Serial.print(", ");
+  Serial.print(theta3);
+
+  Serial.print(" | servo cmd -> ");
   Serial.print(target1);
   Serial.print(", ");
   Serial.print(target2);
@@ -168,7 +225,7 @@ void readSerialCommand() {
   if (cmd.length() == 0) return;
 
   if (cmd == "CENTER") {
-    moveAllServosSmooth(SERVO_CENTER, SERVO_CENTER, SERVO_CENTER, 15);
+    moveAllServosSmooth(0, 0, 0, 15);
   }
 
   else if (cmd == "SWEEP") {
@@ -214,20 +271,20 @@ void readSerialCommand() {
   }
 }
 
-void sweepTest() { // Sweep Test (가동범위 체크용)
+void sweepTest() { // 가동범위 Test 용
   Serial.println("Sweep test start");
 
-  moveAllServosSmooth(70, 70, 70, 20);
+  moveAllServosSmooth(-5, -5, -5, 20);
   delay(500);
 
-  moveAllServosSmooth(110, 110, 110, 20);
+  moveAllServosSmooth(5, 5, 5, 20);
   delay(500);
 
-  moveAllServosSmooth(90, 90, 90, 20);
+  moveAllServosSmooth(0, 0, 0, 20);
   delay(500);
 
   Serial.println("Sweep test end");
-}
+} 
 
 void pumpOn() { // Pump on 코드
   digitalWrite(PUMP_PIN, HIGH);
