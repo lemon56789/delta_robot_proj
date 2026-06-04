@@ -1,0 +1,427 @@
+# 하드웨어 실험 공통 설정
+
+이 문서는 하드웨어 실험에서 공통으로 사용하는 고정 설정을 관리한다. 실험마다 달라지는 목적, trajectory, 실행 명령, 검증 기준은 `docs/hardware_experiment_run_*.md`에 적는다.
+
+## 작성 원칙
+- 각 항목의 콜론 뒤에는 실제 값을 적는다.
+- 아직 값이 없으면 `TBD`로 두고, 확인 필요 사항은 `Open Items`에 남긴다.
+- `sB`, `sP` 같은 외곽 치수는 참고값이며, IK/FK 기준값은 `wB`, `uP`를 우선한다.
+- Run 00 상세 절차는 `docs/hardware_experiment_run_00_commissioning.md`를 따른다. SoT `theta_i = 0 deg`에 대응하는 servo 기준값은 `center_cmd_i`로 기록한다.
+
+## 1. 로봇 기하 - 담당자: T / L
+- measured `L` [mm]: 125
+  - 실제 측정한 upper arm length.
+- measured `l` [mm]: 300
+  - 실제 측정한 parallelogram link length.
+- measured `wB` [mm]: 46
+  - base 중심에서 motor/upper-arm joint 기준점까지의 실제 기구학 기준 거리.
+- measured `uP` [mm]: 27.177
+  - platform 중심에서 platform joint point까지의 실제 기구학 기준 거리.
+- outer base side length `sB` [mm]: 199
+  - base 외곽 정삼각형 변 길이.
+  - IK/FK 기준값이 아니며, 기구학 계산에서는 `wB`를 사용한다.
+- outer platform side length `sP` [mm]: 57.5
+  - platform 외곽 정삼각형 변 길이.
+  - IK/FK 기준값이 아니며, 기구학 계산에서는 `uP`를 사용한다.
+- installation height `H` [mm]: 285
+  - base origin/base center O에서 ground plane까지의 거리.
+- coordinate frame check method:
+  - base center O를 원점으로 두고, B1 방향 기준으로 +x/+y 방향을 실제 장비에 표시한다.
+  - 소프트웨어의 `base_frame` 정의와 실제 장비 표시 방향이 일치하는지 수동으로 +x/+y 방향 target을 넣어 확인한다.
+  - +z는 base에서 바깥으로 나오는 방향이며, 실제 작업공간 방향은 -z로 둔다.
+
+## 2. 모터 - 담당자: S / N
+- motor model: Feetech FT5330M
+- motor type: DC servo
+- 권장/공칭 전압 [V]: 7.4
+  - 2S Li-Po 배터리의 공칭 전압 기준.
+- 허용 입력 전압 [V]: 4.0-8.4
+  - 2S Li-Po 완충 전압은 8.4 V이므로 이를 초과하지 않는다.
+- 성능 표기 기준 전압 [V]: 7.4
+- rated current [A]: TBD
+  - 데이터시트 기준 정격 전류 확인 필요.
+- stall current [A]: 약 3.9 at 7.4 V
+  - 전원, 배선, 물리 차단 방식은 stall 근처 고전류 상황을 고려한다.
+- max current [A]: TBD
+  - 실험에서 허용할 최대 전류 또는 외부 보호 기준을 기록한다.
+- max speed: 312.5 deg/s at 7.4 V
+- max torque: 35.5 kgf*cm at 7.4 V
+- encoder included:
+  - servo 내부 위치 제어용 potentiometer는 있으나, 현재 Arduino에서 이 피드백 값을 직접 읽지 않는다.
+- encoder resolution: N/A
+  - 외부 encoder를 사용하지 않는 현재 prototype에서는 적용하지 않는다.
+- gear ratio: servo 내부 기어 사용, 상세 비율 TBD
+- known backlash: TBD
+- known deadband: TBD
+
+## 3. 모터 드라이버 - 담당자: Y / S
+- driver model: Feetech FT5330M 내장 servo driver
+- supply voltage [V]: 7.4 nominal, max 8.4
+  - 2S Li-Po 배터리 기준.
+- current limit setting: N/A
+  - FT5330M은 사용자가 별도 전류 제한값을 설정하는 외부 드라이버가 아니다.
+  - 전류 제한은 외부 전원 보호, fuse, 물리 차단 절차로 관리한다.
+- microstep setting: N/A
+  - stepper motor driver가 아니므로 적용하지 않는다.
+- control mode: PWM position control
+- enable/disable pin behavior: N/A
+  - 별도 enable pin을 사용하지 않는다.
+- fault output available: N/A
+  - 별도 fault 출력 pin이나 fault 상태 피드백 기능은 없다.
+- fault condition notes:
+  - fault pin이 없으므로 비정상 소음, 진동, stall, 예상 밖 움직임, 전원 상태를 관찰해 판단한다.
+
+## 4. 전원 - 담당자: S / Y
+- power supply model:
+  - servo power: 2S Li-Po battery, nominal 7.4 V, fully charged 8.4 V.
+  - pump power: DC power supply, 12 V.
+  - Arduino power: PC USB 5 V.
+  - exact manufacturer/model: TBD.
+- voltage [V]:
+  - servo line: 2S Li-Po 기준 공칭 7.4 V, 완충 8.4 V. servo 입력 허용 범위는 4.0-8.4 V이며 8.4 V를 초과하지 않는다.
+  - pump line: 12 V DC supply.
+  - Arduino logic line: USB 5 V.
+- current limit [A]:
+  - servo line: Li-Po 배터리를 사용하므로 active current limit은 현재 없다. 각 FT5330M은 부하 또는 stall 근처에서 큰 전류를 요구할 수 있으므로 3개 servo 동시 사용을 고려해 배터리와 배선 전류 여유를 확보한다.
+  - pump line: 선택한 pump 전원 공급 장치에 따라 결정한다. bench power supply를 쓰는 경우 낮은 current limit에서 시작해 pump 동작을 확인하면서 단계적으로 올린다.
+  - Arduino line: USB 전원은 logic/control용이며 motor 또는 pump 전류를 공급하지 않는다.
+- fuse/current protection:
+  - 현재 dedicated fuse는 설치되지 않았다.
+  - servo power line과 pump power line은 Arduino 5 V line과 분리한다.
+  - Arduino는 PWM/control signal만 보내며 servo 또는 pump 전류를 직접 공급하지 않는다.
+  - pump는 MOSFET module을 통해 switching하여 Arduino output pin에 직접 전류 부하가 걸리지 않게 한다.
+  - 안전성을 높이려면 Li-Po servo power line과 pump power line에 inline fuse 또는 물리 전원 switch를 추가한다.
+- emergency power cutoff method:
+  - servo emergency cutoff: 2S Li-Po battery connector를 servo power line에서 물리적으로 분리한다.
+  - pump emergency cutoff: pump adapter/DC supply를 분리하거나 pump power switch를 끈다.
+  - Arduino control stop: 현재 `STOP` serial command는 미구현으로 둔다. Run 00에서는 software stop에 의존하지 않고 물리 전원 차단을 우선한다.
+  - 초기 motor-powered test에서는 Y가 power cutoff operator로 참석해 mechanical interference, abnormal noise, servo stalling, unexpected motion 발생 시 즉시 Li-Po 전원을 분리한다.
+- grounding notes:
+  - Arduino GND, Li-Po negative terminal, pump power negative terminal, MOSFET GND, servo GND는 common GND로 연결한다.
+  - 양전압 line은 분리한다. Li-Po positive는 servo용, pump positive는 pump/MOSFET power input용, Arduino 5 V는 logic/control용으로만 사용한다.
+  - Arduino D9, D10, D11의 servo signal line은 Li-Po servo power line과 common GND가 필요하다.
+  - Arduino D6의 pump MOSFET signal line은 pump power supply와 common GND가 필요하다.
+  - 고전류 servo/pump 배선은 signal wire와 가능한 멀리 배치해 noise와 signal 불안정을 줄인다.
+  - servo는 Arduino 5 V pin에서 전원을 공급하지 않는다.
+  - pump는 Arduino digital output pin에 직접 연결하지 않는다.
+
+## 5. 기계적 제한 - 담당자: T / N
+- hardware-confirmed theta1 range [deg]: TBD
+- hardware-confirmed theta2 range [deg]: TBD
+- hardware-confirmed theta3 range [deg]: TBD
+- interference risk zones:
+  - absolute no-go pose는 `theta_i <= -65 deg` 또는 `theta_i >= +90 deg`로 둔다.
+  - Run 00에서는 `+/-5 deg`까지만 확인하고, slow-check zone은 후속 별도 승인 테스트에서 확정한다.
+- safe initial pose: `theta1=0 deg`, `theta2=0 deg`, `theta3=0 deg`
+- homing pose:
+  - physical zero는 모든 arm의 `theta_i=0 deg` 자세로 정의한다.
+  - Arduino/servo 실제 PWM, offset, direction 변환은 controller layer에서 처리한다.
+- maximum safe velocity:
+  - Run 00에서는 controller가 허용하는 최저속 설정으로 시작한다.
+  - 수치값은 Y와 firmware command 단위 확인 후 확정한다.
+- maximum safe acceleration:
+  - Run 00에서는 controller가 허용하는 최저가속 설정으로 시작한다.
+  - 수치값은 Y와 firmware command 단위 확인 후 확정한다.
+- commissioning theta test range:
+  - 단일축 저속 확인으로 시작한다.
+  - Run 00 A 단계에서는 lower arm과 moving platform까지 결합한 상태에서 각 arm에 대해 `0 -> +3 -> 0 -> -3 -> 0 deg`를 먼저 수행한다.
+  - 방향, 로그, 간섭 확인이 통과하면 같은 절차를 `+/-5 deg`로 확장한다.
+  - Run 00에서는 `+/-5 deg`를 초과하지 않는다. 더 큰 joint 범위 확인은 별도 승인 후 진행한다.
+
+## 6. Arduino 제어기 - 담당자: Y / L
+- Arduino board model: Arduino UNO
+- firmware file/path:
+  - motor range test 예정 경로: `control/motor_test.ino`
+  - final pick-and-place sequence 예정 경로: `control/pick_place_state_machine.ino`
+  - status: 위 firmware 파일은 아직 repo에 추가되지 않았다.
+- firmware version or commit:
+  - prototype version, 2026-06 작성 및 시험 예정.
+  - 실제 commit 또는 파일 추가 후 갱신한다.
+- control loop period [ms]:
+  - fixed real-time control loop는 현재 사용하지 않는다.
+  - Arduino는 serial command 기반 event-driven 방식으로 동작한다.
+  - smooth servo motion 중에는 약 20 ms delay 간격으로 servo command를 단계적으로 갱신한다.
+- serial baud rate: 9600 bps
+- command input format:
+  - individual motor command: `<motor_id> <theta_cmd>`
+    - examples: `1 0`, `2 5`, `3 -5`
+  - three-motor command: `ALL <theta1_cmd> <theta2_cmd> <theta3_cmd>`
+    - examples: `ALL 0 0 0`, `ALL 10 10 10`, `ALL 3 -6 19`
+  - preset commands:
+    - `CENTER`: 모든 motor를 `theta = 0 deg`로 이동.
+    - `SWEEP`: predefined sweep test 실행.
+    - `STATE`: 현재 theta와 servo command 값 출력.
+    - `PON`: pump ON.
+    - `POFF`: pump OFF.
+    - `STOP`: 현재 미구현. Run 00에서는 물리 전원 차단을 우선한다.
+- command unit:
+  - degree [deg].
+  - 입력 command는 raw servo command angle이 아니라 SoT 기준 kinematic joint angle `theta_cmd`다.
+- output log format:
+  - individual motor log: `Servo <id> theta=<theta_cmd> -> servo cmd=<servo_angle>`
+  - three-motor log: `ALL theta -> <theta1>, <theta2>, <theta3> | servo cmd -> <cmd1>, <cmd2>, <cmd3>`
+  - state log:
+    - `Servo1 theta=<theta1> cmd=<cmd1>`
+    - `Servo2 theta=<theta2> cmd=<cmd2>`
+    - `Servo3 theta=<theta3> cmd=<cmd3>`
+  - pump log:
+    - `Pump ON`
+    - `Pump OFF`
+- conversion from `theta_cmd` to motor command:
+  - Arduino는 SoT 기준 kinematic angle command를 실제 servo command angle로 변환한다.
+  - 변환식:
+    - `servo_angle_i = center_cmd_i + sign_i * theta_cmd_i + fine_offset_i`
+  - current calibration values:
+    - `center_cmd_1 = 84 deg`
+    - `center_cmd_2 = 86 deg`
+    - `center_cmd_3 = 88 deg`
+  - `center_cmd_i`는 SoT 기준 `theta_i = 0 deg`가 실제 servo command angle 몇 도에 해당하는지 나타내는 값이다.
+  - 현재 확인 기준에서는 `+90 deg` command가 실제로 `+90 deg`만큼 이동하므로 `sign_i = +1`로 둔다.
+  - `fine_offset_i`는 center command 이후 남는 추가 보정값이며 현재는 `0 deg`로 둔다.
+  - 최종 servo command는 Servo library로 전송하기 전에 safe servo command range로 constrain한다.
+- command timeout behavior:
+  - automatic timeout behavior는 현재 미구현이다.
+  - 새 serial command가 없으면 Arduino는 마지막으로 명령된 servo position을 유지한다.
+  - `STOP` command도 현재 미구현이므로, 이상 동작 시 operator가 즉시 Li-Po servo power를 물리적으로 차단한다.
+  - 필요하면 최종 버전에서 command timeout 또는 emergency-stop 기능을 추가한다.
+- invalid command behavior:
+  - parsing 실패 또는 command format 오류 시 Arduino는 serial monitor에 `Invalid command.`를 출력하고 해당 command를 무시한다.
+  - 입력 `theta_cmd`가 predefined safe range 밖이면 변환 전에 허용 범위로 constrain한다.
+  - 변환된 servo command가 valid servo range를 넘으면 motor에 전송하기 전에 constrain한다.
+
+## 7. 측정 인터페이스 - 담당자: Y / L
+- `theta*_meas` source:
+  - 현재 prototype에서는 외부 encoder measurement를 사용하지 않는다.
+  - FT5330M servo는 자체 위치 제어용 내부 potentiometer를 갖지만, 현재 Arduino에서 해당 feedback value를 직접 읽지 않는다.
+  - 따라서 현재 로그 가능한 값은 실제 측정각이 아니라 마지막으로 accept된 SoT 기준 command에서 만든 `theta*_meas_est`다.
+  - SoT 기준 `theta_i = 0 deg`에 대응하는 실제 servo command 기준값은 `center_cmd_i`로 기록한다.
+- `theta*_meas` unit: degree [deg]
+- SoT/servo command calibration:
+  - processed/main log의 `theta*_cmd`, `theta*_meas`, `theta*_meas_est` 계열 값은 SoT 기준 `theta_i` convention을 따라야 한다.
+  - raw servo command angle을 별도로 기록하는 경우, SoT 기준값과 혼동하지 않도록 `servo*_cmd` 또는 별도 raw log field로 분리한다.
+  - `center_cmd_i`는 SoT 기준 `theta_i = 0 deg`에 대응하는 servo command angle이다.
+  - 현재 확인 기준에서는 추가 fine offset이 없다.
+- center command table:
+  - arm 1:
+    - SoT theta reference [deg]: `0`
+    - `center_cmd_1` [deg]: `84`
+    - `sign_1`: `+1`
+    - `fine_offset_1` [deg]: `0`
+  - arm 2:
+    - SoT theta reference [deg]: `0`
+    - `center_cmd_2` [deg]: `86`
+    - `sign_2`: `+1`
+    - `fine_offset_2` [deg]: `0`
+  - arm 3:
+    - SoT theta reference [deg]: `0`
+    - `center_cmd_3` [deg]: `88`
+    - `sign_3`: `+1`
+    - `fine_offset_3` [deg]: `0`
+- encoder calibration method:
+  - N/A. 현재 prototype에서는 외부 encoder를 사용하지 않는다.
+  - servo command center 값은 실험적으로 보정한다.
+  - current calibrated center command values:
+    - `center_cmd_1 = 84 deg`
+    - `center_cmd_2 = 86 deg`
+    - `center_cmd_3 = 88 deg`
+  - 이 값들은 mechanical reference pose `theta_i = 0 deg`에 대응한다.
+- zeroing/homing method:
+  - startup 또는 test 전에 `CENTER` command 또는 `ALL 0 0 0`으로 reference pose에 둔다.
+  - project home position:
+    - `theta1 = 0 deg`
+    - `theta2 = 0 deg`
+    - `theta3 = 0 deg`
+  - servo command 변환식:
+    - `servo_angle_i = center_cmd_i + sign_i * theta_i + fine_offset_i`
+  - home에서는 `theta_i = 0 deg`이므로 servo command는 calibrated center 값이 된다.
+- startup offset handling:
+  - startup offset은 firmware의 fixed calibration constants로 처리한다.
+  - 현재 offset 성격의 보정값은 center command values `84`, `86`, `88`에 포함되어 있다.
+  - 조립 오차가 남으면 `fine_offset_i`로 추가 보정을 적용할 수 있다.
+  - servo horn 또는 upper arm을 재조립하면 center calibration을 다시 확인한다.
+- dropout handling:
+  - 실시간 외부 angle sensor가 없으므로 현재 단계에서는 measurement dropout이 직접 적용되지 않는다.
+  - serial command가 누락되거나 invalid하면 Arduino는 command를 무시하고 마지막 command position을 유지한다.
+  - sudden servo motion, vibration, signal loss, unexpected arm movement가 보이면 수동으로 system을 멈추고 Li-Po power를 분리한다.
+  - future camera-based measurement dropout은 invalid frame을 제외하고 previous valid measurement를 유지하는 방식으로 처리할 수 있다.
+- fault/status fields:
+  - Arduino serial log에 포함할 수 있는 status field:
+    - `theta1_cmd`
+    - `theta2_cmd`
+    - `theta3_cmd`
+    - `theta1_meas_est`
+    - `theta2_meas_est`
+    - `theta3_meas_est`
+    - `servo1_cmd`
+    - `servo2_cmd`
+    - `servo3_cmd`
+    - `pump_state`
+    - `enabled`
+    - `homed`
+    - `fault`
+  - 현재 prototype에서는 외부 angle feedback이 없으므로 `theta*_meas_est`는 마지막으로 accept된 `theta*_cmd`와 같다.
+  - `fault` field는 invalid command, out-of-range command, emergency stop 같은 software condition 또는 operator 판단으로 설정할 수 있다.
+
+## 8. 비전 설정 - 담당자: L / N
+- camera model: Logitech C270 HD Webcam
+- connection type: USB
+- resolution: 1280x720 HD
+- FPS: 30 fps
+- exposure setting:
+  - auto로 시작한다.
+  - ArUco marker 인식이 불안정하거나 조명 변화로 좌표가 흔들리면 manual exposure로 전환한다.
+- focus setting:
+  - fixed focus 또는 auto focus를 사용한다.
+  - marker가 선명하게 인식되는 설치 높이에서 사용한다.
+- mount height: TBD
+  - 카메라가 전체 작업공간과 ArUco marker를 안정적으로 포함하도록 작업 평면 상단에 고정한다.
+  - 실제 설치 후 카메라-작업평면 거리 또는 카메라-base 거리 [mm]를 실측해 기록한다.
+- mount orientation:
+  - top-view 방식으로 카메라를 작업공간 위쪽에 고정한다.
+  - camera optical axis가 작업 평면에 최대한 수직이 되도록 설치한다.
+  - image coordinate와 `base_frame`의 +x/+y 대응은 homography calibration 후 확인한다.
+- field of view coverage:
+  - reachable workspace 전체와 calibration 기준점이 모두 화면에 들어오도록 설정한다.
+  - 초기 목표는 최소 60 mm x 60 mm XY 작업영역과 주변 기준점을 포함하는 것이다.
+  - 실제 카메라 설치 후 화면에 포함되는 `base_frame` 기준 x/y 범위를 기록한다.
+- marker type: ArUco marker
+- marker size [mm]: TBD
+  - 실제 출력 후 marker 한 변 길이를 mm 단위로 측정해 기록한다.
+- marker ID: TBD
+  - 실험에서 사용할 ArUco dictionary와 marker ID를 정한 뒤 기록한다.
+- marker attachment point:
+  - moving platform 상단 중앙에서 약간 벗어나게 부착한다.
+- marker center offset from end-effector center [mm]: TBD
+  - 실제 부착 후 marker 중심과 end-effector 기준점 사이의 x/y/z offset을 실측해 기록한다.
+- occlusion risk:
+  - upper/lower link, cable, end-effector 구조물이 top-view camera와 marker 사이를 가릴 수 있다.
+  - workspace 외곽, 큰 x/y 이동, 높은 속도 이동, cable 처짐 상황에서 marker 미검출 가능성이 있으므로 `marker_detected`와 `valid` field로 기록한다.
+
+## 9. 비전 캘리브레이션 - 담당자: L / T
+- calibration method:
+  - OpenCV 기반으로 camera calibration과 planar homography calibration을 수행한다.
+  - 먼저 checkerboard로 lens distortion correction parameter를 구한다.
+  - 이후 작업 평면 위 기준점으로 image pixel coordinate를 `base_frame` 기준 mm 좌표로 변환하는 homography matrix를 계산한다.
+  - 단일 top-view camera이므로 vision system은 XY ground-truth만 제공하며, Z 위치는 직접 측정하지 않는다.
+- calibration target:
+  - checkerboard와 작업 평면 기준점 4개 이상을 사용한다.
+  - checkerboard는 lens distortion correction용으로 사용한다.
+  - 작업 평면 기준점은 homography 계산용으로 사용한다.
+  - 기준점은 `base_frame` 기준 실제 x/y 좌표를 mm 단위로 실측해 기록한다.
+- calibration date: TBD
+  - 실제 calibration 수행 날짜를 `YYYY-MM-DD` 형식으로 기록한다.
+- lens distortion correction file/path: `data/vision/calibration/camera_calib_<date>.npz`
+  - 파일에는 camera matrix, distortion coefficients, calibration image size, calibration error를 저장한다.
+- homography reference point count:
+  - 최소 4개를 사용한다.
+  - 가능하면 작업공간 주변에 6개 이상 기준점을 배치해 calibration 안정성을 높인다.
+- homography reference coordinates in `base_frame`: TBD
+  - 실제 기준점 설치 후 아래 형식으로 기록한다.
+  - example:
+    - `P1: (x1, y1) mm`
+    - `P2: (x2, y2) mm`
+    - `P3: (x3, y3) mm`
+    - `P4: (x4, y4) mm`
+  - 기준점 좌표는 base 중심 O를 원점으로 하는 `base_frame` 기준으로 작성한다.
+- reprojection error threshold: TBD
+  - 초기 기준은 calibration 결과를 확인한 뒤 정한다.
+  - 우선 reprojection error와 실제 기준점 재측정 오차를 모두 기록하고, ArUco marker 좌표가 안정적으로 검출되는지 확인한다.
+
+## 10. 데이터 로깅 기본값 - 담당자: L / Y
+- real main log storage path:
+  - proposed: `data/real/raw/`
+  - status: Y와 PC/Arduino logger 저장 구조 확인 필요.
+- real main log filename rule:
+  - proposed: `main_<run_id>.csv`
+  - status: Y와 logger 구현 방식 확인 필요.
+- vision raw log storage path: `data/vision/raw/`
+- vision raw log filename rule: `vision_<run_id>.csv`
+- angle-derived position log storage path: `data/real/derived/`
+- angle-derived position filename rule: `measured_est_<run_id>.csv`
+- processed merged dataset storage path: `data/processed/`
+- processed merged dataset filename rule: `merged_<run_id>.csv`
+- run_id rule:
+  - `YYYY-MM-DD_<test_type>_<index>`
+  - Arduino 로그 파일명이나 run 시작 command에 `run_id`를 삽입할지는 Y와 logger 구현 방식 확인 후 확정한다.
+- run_id examples:
+  - `2026-05-28_static_001`
+  - `2026-05-28_square_slow_001`
+  - `2026-05-28_pickplace_001`
+
+## 11. 동기화와 정렬 기본값 - 담당자: L / Y
+- PC logger used as reference clock: yes
+  - real main log, vision raw log, Simscape output을 후처리 단계에서 PC logger 기준 시간축으로 정렬한다.
+- Arduino timestamp source:
+  - proposed: Arduino `millis()`
+  - status: Y와 실제 firmware timestamp 생성 방식 확인 필요.
+- camera timestamp source:
+  - PC capture time.
+  - OpenCV에서 frame을 받은 시점의 PC timestamp를 `vision_time`으로 기록한다.
+- default common start event:
+  - proposed: PC logger에서 run start command를 발생시킨 시점.
+  - 같은 `run_id`를 real main log와 vision raw log에 기록한다.
+  - 실제 logger 구현에 따라 변동 가능.
+- default common stop event:
+  - proposed: trajectory end 또는 PC logger에서 run stop command를 발생시킨 시점.
+  - marker lost, serial dropout, emergency stop 등으로 조기 종료되면 해당 사유를 별도 status 또는 run note에 기록한다.
+- expected serial delay: TBD
+  - Arduino command/response 구조가 확정된 뒤 Y와 확인한다.
+  - 초기 실험에서는 별도 delay 값을 고정 보정하지 않고, post-alignment 단계에서 필요 여부를 확인한다.
+- expected camera delay: TBD
+  - Logitech C270과 OpenCV capture 환경에서 실제 frame delay를 확인한 뒤 기록한다.
+  - 초기 실험에서는 PC capture time을 기준으로 사용하고, marker trajectory와 target trajectory 비교로 delay 영향을 확인한다.
+- default lag estimation method:
+  - initial manual offset + trajectory event comparison.
+  - 필요 시 target/vision trajectory 또는 theta/vision trajectory 사이 cross-correlation으로 lag를 추정한다.
+- default alignment validation method:
+  - 정렬 후 `target_x/y`, `vision_x/y`, `sim_x/y` trajectory를 같은 plot에 표시해 시간축이 맞는지 확인한다.
+  - static point test에서는 정지 구간 평균값을 비교한다.
+  - moving trajectory test에서는 이동 시작/정지 시점이 서로 일치하는지 확인한다.
+
+## 12. 공통 중지 조건 - 담당자: S / N / T
+- emergency stop / power cutoff:
+  - Run 00 motor-powered test는 Y가 power cutoff operator로 참석해야 한다.
+  - Y가 전원 담당으로 실험 중 즉시 물리 차단을 수행한다.
+  - 현재 `STOP` command는 미구현이므로 물리 전원 차단을 우선한다.
+- overcurrent:
+  - 정량 기준은 TBD.
+  - current limit 또는 current log 확보 전에는 servo stalling, 비정상 발열, 배선 이상, 배터리 이상 징후가 보이면 즉시 중지한다.
+- motor driver fault:
+  - FT5330M에서 별도 fault output을 읽지 않는다.
+  - 비정상 소음, 진동, unexpected motion, command 무응답, servo stalling을 fault 의심 조건으로 본다.
+- abnormal vibration:
+  - Run 00에서는 육안으로 보이는 지속 진동, link 떨림, base 흔들림, 비정상 소음이 발생하면 즉시 중지한다.
+  - 정량 threshold는 추후 vibration/current log 확보 후 확정한다.
+- link interference:
+  - upper arm, parallelogram link, platform, frame, wiring/cable이 접촉하거나 접촉이 예상되면 즉시 중지한다.
+  - Run 00에서는 `+/-3 deg` 확인 후 `+/-5 deg`로 확장하며, 각 단계에서 한 축씩 움직여 간섭 여부를 확인한다.
+- marker lost for longer than threshold:
+  - Run 00 motor direction/zeroing 확인 단계에서는 marker loss를 hard stop 조건으로 사용하지 않는다.
+  - vision logger를 사용하는 단계에서는 marker가 `1 s` 이상 연속 미검출되면 해당 run을 invalid로 표시하고 trajectory test는 중지한다.
+- serial dropout:
+  - command 또는 log stream이 끊기면 즉시 motion command를 중지하고 전원 차단 준비 상태로 전환한다.
+  - 정량 timeout 값은 Arduino firmware와 serial protocol 확인 후 확정한다.
+- theta range exceeded:
+  - Run 00 commissioning 중에는 현재 승인된 test step 범위를 초과하면 즉시 중지한다.
+  - A 단계 초기 범위는 `+/-3 deg`, 통과 후 `+/-5 deg`까지만 허용한다.
+  - `+/-5 deg`를 넘는 joint 범위 확인은 Run 00 범위가 아니며 별도 승인 후 진행한다.
+  - absolute no-go는 `theta_i <= -65 deg` 또는 `theta_i >= +90 deg`로 둔다.
+- target range exceeded:
+  - Run 00 A 단계에서는 target position command를 사용하지 않는다.
+  - Run 00 B/C 단계에서는 A 단계가 통과한 뒤 승인된 `+/-3 mm`, 확장 후 `+/-5 mm` x/y target 이동만 사용한다.
+  - 승인된 x/y target 범위를 초과하면 즉시 중지한다.
+- operator judgment:
+  - 실험 참여자 중 누구든 위험하다고 판단하면 즉시 중지할 수 있다.
+  - 중지 판단은 실험 성공 여부보다 우선한다.
+
+## 13. Open Items - 담당자: 전체
+1. `control/motor_test.ino`, `control/pick_place_state_machine.ino` firmware 파일 repo 추가 여부 확인.
+2. SoT `theta_i = 0 deg` 기준 `center_cmd_i = 84/86/88 deg` 기록값을 Run 00에서 arm별로 재확인.
+3. `sign_i = +1`, `fine_offset_i = 0 deg`가 arm별 Run 00 저속 확인에서도 유지되는지 검증.
+4. real main log storage path와 PC/Arduino logger 저장 구조 확인.
+5. Arduino timestamp source와 serial protocol timeout 기준 확인.
+6. overcurrent 정량 기준 또는 외부 current protection 방식 확인.
+7. hardware-confirmed angle limits는 T/S/N/Y 실험 후 기록.
+8. emergency stop 구현은 현재 물리 차단 우선이며, software `STOP` command 추가 여부는 추후 결정.
+9. marker size, marker ID, camera mount height, calibration file path 확정.
+10. `estimator_method` naming rule은 L이 후속 작성.

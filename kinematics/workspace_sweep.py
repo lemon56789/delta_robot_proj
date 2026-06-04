@@ -109,6 +109,7 @@ def write_results_csv(results: Iterable[SweepPointResult], output_path: Path) ->
     with output_path.open("w", newline="", encoding="utf-8") as csv_file:
         writer = csv.DictWriter(
             csv_file,
+            lineterminator="\n",
             fieldnames=[
                 "x_mm",
                 "y_mm",

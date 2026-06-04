@@ -77,13 +77,13 @@
 
 좌표 및 기구 변수:
 - `O`: `base_frame` 원점, base center
-- `B1`, `B2`, `B3`: base side center에 위치한 각 arm의 motor position
+- `B1`, `B2`, `B3`: 각 arm의 motor/upper-arm joint 기준점
 - `P1`, `P2`, `P3`: platform의 각 연결점
 - `L`: motor-driven upper arm length
 - `l`: parallelogram link length
 - `sB`: base triangle side length
 - `uB`: base center to vertex distance
-- `wB`: base center to side distance
+- `wB`: base center to motor/upper-arm joint reference distance
 - `sP`: platform triangle side length
 - `uP`: platform center to vertex distance
 - `wP`: platform center to side distance
@@ -99,6 +99,7 @@ arm index 대응:
 - `B_i` 좌표는 `wB` 기준으로 표현한다.
 - `P_i` 좌표는 `uP` 기준으로 표현한다.
 - 좌표식 전개에서는 `sB`, `sP`를 직접 쓰지 않고 필요하면 후처리에서 변환한다.
+- 현재 하드웨어에서는 외곽 base side length와 motor/upper-arm joint 위치가 다르므로, `wB = 46.0 mm`를 기구학 기준값으로 사용한다.
 
 `theta_i` 정의:
 - `theta_i`는 arm `i`의 local actuation plane에서 정의되는 upper arm 회전각이다.

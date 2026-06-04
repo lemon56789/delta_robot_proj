@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import csv
 from dataclasses import asdict, dataclass
 import json
@@ -11,15 +12,17 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from kinematics.forward_kinematics import delta_fk
+from kinematics.geometry import NOMINAL_DELTA_GEOMETRY
 from kinematics.inverse_kinematics import delta_ik
 
 
 OUTPUT_CSV = Path("data/fake_pipeline/fake_pipeline_sample_2026-05-04.csv")
-OUTPUT_JSON = Path("data/fake_pipeline/fake_pipeline_sample_2026-05-04.json")
 DT_MS = 20
 NUM_SAMPLES = 180
 THETA_MIN_DEG = -45.0
 THETA_MAX_DEG = 90.0
+DEFAULT_Z_CENTER_MM = -220.0
+DEFAULT_Z_AMPLITUDE_MM = 8.0
 
 THETA_BIAS_DEG = (0.8, -0.6, 0.4)
 THETA_LAG_ALPHA = 0.82
@@ -47,12 +50,19 @@ class FakePipelineRow:
 
 
 def main() -> int:
-    rows = build_fake_pipeline_rows()
-    write_rows_csv(rows, OUTPUT_CSV)
+    args = _parse_args()
+    output_csv = Path(args.output_csv)
+    output_json = Path(args.output_json) if args.output_json is not None else output_csv.with_suffix(".json")
+
+    rows = build_fake_pipeline_rows(
+        z_center_mm=args.z_center,
+        z_amplitude_mm=args.z_amplitude,
+    )
+    write_rows_csv(rows, output_csv)
     metadata = build_metadata(rows)
-    write_metadata_json(metadata, OUTPUT_JSON)
-    print(f"csv_written={OUTPUT_CSV}")
-    print(f"json_written={OUTPUT_JSON}")
+    write_metadata_json(metadata, output_json)
+    print(f"csv_written={output_csv}")
+    print(f"json_written={output_json}")
     print(f"row_count={len(rows)}")
     print(
         "trajectory_bounds="
@@ -63,12 +73,20 @@ def main() -> int:
     return 0
 
 
-def build_fake_pipeline_rows() -> list[FakePipelineRow]:
+def build_fake_pipeline_rows(
+    *,
+    z_center_mm: float = DEFAULT_Z_CENTER_MM,
+    z_amplitude_mm: float = DEFAULT_Z_AMPLITUDE_MM,
+) -> list[FakePipelineRow]:
     rows: list[FakePipelineRow] = []
     previous_meas = (0.0, 0.0, 0.0)
     for index in range(NUM_SAMPLES):
         phase = 2.0 * math.pi * index / NUM_SAMPLES
-        target = generate_target_position(phase)
+        target = generate_target_position(
+            phase,
+            z_center_mm=z_center_mm,
+            z_amplitude_mm=z_amplitude_mm,
+        )
         theta_cmd = delta_ik(
             *target,
             theta_min_deg=THETA_MIN_DEG,
@@ -106,12 +124,17 @@ def build_fake_pipeline_rows() -> list[FakePipelineRow]:
     return rows
 
 
-def generate_target_position(phase: float) -> tuple[float, float, float]:
+def generate_target_position(
+    phase: float,
+    *,
+    z_center_mm: float = DEFAULT_Z_CENTER_MM,
+    z_amplitude_mm: float = DEFAULT_Z_AMPLITUDE_MM,
+) -> tuple[float, float, float]:
     # Keep the first fake pipeline inside the conservative safe zone so the
     # dataset focuses on end-to-end wiring rather than boundary behavior.
     x_mm = 15.0 * math.sin(phase)
     y_mm = 12.0 * math.sin(2.0 * phase + 0.4)
-    z_mm = -220.0 + 8.0 * math.cos(phase)
+    z_mm = z_center_mm + z_amplitude_mm * math.cos(phase)
     return (x_mm, y_mm, z_mm)
 
 
@@ -134,6 +157,7 @@ def write_rows_csv(rows: list[FakePipelineRow], output_path: Path) -> None:
     with output_path.open("w", encoding="utf-8", newline="") as csv_file:
         writer = csv.DictWriter(
             csv_file,
+            lineterminator="\n",
             fieldnames=[
                 "time",
                 "target_x",
@@ -180,6 +204,12 @@ def build_metadata(rows: list[FakePipelineRow]) -> dict[str, object]:
             "theta_max_deg": THETA_MAX_DEG,
             "range_type": "hardware-safe provisional",
         },
+        "geometry": {
+            "L_mm": NOMINAL_DELTA_GEOMETRY.L,
+            "l_mm": NOMINAL_DELTA_GEOMETRY.l,
+            "wB_mm": NOMINAL_DELTA_GEOMETRY.wB,
+            "uP_mm": NOMINAL_DELTA_GEOMETRY.uP,
+        },
         "fake_measurement_model": {
             "theta_bias_deg": list(THETA_BIAS_DEG),
             "theta_lag_alpha": THETA_LAG_ALPHA,
@@ -215,6 +245,17 @@ def write_metadata_json(metadata: dict[str, object], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8") as json_file:
         json.dump(metadata, json_file, ensure_ascii=True, indent=2)
+
+
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Generate a deterministic fake pipeline CSV using current nominal geometry."
+    )
+    parser.add_argument("--output-csv", type=str, default=str(OUTPUT_CSV))
+    parser.add_argument("--output-json", type=str, default=None)
+    parser.add_argument("--z-center", type=float, default=DEFAULT_Z_CENTER_MM)
+    parser.add_argument("--z-amplitude", type=float, default=DEFAULT_Z_AMPLITUDE_MM)
+    return parser.parse_args()
 
 
 if __name__ == "__main__":

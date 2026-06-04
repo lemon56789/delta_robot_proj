@@ -32,7 +32,7 @@
 10. 외부 측정계 제거 후 운영 검증
 
 ## 4-A. Current Status Snapshot
-- 기준일: `2026-05-25`
+- 기준일: `2026-06-01`
 - Stage 1 설계 기준 확정: 완료
 - Stage 2 운동학 정의 및 구현: 진행 중
 - Stage 3 FK 검증 및 기본 해석: 진행 중
@@ -46,7 +46,7 @@
 
 현재 구현 기준 핵심 상태:
 - `docs/system_data_flow.md`, `docs/ik_structure_note.md`, `docs/vision_tracking.md`가 현재 SoT 역할을 수행한다.
-- nominal geometry parameter `L=125.0 mm`, `l=300.0 mm`, `wB=24.051 mm`, `uP=27.177 mm`가 코드 기준값으로 반영되었다.
+- nominal geometry parameter `L=125.0 mm`, `l=300.0 mm`, `wB=46.0 mm`, `uP=27.177 mm`가 코드 기준값으로 반영되었다.
 - `kinematics/geometry.py`에 geometry dataclass와 nominal parameter가 추가되었다.
 - `kinematics/inverse_kinematics.py`에 `delta_ik(x_mm, y_mm, z_mm)` 최소 구현과 arm별 reject 진단이 추가되었다.
 - `kinematics/forward_kinematics.py`, `kinematics/validate_roundtrip.py`, `kinematics/workspace_sweep.py`가 추가되어 IK↔FK round-trip 검증과 workspace sweep이 가능해졌다.
@@ -102,7 +102,7 @@
 - sample point에 대해 일관된 결과가 나온다
 
 ### Current Status
-- nominal geometry parameter는 현재 `L=125.0 mm`, `l=300.0 mm`, `wB=24.051 mm`, `uP=27.177 mm`로 정의되어 있다.
+- nominal geometry parameter는 현재 `L=125.0 mm`, `l=300.0 mm`, `wB=46.0 mm`, `uP=27.177 mm`로 정의되어 있다.
 - `kinematics/geometry.py`에서 geometry dataclass와 nominal parameter 상수를 제공한다.
 - `kinematics/inverse_kinematics.py`에서 문서 기준 `E/F/G + 2atan(t)` 구조의 IK가 구현되어 있다.
 - `reject` 처리, arm별 failure diagnostic, `previous_theta_deg` 기반 연속성 선택이 코드에 반영되어 있다.
@@ -160,9 +160,9 @@ FK를 정리하고, IK↔FK 왕복 검증으로 운동학 일관성을 확인한
 - 실험별 데이터 저장 구조가 재현 가능하다
 
 ### Current Status
-- `data/fake_pipeline/fake_pipeline_sample_2026-05-04_recomputed.csv`와 `data/fake_pipeline/fake_pipeline_sample_2026-05-04_recomputed_simscape.csv`, `data/fake_pipeline/fake_pipeline_sample_2026-05-25_positive_theta.csv`와 `data/fake_pipeline/fake_pipeline_sample_2026-05-25_positive_theta_simscape.csv`를 기준으로 Python/Simscape CSV 비교가 가능하다.
-- 현재 comparison 기준에서 `theta*_cmd`와 `theta*_meas`는 Python 기준과 직접 일치한다.
-- `sim_x`, `sim_y`, `sim_z`는 provisional `1 sample = 20 ms` lag 보정 후 Python 기준과 매우 가깝게 정렬된다.
+- `data/fake_pipeline/fake_pipeline_sample_2026-05-04_recomputed.csv`와 `data/fake_pipeline/fake_pipeline_sample_2026-05-25_positive_theta.csv`는 `wB = 46.0 mm` 기준으로 다시 생성되었다.
+- `data/fake_pipeline/fake_pipeline_sample_2026-05-04_recomputed_simscape.csv`와 `data/fake_pipeline/fake_pipeline_sample_2026-05-25_positive_theta_simscape.csv`는 `wB = 24.051 mm` 기준 old-geometry artifact이므로, Simscape comparison output은 다시 생성해야 한다.
+- 기존 comparison에서는 `theta*_cmd`와 `theta*_meas`가 Python 기준과 직접 일치했고, `sim_x`, `sim_y`, `sim_z`는 provisional `1 sample = 20 ms` lag 보정 후 Python 기준과 매우 가깝게 정렬되었다.
 - 다만 현재 `Simscape` CSV의 `error_x`, `error_y`, `error_z`는 `target_position - sim_position` diagnostic 값이며, SoT correction field 의미인 `measured_position - sim_position`과 다르다.
 - 하드웨어 또는 estimator 경로에서 `measured_position`을 확보한 뒤 `Simulink/Simscape` export의 `error_*` 계산을 SoT 기준으로 수정해야 한다.
 
