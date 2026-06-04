@@ -5,8 +5,10 @@
 현재 nominal geometry parameter 기준:
 - `L = 125.0 mm`
 - `l = 300.0 mm`
-- `wB = 24.051 mm`
+- `wB = 46.0 mm`
 - `uP = 27.177 mm`
+
+`wB`는 외곽 base 변에서 유도한 거리가 아니라, 실제 하드웨어에서 base center부터 motor/upper-arm joint 기준점까지의 거리다.
 
 현재 포함 모듈:
 - `geometry.py`: 델타 로봇 기하 파라미터 dataclass와 nominal parameter 정의

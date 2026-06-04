@@ -19,7 +19,7 @@
 - +z direction: direction coming out through the base
 - workspace direction: `-z`
 - right-hand rule 사용 여부: `yes`
-- 비고: 모든 position-related fields는 `base_frame` 기준으로 기록한다. `sB`는 base 정삼각형의 변 길이, `sP`는 platform 정삼각형의 변 길이, `uB`는 base 중심에서 꼭짓점까지의 길이, `uP`는 platform 중심에서 꼭짓점까지의 길이, `wB`는 base 중심에서 변까지의 길이, `wP`는 platform 중심에서 변까지의 길이, `L`은 link arm length, `l`은 crank의 parallelogram length를 의미한다. `B1`, `B2`, `B3`는 `sB` 각 변의 중심에 위치한 step motor 위치이며, `B1`은 `O`에서 `-y` 방향으로 향할 때 만나는 점이고 이후 반시계방향으로 `B2`, `B3`가 배치된다. `P1`, `P2`, `P3`는 각각 `B1`, `B2`, `B3`에 연결된 platform 점이며 `sP`의 꼭짓점이다.
+- 비고: 모든 position-related fields는 `base_frame` 기준으로 기록한다. `sB`는 base 외곽 정삼각형 변 길이, `sP`는 platform 외곽 정삼각형 변 길이, `uB`는 base 중심에서 외곽 꼭짓점까지의 길이, `uP`는 platform 중심에서 platform joint point까지의 길이, `wB`는 base 중심에서 motor/upper-arm joint 기준점 `B_i`까지의 base-plane radial distance, `wP`는 platform 중심에서 외곽 변까지의 길이를 의미한다. `L`은 link arm length, `l`은 crank의 parallelogram length를 의미한다. 현재 하드웨어 기준 `wB = 46.0 mm`이며, 외곽 base side length `sB = 199 mm`에서 계산되는 외곽 side distance와는 다른 기구학 기준값이다. `B1`, `B2`, `B3`는 각 arm의 motor/upper-arm joint 기준점이며, `B1`은 `O`에서 `-y` 방향으로 향할 때 만나는 점이고 이후 반시계방향으로 `B2`, `B3`가 배치된다. `P1`, `P2`, `P3`는 각각 `B1`, `B2`, `B3`에 연결된 platform 점이다.
 
 ## 2. Timestamp Policy
 - timestamp field name: `time`
@@ -68,7 +68,7 @@
   3. `sim_z`
 - simulation step/sampling rate: current fake pipeline comparison export uses `20 ms` (`50 Hz`) row spacing; final real/sim logging rate is to be fixed later
 - parameter source (geometry, mass, friction):
-- notes: `RecurDyn` result may be used later as a secondary reference for cross-checking, but the current system data flow is defined around `Simscape`. Current comparison against `data/fake_pipeline/fake_pipeline_sample_2026-05-04_recomputed.csv` and `data/fake_pipeline/fake_pipeline_sample_2026-05-25_positive_theta.csv` shows that `theta*_cmd` and `theta*_meas` match the Python reference directly, while `sim_x`, `sim_y`, `sim_z` align after a provisional `1 sample = 20 ms` `post-alignment` shift. The current `Simscape` CSV export writes `error_x`, `error_y`, `error_z` as diagnostic `target_position - sim_position` values, which do not match the SoT correction-field meaning. Contract-compliant `error_*` values are generated only after measured data is aligned with simulation data in a processed/merged dataset.
+- notes: `RecurDyn` result may be used later as a secondary reference for cross-checking, but the current system data flow is defined around `Simscape`. Geometry was updated to hardware-built `wB = 46.0 mm` on 2026-06-01, so pre-update comparison files generated with `wB = 24.051 mm` must be treated as old-geometry artifacts. New Python/Simscape comparisons must be regenerated from the same `wB = 46.0 mm` parameters. The current `Simscape` CSV export writes `error_x`, `error_y`, `error_z` as diagnostic `target_position - sim_position` values, which do not match the SoT correction-field meaning. Contract-compliant `error_*` values are generated only after measured data is aligned with simulation data in a processed/merged dataset.
 
 ## 6. Real-Sim Alignment Policy
 - alignment reference clock: `PC logger`

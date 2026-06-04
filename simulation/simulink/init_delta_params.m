@@ -7,7 +7,7 @@ clc
 % Geometry
 L  = 125.0e-3;      % upper arm length [m]
 l  = 300.0e-3;      % lower link length [m]
-wB = 24.051e-3;     % base center to side-center [m]
+wB = 46.0e-3;       % base center to motor/upper-arm joint reference [m]
 uP = 27.177e-3;     % platform center to vertex/connection [m]
 
 % Arm direction vectors in base frame

@@ -11,8 +11,8 @@
     "x_max_mm": 15.0,
     "y_min_mm": -11.998458736039522,
     "y_max_mm": 11.99845873603952,
-    "z_min_mm": -228.0,
-    "z_max_mm": -212.0
+    "z_min_mm": -340.0,
+    "z_max_mm": -324.0
   },
   "angle_limits": {
     "theta_min_deg": -45.0,
@@ -57,8 +57,8 @@
     "error_z"
   ],
   "error_summary": {
-    "max_abs_error_x_mm": 18.434352373335738,
-    "max_abs_error_y_mm": 17.977312435340746,
-    "max_abs_error_z_mm": 40.8437727151686
+    "max_abs_error_x_mm": 26.91595655467983,
+    "max_abs_error_y_mm": 26.5461164935537,
+    "max_abs_error_z_mm": 50.06664262652936
   }
 }
