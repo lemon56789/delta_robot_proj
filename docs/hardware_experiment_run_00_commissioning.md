@@ -296,22 +296,26 @@ Fail / stop criteria:
   - y direction match: yes.
   - parallel motion acceptable by visual check: yes.
 - C result:
-  - passed: pending.
-  - marker_detected: pending.
-  - valid=true row ratio: TBD.
-  - vision_x direction match: pending.
-  - vision_y direction match: pending.
-  - static coordinate noise: TBD mm.
-  - same run_id as main log: pending.
+  - passed: yes.
+  - basis: `data/vision/raw/vision_stopcheck_2026-06-04_run00_c_stopcheck_001.csv`.
+  - provenance note: 파일/run_id 날짜는 2026-06-04지만, 2026-06-05 검토 기준 Run 00-C vision readiness 근거로 사용한다.
+  - marker_detected: yes, `40/40` rows.
+  - valid=true row ratio: `40/40` rows, `100%`.
+  - homography-applied `vision_x/y` mm coordinates recorded: yes.
+  - vision_x direction match: yes, `x_plus_stop`에서 home 대비 `vision_x` 증가.
+  - vision_y direction match: yes, `y_plus_stop`에서 home 대비 `vision_y` 증가.
+  - static coordinate noise: maximum observed stop-phase std `x <= 0.093 mm`, `y <= 0.362 mm`.
+  - same run_id as main log: not verified in Run 00-C stopcheck.
 - main log valid:
-  - required command/state fields recorded: TBD.
-  - timestamp present: TBD.
+  - required command/state fields recorded: not verified in Run 00-C stopcheck.
+  - timestamp present: not verified in Run 00-C stopcheck.
 - Run 01 readiness:
-  - ready for vision-based baseline data collection: no.
-  - reason if no: C 단계 vision readiness check가 아직 완료되지 않았다.
+  - ready for vision-based baseline data collection: yes.
+  - condition: Run 01부터는 main log와 vision log를 같은 `run_id`로 저장하고, post-run validation에서 timestamp와 required fields를 확인한다.
 - issues found:
   - A/B 단계에서 사용자 보고 기준 issue 없음.
-  - C 단계는 pending.
+  - C 단계 vision readiness check에서 marker detection, homography coordinate output, x/y direction issue 없음.
+  - Run 00-C stopcheck에서는 main log run_id match를 확인하지 못했으므로 Run 01에서 별도 확인한다.
 
 ## 8. Run Metadata
 - run_id: TBD
@@ -327,8 +331,10 @@ Fail / stop criteria:
 - main log path: `data/real/raw/main_<run_id>.csv`
 - vision log path: `data/vision/raw/vision_<run_id>.csv`
 - vision calibration file:
-  - status: pending.
-  - note: camera calibration/homography file 정보 수신 후 작성한다.
+  - status: recorded for Run 00-C stopcheck.
+  - path: `data/vision/calibration/homography_2026-06-04_run00_cpre_001.npz`
+  - note: calibration file run_id date is 2026-06-04; retained as original calibration provenance for the 2026-06-05 Run 00-C review.
 - notes:
   - 2026-06-05: A/B gate는 사용자 보고 기준으로 pass 기록.
-  - C gate는 homography 적용 vision logger와 방향 확인 후 별도 기록.
+  - 2026-06-05: C gate는 `vision_stopcheck_2026-06-04_run00_c_stopcheck_001.csv`의 homography 적용 `vision_x/y`와 stop-and-check phase 기준으로 pass 기록.
+  - 2026-06-05: Run 01부터는 main log와 vision log의 `run_id`를 같은 값으로 저장해야 한다.
