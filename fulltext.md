@@ -1,7 +1,7 @@
 # Delta Robot Virtual Sensing - Full Context
 
 문서 목적: 외부 AI 모델이 이 리포지토리를 빠르게 이해하고, 분석/코드 지원을 수행할 수 있도록 프로젝트 전반을 한 파일로 요약한다.
-갱신일: 2026-06-04
+갱신일: 2026-06-06
 
 주의: 이 파일은 요약본이다. 상충 시 Source of Truth는 `docs/*` -> `AGENTS.md` -> `README.md` -> 코드 순서를 따른다.
 
@@ -53,9 +53,22 @@ Target Trajectory
 - `control/`: Arduino 제어 로직 및 파라미터
 - `virtual_sensor/`: 가상 센서 학습/추론 코드
 - `data/`: 실험/시뮬레이션 원본 및 가공 데이터
+- `data/real/raw/`: Run 01 main logger CSV/JSON/TXT 저장 경로
+- `data/real/derived/`: angle-derived measured position CSV 저장 경로
 - `data/vision/raw/`: 비전 기반 raw ground-truth 로그 저장 기준 경로
+- `data/vision/calibration/`: calibration/homography artifact 저장 경로
+- `data/simulation/raw/`: Simscape raw output CSV 저장 경로
+- `data/processed/`: processed merged dataset 저장 경로
 - `cad/`: CAD 모델
 - `experiments/`: 실험 계획, 로그, 성능 검증 자료
+
+## 3-A) 팀 역할 요약
+- S: 팀장, 하드웨어 제작/조립, 실험 진행 지원, 기획 단계 동역학/진동 분석
+- L: 시스템 통합, 가상센싱, 데이터 처리/학습, 비전 기반 측정
+- Y: Arduino 제어, 회로 구성/배선, 전원 및 구동계 연결
+- T: 하드웨어 제작/조립, 기구 설계, 제작 치수 검토
+- N: 하드웨어 제작/조립, 프로파일 주문제작 요청, 기획 단계 구조/응력 해석
+- 동역학/진동/구조/응력 해석은 기획 단계 역할로 유지하되, 시간 제약상 실제 주 산출물은 Run 00/Run 01-pre 하드웨어 제작, 조립, 회로/배선, 데이터 파이프라인 검증 중심으로 정리한다.
 
 ## 4) 좌표계와 단위
 현재 기준 문서: `docs/system_data_flow.md`
@@ -133,10 +146,11 @@ Timestamp:
 - contract-compliant `error_*`는 measured data, simulation output, vision data가 post-alignment된 processed merged dataset 단계에서만 생성한다.
 
 Measured data 계층:
-- Real main log: `run_id`, `time`, `target_*`, `theta*_cmd`, `theta*_meas`, `valid`를 기록한다.
-- Vision raw log: `run_id`, `vision_time`, `vision_x`, `vision_y`, `marker_detected`, `frame_id`, `valid`를 기록한다.
-- Angle-derived measured position: `theta*_meas` 기반 FK 또는 estimator로 `measured_x_est`, `measured_y_est`, `measured_z_est`를 생성한다.
-- Processed merged dataset: real main log, Simscape output, vision raw log, angle-derived measured position을 정렬해 16개 final CSV 컬럼을 만든다.
+- Real main log: `data/real/raw/main_<run_id>.csv`에 `run_id`, `time`, `target_*`, `theta*_cmd`, `theta*_meas`, `valid`를 기록한다.
+- Vision raw log: `data/vision/raw/vision_<run_id>.csv`에 `run_id`, `vision_time`, `vision_x`, `vision_y`, `marker_detected`, `frame_id`, `valid`를 기록한다.
+- Simscape raw output: `data/simulation/raw/simscape_<run_id>.csv`에 `time`, `sim_x`, `sim_y`, `sim_z`를 기록한다.
+- Angle-derived measured position: `data/real/derived/measured_position_<run_id>.csv`에 `theta*_meas` 기반 FK 또는 estimator로 `measured_x_est`, `measured_y_est`, `measured_z_est`를 생성한다.
+- Processed merged dataset: `data/processed/merged_<run_id>.csv`에 real main log, Simscape output, vision raw log, angle-derived measured position을 정렬해 16개 final CSV 컬럼을 만든다.
 
 `error_*` 생성 기준:
 - `error_x = measured_x_vision - sim_x`
@@ -164,6 +178,7 @@ Alignment:
 - resampling: `linear interpolation`
 - delay compensation: `post-alignment`
 - 현재 fake pipeline 기준 `Simscape` 비교에서는 provisional `1 sample = 20 ms` lag 보정을 사용한다.
+- Run 01-pre preprocessing에서는 vision 로그 시작 시각을 main 첫 timestamp에 맞추는 provisional relative-time alignment를 사용했다.
 - `invalid` row는 alignment와 비교에서 제외한다.
 
 Correction:
@@ -301,10 +316,11 @@ root selection:
 ## 9) 하드웨어 실험 준비 상태
 현재 기준 문서: `docs/hardware_experiment_base_config.md`, `docs/hardware_experiment_run_00_commissioning.md`
 
-Run 00의 성격:
-- 데이터 수집 실험이 아니라 실제 장비 커미셔닝 실험이다.
+Run 00 상태:
+- Run 00은 데이터 수집 실험이 아니라 실제 장비 커미셔닝 실험이다.
 - 목적은 전원, Arduino 명령, motor 방향, zeroing 기준, 안전 중지 조건, 기본 로그, vision 위치 확인이 SoT 기준과 일치하는지 검증하는 것이다.
-- Run 00을 통과해야 Run 01 baseline 데이터 수집으로 넘어갈 수 있다.
+- 2026-06-05 기준 Run 00 A/B/C gate는 통과 상태로 정리되었다.
+- Run 01 baseline data collection으로 넘어갈 수 있는 최소 gate는 통과했지만, Run 01부터는 main/vision/simscape/processed artifact와 metadata를 run별로 검증해야 한다.
 
 전원과 안전:
 - servo 전원은 2S Li-Po battery 기준 공칭 `7.4 V`, 완충 `8.4 V`이며 servo 입력은 `8.4 V`를 초과하지 않는다.
@@ -333,6 +349,19 @@ Run 00 기본 확인 순서:
 - C 단계에서는 B와 같은 작은 x/y 이동을 vision logger로 읽어 marker 검출, `vision_x/y` 좌표 방향, static noise, 같은 `run_id` 여부를 확인한다.
 - A가 실패하면 B로 가지 않고, B가 실패하면 C로 가지 않는다.
 
+Run 01-pre 상태:
+- Run 01-pre는 final training dataset이 아니라 raw log, Simscape output, alignment, merge, `error_*` label 생성이 end-to-end로 동작하는지 확인하는 pipeline validation 단계다.
+- 2026-06-06 기준 static/cross/square Run 01-pre pipeline validation은 완료되었다.
+- 확보된 산출물:
+  - `data/real/raw/main_2026-06-05_run01_pre_*.csv`
+  - `data/vision/raw/vision_2026-06-05_run01_pre_*.csv`
+  - `data/simulation/raw/simscape_2026-06-05_run01_pre_*.csv`
+  - `data/real/derived/measured_position_2026-06-05_run01_pre_*.csv`
+  - `data/processed/merged_2026-06-05_run01_pre_*.csv`
+- `virtual_sensor/check_dataset.py` 검증에서 static/cross/square merged CSV 모두 16-column shape와 `has_nan=False`를 확인했다.
+- 한계: cross marker/valid ratio는 약 `92.98%`, square는 약 `93.21%`였고, 현재 `theta*_meas`는 실제 encoder가 아니라 `command_echo_no_encoder`다. 따라서 Run 01-pre artifact는 최종 학습 데이터가 아니다.
+- 현재 `experiments/run01_main_logger.py`는 pre trajectory만 지원한다. Run 01-main/holdout 실행 전 main/holdout trajectory 지원 추가가 필요하다.
+
 ## 10) 프로젝트 로드맵
 현재 기준 문서: `docs/roadmap.md`
 
@@ -352,11 +381,11 @@ Run 00 기본 확인 순서:
 - Stage 1 설계 기준 확정: 완료
 - Stage 2 운동학 정의 및 구현: nominal geometry, IK, workspace/angle range 진단까지 1차 완료
 - Stage 3 FK 검증 및 기본 해석: FK 최소 구현 및 round-trip/workspace 검증 진행 중
-- Stage 4 시뮬레이션 및 데이터 경로 정리: 부분 완료
-- Stage 5 외부 ground-truth 측정계 구축: 문서화 완료, 구현 미착수
-- Stage 6 fake pipeline 구성: 진행 중
-- Stage 7 실제 데이터 수집: Run 00 커미셔닝 준비 중
-- Stage 8 가상센서 학습 및 보정: 미착수
+- Stage 4 시뮬레이션 및 데이터 경로 정리: Run 01-pre 기준 부분 완료
+- Stage 5 외부 ground-truth 측정계 구축: Run 00/Run 01-pre 기준 초기 구현 완료, 품질 개선 필요
+- Stage 6 fake pipeline 구성: 최소 경로 완료
+- Stage 7 실제 데이터 수집: Run 00 통과, Run 01-pre pipeline validation 완료, Run 01-main 준비 중
+- Stage 8 가상센서 학습 및 보정: 미착수, 첫 모델은 linear regression/Ridge baseline으로 계획
 - Stage 9 폐루프 적용 및 성능 검증: 미착수
 - Stage 10 외부 측정계 제거 후 운영 검증: 미착수
 
@@ -366,9 +395,15 @@ Run 00 기본 확인 순서:
 - `2026-05-25` 기준 `IK/FK`의 `theta` 및 `z` 부호 정의가 문서 SoT와 정렬되었고, representative `IK -> FK` roundtrip 검증이 다시 통과했다.
 - 현재 angle range는 `hardware-safe provisional: -45..90 deg`, `nominal-analysis candidate: -45..90 deg`로 관리하고, `hardware-confirmed`는 별도 확정 전 상태로 둔다.
 - `docs/workspace_envelope.md`에 설치 높이와 `XY` reachable area 참고 결과가 정리되어 있으며, 현재 기준 추천 설치 높이는 일반적인 pick-and-place 기준 `H = 290 mm`, 대안은 `H = 310 mm`다.
-- 실제 현재 hardware base-ground 설치 높이는 `H = 285 mm`로 base config에 기록되어 있고, 이 높이 기준의 Run 00 준비를 진행한다.
+- 실제 현재 hardware base-ground 설치 높이는 `H = 285 mm`로 base config에 기록되어 있고, 이 높이 기준으로 Run 00과 Run 01-pre를 진행했다.
 - `experiments/fake_pipeline.py`가 현재 CSV 계약을 따르는 fake dataset CSV/JSON을 생성한다.
 - `virtual_sensor/dataset.py`, `virtual_sensor/check_dataset.py`로 fake pipeline CSV를 읽고 feature/target shape와 NaN 여부를 확인할 수 있다.
+- `experiments/run01_preprocess.py`가 Run 01 raw main, vision, Simscape CSV를 읽어 angle-derived measured position과 processed merged dataset을 생성한다.
+- Run 01-pre static/cross/square processed merged dataset은 생성 및 shape/NaN 검증을 통과했다.
+- Run 01-pre artifact는 pipeline validation용이며 final training dataset으로 채택하지 않는다.
+- 시간 제약상 첫 virtual sensor model은 PyTorch neural network가 아니라 linear regression 또는 Ridge regression으로 진행한다. PyTorch MLP는 linear/Ridge baseline 이후 필요성이 확인될 때의 후속 확장으로 둔다.
+- 초기 모델의 기본 feature는 `theta1_cmd`, `theta2_cmd`, `theta3_cmd`, `theta1_meas`, `theta2_meas`, `theta3_meas`, `sim_x`, `sim_y`, `sim_z`이고 target은 processed merged dataset의 `error_x`, `error_y`, `error_z`다.
+- Ridge regularization strength와 feature 선택은 validation split에서만 결정하고, Run 01-holdout은 fitting/tuning에 사용하지 않는다.
 - `wB = 46.0 mm` 기준 Python fake pipeline CSV/JSON과 workspace sweep artifact가 다시 생성되었다.
 - Simulink/Simscape에서 새 `sim_*` CSV를 받아 비교한 결과, header/row/time/input field는 일치했고 `sim_*`는 예상대로 약 `1 sample = 20 ms` lag를 보였다.
 - 현재 Simscape CSV의 `error_*`는 `target_position - sim_position` diagnostic 값이므로 SoT correction field인 `measured_position - sim_position`으로 직접 사용하지 않는다.
@@ -377,7 +412,9 @@ Run 00 기본 확인 순서:
 - `error_*`는 raw Simscape export가 아니라 processed merged dataset 단계에서 생성한다.
 - 하드웨어 실험 문서는 고정 설정 `docs/hardware_experiment_base_config.md`와 실험별 run protocol `docs/hardware_experiment_run_*.md`로 분리되었다.
 - base config에는 `wB=46 mm`, `H=285 mm`, 전원 구조, `STOP` 미구현/물리 차단 우선, `center_cmd_i=84/86/88 deg`, Run 00 단계적 theta test range, vision 위치 확인 기준이 반영되었다.
-- Run 00 문서는 A/B/C gate 구조로 작성되었고, 실제 실험 전 `z0`, firmware path/status, logger 저장 경로, vision calibration file을 채워야 한다.
+- Run 00 문서는 A/B/C gate 구조로 작성되었고, A/B/C gate는 통과 상태로 정리되었다.
+- Run 01 문서는 pre/main/holdout 구조로 작성되었고, main은 training/validation, holdout은 Run 02 comparison baseline으로 분리한다.
+- 실제 역할 기준으로 S/T/N은 하드웨어 제작/조립을 수행했고, S는 팀장 역할을 맡았으며, N은 프로파일 주문제작 요청을 담당했다. Y는 Arduino 제어와 함께 회로 구성/배선 및 전원/구동계 연결을 담당했다. L은 시스템 통합, 가상센싱, 데이터 처리/학습, 비전 기반 측정을 담당한다.
 
 ## 11) 개발 및 변경 원칙
 AGENTS.md 기준 핵심 원칙:
@@ -393,26 +430,26 @@ AGENTS.md 기준 핵심 원칙:
 - Python 3.12.3
 - MATLAB / Simulink / Simscape
 - Arduino
-- PyTorch
+- PyTorch (future optional)
 - OpenCV
 - GitHub
 
 ## 13) 바로 다음 작업
 우선순위:
-1. Run 00 실행 전 `z0`, firmware path/status, logger 저장 경로, vision calibration file을 채운다.
-2. Run 00 A 단계에서 `center_cmd_i = 84/86/88 deg`, `sign_i = +1`, `fine_offset_i = 0 deg`가 arm별로 유지되는지 `±3 deg -> ±5 deg` 저속 확인한다.
-3. Run 00 B 단계에서 IK 기반 `x/y` 방향 `±3 mm -> ±5 mm` 이동 방향과 platform 평행 이동 상태를 확인한다.
-4. Run 00 C 단계에서 vision marker, homography/calibration file, `vision_x/y` 좌표 방향, static noise, 같은 `run_id` 여부를 확인한다.
-5. Y와 함께 power cutoff, firmware 파일, serial command/log format, timeout 기준을 실제 구현 기준으로 확인한다.
-6. real main log, vision raw log, Simscape output의 post-alignment 절차를 실제 실험 로그 기준으로 구체화한다.
-7. processed merged dataset의 저장 경로, 파일명 규칙, `estimator_method` 기록 규칙을 정한다.
-8. `virtual_sensor/` baseline model 학습/추론 뼈대는 processed dataset 규칙이 정리된 뒤 추가한다.
+1. `experiments/run01_main_logger.py`에 Run 01-main/holdout trajectory 지원을 추가한다.
+2. Run 01-main을 correction off, 동일 gain/camera/marker/calibration 조건으로 수집한다.
+3. 각 Run 01-main `run_id`에 대해 Simscape output을 생성한다.
+4. `experiments/run01_preprocess.py --run-id <run_id>`로 measured position과 processed merged dataset을 생성한다.
+5. `virtual_sensor/check_dataset.py`로 processed dataset의 16-column shape, NaN, timestamp, marker valid ratio를 검증한다.
+6. Run 01-main processed CSV로 linear/Ridge baseline을 학습하고 validation에서만 alpha/feature 선택을 수행한다.
+7. Run 01-holdout은 같은 처리 흐름으로 생성하되 fitting/tuning에 사용하지 않고 최종 일반화 평가에만 사용한다.
+8. Run 02에서 holdout 대응 trajectory를 correction on 상태로 다시 실행해 baseline 대비 성능을 비교한다.
 
 BLOCKER 가능성이 있는 항목:
-- Run 00에서 `center_cmd_i`, `sign_i`, `fine_offset_i`가 문서 기준과 다르게 나오면 Arduino command mapping을 다시 정리해야 한다.
-- 물리 전원 차단 담당과 절차가 확정되지 않으면 motor-powered test를 진행하면 안 된다.
-- vision calibration 데이터가 없으면 비전 ground-truth는 문서 기준만 있고 실제 측정 정확도 검증은 할 수 없다.
-- measured data 구조가 실제 logger 구현과 다르면 processed dataset 생성 규칙을 다시 조정해야 한다.
+- Run 01-main/holdout trajectory가 logger에 추가되지 않으면 main/holdout 수집을 시작할 수 없다.
+- marker valid ratio가 Run 01-main/holdout에서 `>=95%`에 미달하면 rerun 또는 rejection note가 필요하다.
+- 현재 `theta*_meas`가 `command_echo_no_encoder` 상태로 유지되면 `error_z`는 계속 diagnostic으로만 해석해야 한다.
+- Simscape output이 같은 target/command trajectory와 time axis로 생성되지 않으면 processed merge를 학습 데이터로 사용할 수 없다.
 
 ## 14) 유지보수 규칙
 - 이 파일은 외부 AI 분석용 요약본이다.

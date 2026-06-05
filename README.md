@@ -44,7 +44,7 @@ flowchart LR
 - RecurDyn
 - Nastran
 - Arduino
-- PyTorch
+- PyTorch (future optional)
 - Unity (optional)
 - GitHub
 
@@ -54,11 +54,11 @@ flowchart LR
 
 | 팀원 | 역할 |
 |------|------|
-| S | 동역학 해석, 진동 분석 |
-| L | 시스템 통합, 가상센싱 |
-| Y | 아두이노 제어 |
-| T | 기구 설계 |
-| N | 구조/응력 해석 |
+| S | 팀장, 하드웨어 제작/조립, 기획 단계 동역학/진동 분석 |
+| L | 시스템 통합, 가상센싱, 데이터 처리/학습 |
+| Y | Arduino 제어, 회로 구성/배선, 전원 연결 |
+| T | 하드웨어 제작/조립, 기구 설계 |
+| N | 하드웨어 제작/조립, 프로파일 주문제작 요청, 기획 단계 구조/응력 해석 |
 
 ---
 

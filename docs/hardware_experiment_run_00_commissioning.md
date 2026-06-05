@@ -22,11 +22,12 @@ Run 00은 위치 정확도 평가가 아니라 방향성, 조립 안정성, 로�
   - vision log: `data/vision/raw/vision_<run_id>.csv`
 - target stage: Stage 7 실제 데이터 수집 전 hardware commissioning.
 - responsible members:
-  - operator: TBD
+  - team lead / operator coordination: S
   - Arduino/firmware: Y
+  - circuit/wiring/power connection: Y
   - power cutoff operator: Y
-  - hardware/safety observer: TBD
-  - vision/logger: TBD
+  - hardware fabrication/assembly and safety observer: S / T / N
+  - vision/logger: L
 - date: TBD
 - run_id: `YYYY-MM-DD_run00_commissioning_001`
 
@@ -319,7 +320,7 @@ Fail / stop criteria:
 
 ## 8. Run Metadata
 - run_id: TBD
-- operator: TBD
+- operator / team lead: S
 - date/time: TBD
 - hardware configuration version: `docs/hardware_experiment_base_config.md`, 2026-06-04 기준
 - firmware version or commit:

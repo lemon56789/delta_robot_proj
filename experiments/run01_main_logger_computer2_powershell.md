@@ -73,24 +73,24 @@ python .\run01_main_logger.py static_center_pre `
 ## 6. Run 01-pre 나머지 실행
 static run이 정상 저장된 뒤 실행한다.
 
-### cross `±10 mm`
+### cross `±40 mm`
 ```powershell
-python .\run01_main_logger.py cross_pm10_pre `
-  --run-id 2026-06-05_run01_pre_cross_pm10_r01 `
+python .\run01_main_logger.py cross_pm40_pre `
+  --run-id 2026-06-05_run01_pre_cross_pm40_r01 `
   --port COM3 `
-  --output-csv .\main_2026-06-05_run01_pre_cross_pm10_r01.csv `
-  --metadata-json .\main_2026-06-05_run01_pre_cross_pm10_r01.json `
-  --serial-log .\serial_2026-06-05_run01_pre_cross_pm10_r01.txt
+  --output-csv .\main_2026-06-05_run01_pre_cross_pm40_r01.csv `
+  --metadata-json .\main_2026-06-05_run01_pre_cross_pm40_r01.json `
+  --serial-log .\serial_2026-06-05_run01_pre_cross_pm40_r01.txt
 ```
 
-### square `±10 mm`
+### square `±40 mm`
 ```powershell
-python .\run01_main_logger.py square_pm10_pre `
-  --run-id 2026-06-05_run01_pre_square_pm10_r01 `
+python .\run01_main_logger.py square_pm40_pre `
+  --run-id 2026-06-05_run01_pre_square_pm40_r01 `
   --port COM3 `
-  --output-csv .\main_2026-06-05_run01_pre_square_pm10_r01.csv `
-  --metadata-json .\main_2026-06-05_run01_pre_square_pm10_r01.json `
-  --serial-log .\serial_2026-06-05_run01_pre_square_pm10_r01.txt
+  --output-csv .\main_2026-06-05_run01_pre_square_pm40_r01.csv `
+  --metadata-json .\main_2026-06-05_run01_pre_square_pm40_r01.json `
+  --serial-log .\serial_2026-06-05_run01_pre_square_pm40_r01.txt
 ```
 
 ## 7. 생성 파일 전달
@@ -118,6 +118,7 @@ metadata JSON과 serial text log도 같은 run 근거로 보관한다.
   - 현재 값은 PC logger 기준 elapsed ms이며 `time_source=pc_elapsed_ms`로 기록된다.
 - 이 logger의 목적은 Run 01-pre pipeline validation이다.
 - 이 단계의 `error_z`는 pipeline 확인용 diagnostic으로만 사용하고, 외부 3D ground-truth 성능으로 해석하지 않는다.
+- Arduino/controller에 position gain `1.25`를 적용한 경우 main metadata 또는 별도 run note에 반드시 기록한다.
 
 ## 9. 문제 발생 시
 - `Access denied` 또는 port open 실패:
