@@ -76,6 +76,13 @@ const int SERVO1_SIGN = -1;
 const int SERVO2_SIGN = -1;
 const int SERVO3_SIGN = -1;
 
+// Hardware calibration gain.
+// If commanded XY motion is smaller than measured motion, increase these values.
+// 40 mm command -> about 30-31 mm measured suggests around 1.30, but start lower.
+const float SERVO1_THETA_GAIN = 1.25;
+const float SERVO2_THETA_GAIN = 1.25;
+const float SERVO3_THETA_GAIN = 1.25;
+
 const int SERVO1_OFFSET = 0;
 const int SERVO2_OFFSET = 0;
 const int SERVO3_OFFSET = 0;
@@ -175,13 +182,13 @@ int thetaToServoAngle(int id, float theta) {
   float servoCmd = 90.0;
 
   if (id == 1) {
-    servoCmd = SERVO1_CENTER_CMD + SERVO1_SIGN * theta + SERVO1_OFFSET;
+    servoCmd = SERVO1_CENTER_CMD + SERVO1_SIGN * theta * SERVO1_THETA_GAIN + SERVO1_OFFSET;
   }
   else if (id == 2) {
-    servoCmd = SERVO2_CENTER_CMD + SERVO2_SIGN * theta + SERVO2_OFFSET;
+    servoCmd = SERVO2_CENTER_CMD + SERVO2_SIGN * theta * SERVO2_THETA_GAIN + SERVO2_OFFSET;
   }
   else if (id == 3) {
-    servoCmd = SERVO3_CENTER_CMD + SERVO3_SIGN * theta + SERVO3_OFFSET;
+    servoCmd = SERVO3_CENTER_CMD + SERVO3_SIGN * theta * SERVO3_THETA_GAIN + SERVO3_OFFSET;
   }
 
   return limitServoCommand((int)round(servoCmd));
@@ -499,6 +506,35 @@ void pumpOff() {
 // =====================================================
 // Serial parsing helpers
 // =====================================================
+bool isTokenSeparator(char c) {
+  return c == ' ' || c == '\t' || c == ',' || c == '\r' || c == '\n';
+}
+
+String normalizeCommand(String input) {
+  input.trim();
+
+  String output = "";
+  bool previousWasSeparator = false;
+
+  for (int i = 0; i < input.length(); i++) {
+    char c = input.charAt(i);
+
+    if (isTokenSeparator(c)) {
+      if (!previousWasSeparator && output.length() > 0) {
+        output += ' ';
+      }
+      previousWasSeparator = true;
+    } else {
+      output += c;
+      previousWasSeparator = false;
+    }
+  }
+
+  output.trim();
+  output.toUpperCase();
+  return output;
+}
+
 String getToken(String input, int index) {
   input.trim();
 
@@ -506,14 +542,16 @@ String getToken(String input, int index) {
   int startIndex = 0;
 
   while (startIndex < input.length()) {
-    while (startIndex < input.length() && input.charAt(startIndex) == ' ') {
+    while (startIndex < input.length() && isTokenSeparator(input.charAt(startIndex))) {
       startIndex++;
     }
 
     if (startIndex >= input.length()) break;
 
-    int endIndex = input.indexOf(' ', startIndex);
-    if (endIndex == -1) endIndex = input.length();
+    int endIndex = startIndex;
+    while (endIndex < input.length() && !isTokenSeparator(input.charAt(endIndex))) {
+      endIndex++;
+    }
 
     if (tokenIndex == index) {
       return input.substring(startIndex, endIndex);
@@ -549,54 +587,56 @@ void readSerialCommand() {
   if (Serial.available() == 0) return;
 
   String cmd = Serial.readStringUntil('\n');
-  cmd.trim();
+  cmd = normalizeCommand(cmd);
 
   if (cmd.length() == 0) return;
 
+  String keyword = getToken(cmd, 0);
+
 // Basic Motion Commands
-  if (cmd == "HOME") {
+  if (keyword == "HOME") {
     moveAllThetaSmooth(0, 0, 0, defaultStepDelay);
   }
 
-  else if (cmd == "STATE") {
+  else if (keyword == "STATE") {
     printState();
   }
 
-  else if (cmd == "SWEEP") {
+  else if (keyword == "SWEEP") {
     sweepTest();
   }
 
-  else if (cmd == "XYTEST"){
+  else if (keyword == "XYTEST"){
     xyMoveTest();
   }
 
 // Waypoint Test Commands
-  else if (cmd == "STATIC") {
+  else if (keyword == "STATIC") {
   staticTest();
 }
 
-  else if (cmd == "CROSS") {
+  else if (keyword == "CROSS") {
     crossTest();
   }
 
-  else if (cmd == "SQUARE") {
+  else if (keyword == "SQUARE") {
     squareTest();
   }
 
-  else if (cmd == "CIRCLE") {
+  else if (keyword == "CIRCLE") {
     circleTest();
   }
 
-  else if (cmd == "GRID") {
+  else if (keyword == "GRID") {
     gridTest();
   }
 
 // Pump Commands
-  else if (cmd == "PON") {
+  else if (keyword == "PON") {
     pumpOn();
   }
 
-  else if (cmd == "POFF") {
+  else if (keyword == "POFF") {
     pumpOff();
   }
 
@@ -604,7 +644,7 @@ void readSerialCommand() {
 // Direct theta commands
 // Format : ALL theta1 theta2 theta3
 // =========================
-  else if (cmd.startsWith("ALL")) {
+  else if (keyword == "ALL") {
     float t1, t2, t3;
 
     if (parseThreeFloats(cmd, t1, t2, t3)) {
@@ -618,7 +658,7 @@ void readSerialCommand() {
 // IK calculation only
 // Format: IK x y z
 // ========================
-  else if (cmd.startsWith("IK")) {
+  else if (keyword == "IK") {
     float x, y, z;
 
     if (parseThreeFloats(cmd, x, y, z)) {
@@ -632,7 +672,7 @@ void readSerialCommand() {
 // IK calculation + movement
 // Format: XYZ x y z
 // ========================
-  else if (cmd.startsWith("XYZ")) {
+  else if (keyword == "XYZ") {
     float x, y, z;
 
     if (parseThreeFloats(cmd, x, y, z)) {
@@ -653,7 +693,9 @@ void readSerialCommand() {
     if (parseMotorThetaCommand(cmd, id, theta)) {
       moveServoTheta(id, theta);
     } else {
-      Serial.println("Invalid command.");
+      Serial.print("Invalid command: [");
+      Serial.print(cmd);
+      Serial.println("]");
     }
   }
 }
