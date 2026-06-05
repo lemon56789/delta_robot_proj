@@ -118,18 +118,20 @@
 - notes: 위 16개 컬럼은 processed merged dataset의 fixed column order다. real main log, vision raw log, angle-derived measured position은 별도 raw/auxiliary 계층으로 관리하며 `docs/measured_data_structure.md`를 따른다.
 
 ## 9. Owner Mapping
-- S = dynamics analysis, vibration analysis
-- L = system integration, virtual sensing
-- Y = Arduino control
-- T = mechanical design
+- S = team lead, hardware fabrication/assembly, experiment support, planning-stage dynamics/vibration analysis
+- L = system integration, virtual sensing, data processing/training, vision-based measurement
+- Y = Arduino control, circuit/wiring, power/drive connection
+- T = hardware fabrication/assembly, mechanical design, fabrication dimension review
+- N = hardware fabrication/assembly, custom profile ordering request, planning-stage structural/stress analysis
 - Team = shared ownership across all members
 - block별 owner:
   - Target Trajectory Generator: Team
-  - Inverse Kinematics: S, L
+  - Inverse Kinematics: L, T
   - Arduino Controller: Y
-  - Delta Robot Hardware: T, Y
+  - Circuit / Wiring / Power Connection: Y
+  - Delta Robot Hardware: S, T, N
   - Data Logger: Y, L
-  - Simulation Model: S, L
+  - Simulation Model: L, S
   - Virtual Sensor: L
   - Feedback Controller: L, Y
 

@@ -25,10 +25,11 @@ Run 01은 하나의 긴 궤적 실험이 아니라 아래 세 단계로 나눈�
   - Stage 7 real data collection.
   - Stage 8 training data preparation.
 - 담당자:
-  - operator: TBD.
-  - Arduino/control: Y.
-  - vision/logger: TBD.
-  - Simscape/data processing: TBD.
+  - team lead / operator coordination: S.
+  - hardware fabrication/assembly and experiment support: S / T / N.
+  - Arduino/control and circuit/wiring: Y.
+  - vision/logger: L.
+  - Simscape/data processing and merge/training: L.
   - safety observer / power cutoff: Y 또는 지정된 담당자.
 - 실행 컴퓨터 분담:
   - 컴퓨터 1(L): vision logger 실행, vision CSV 저장, 후처리/merge/학습 수행.
@@ -36,7 +37,7 @@ Run 01은 하나의 긴 궤적 실험이 아니라 아래 세 단계로 나눈�
 - date: `2026-06-05` 예정.
 - run_id 형식:
   - `YYYY-MM-DD_run01_<phase>_<trajectory>_<repeat>`.
-  - 예시: `2026-06-05_run01_pre_cross_pm10_r01`.
+  - 예시: `2026-06-05_run01_pre_cross_pm40_r01`.
 - correction enabled: `no`.
 - 선행 조건:
   - Run 00 A/B/C gate가 pass 상태여야 한다.
@@ -50,8 +51,35 @@ Run 01-pre는 최종 학습 데이터셋이 아니다. raw log, Simscape output,
 | trajectory | target range | 반복 | 목적 |
 |---|---:|---:|---|
 | `static_center_pre` | `(0, 0, z0)` hold | 1 | timestamp, static noise, bias 확인 |
-| `cross_pm10_pre` | `x/y = ±10 mm` | 1 | 방향성과 alignment sanity check |
-| `square_pm10_pre` | `x/y = ±10 mm` | 1 | corner/segment merge sanity check |
+| `cross_pm40_pre` | `x/y = ±40 mm` | 1 | 방향성과 alignment sanity check |
+| `square_pm40_pre` | corner `x/y = ±40 mm` | 1 | corner/segment merge sanity check |
+
+`square_pm40_pre` target order:
+1. home: `(0, 0, z0)`
+2. 1사분면: `(40, 40, z0)`
+3. 2사분면: `(-40, 40, z0)`
+4. 3사분면: `(-40, -40, z0)`
+5. 4사분면: `(40, -40, z0)`
+6. 1사분면 재방문: `(40, 40, z0)`
+7. home: `(0, 0, z0)`
+
+Vision logger handoff for `square_pm40_pre`:
+- vision `run_id`는 main logger와 같은 `2026-06-05_run01_pre_square_pm40_r01`을 사용한다.
+- vision 측 target label 또는 segment note가 가능하면 위 target order와 같은 순서로 기록한다.
+- marker loss, occlusion, corner 도달 전후 흔들림이 있으면 해당 frame range 또는 segment를 note에 남긴다.
+- Arduino/controller position gain `1.25`를 적용했다면 vision note에도 같은 조건을 적어 main/vision metadata 조건이 일치하게 한다.
+
+Run 01-pre hardware compensation note:
+- cross 실행 중 command 대비 실제 이동량이 작게 나타났다. 예: `40 mm` command에서 실제 vision 이동은 약 `30 mm`.
+- 다른 거리에서는 같은 비율로 오차가 나지 않아 완전 선형 gain error로 판단하지 않는다.
+- Arduino/controller 쪽 position gain `1.25`를 Run 01-pre용 coarse hardware compensation으로 적용할 수 있다.
+- `1.25`는 한 점 기준 정밀 보정값이 아니라 실제 이동량을 목표 범위 근처로 끌어올리는 보수적 1차 보정값이다.
+- 이 gain은 virtual sensing correction 또는 feedback correction으로 취급하지 않는다. Run 01의 correction enabled 상태는 계속 `no`다.
+- gain 적용 여부와 값은 run metadata에 반드시 기록한다. gain이 다른 데이터는 같은 training/validation set에 섞지 않는다.
+- 현재 Run 01-pre 기록 기준:
+  - `2026-06-05_run01_pre_cross_pm40_r01`: Arduino/controller position gain `1.25` 적용 전 데이터.
+  - `2026-06-05_run01_pre_square_pm40_r01`: Arduino/controller position gain `1.25` 적용 후 데이터.
+  - 따라서 cross와 square는 hardware calibration condition이 다르며, processed dataset 또는 virtual sensor 학습에서 같은 조건의 반복 데이터처럼 섞지 않는다.
 
 Run 01-pre 통과 기준:
 - main log가 생성된다.
@@ -64,6 +92,14 @@ Run 01-pre 통과 기준:
 - main과 vision timestamp가 단조 증가한다.
 
 Run 01-pre가 실패하면 Run 01-main으로 넘어가지 않는다.
+
+Current Run 01-pre status as of 2026-06-06:
+- static/cross/square main log, vision log, and Simscape output exist.
+- `experiments/run01_preprocess.py` generated angle-derived measured position CSVs and processed merged datasets.
+- `virtual_sensor/check_dataset.py` passed for all three Run 01-pre merged CSVs with `has_nan=False`.
+- static merged rows: `299`; cross merged rows: `450`; square merged rows: `350`.
+- Run 01-pre is considered complete for pipeline validation.
+- Limitations: cross marker/valid ratio was about `92.98%`, square was about `93.21%`, and current `theta*_meas` is `command_echo_no_encoder`. Therefore Run 01-pre artifacts are not final training data.
 
 ### 2-B. Run 01-main - Training Baseline Dataset
 Run 01-main은 virtual sensor 초기 학습에 사용할 baseline dataset이다. 모든 run에서 correction은 끈다.
@@ -86,6 +122,14 @@ Training/validation split 기준:
   - `circle_r15` 중 1회 반복, 또는 fitting에 쓰지 않은 main trajectory 1회 반복.
 
 Static data는 bias/noise 확인에 유용하지만 training batch에서 과도한 비중을 차지하지 않게 한다.
+
+Initial virtual sensor modeling policy:
+- 시간 제약상 Stage 8의 첫 virtual sensor model은 PyTorch neural network가 아니라 linear regression 또는 Ridge regression으로 구현한다.
+- 기본 입력 feature는 `virtual_sensor.dataset.FEATURE_COLUMNS`와 같은 `theta1_cmd`, `theta2_cmd`, `theta3_cmd`, `theta1_meas`, `theta2_meas`, `theta3_meas`, `sim_x`, `sim_y`, `sim_z`를 사용한다.
+- 출력 target은 processed merged dataset의 `error_x`, `error_y`, `error_z`다.
+- Ridge의 regularization strength는 validation split에서만 선택한다. Run 01-holdout은 alpha 선택, feature 선택, 재학습 판단에 사용하지 않는다.
+- `error_x/y`는 vision 기반 XY ground-truth label이므로 주 평가 대상이다. `error_z`는 현재 `theta*_meas` 기반 angle-derived estimate에서 나온 보조/diagnostic label로 해석한다.
+- PyTorch MLP는 linear/Ridge baseline보다 명확한 성능 개선 필요성이 확인될 때의 future extension으로 둔다.
 
 ### 2-C. Run 01-holdout - Run 02 Comparison Baseline
 Run 01-holdout은 virtual sensor 학습에 사용하지 않는다. Run 02에서는 같은 holdout trajectory를 correction on 상태로 다시 실행한다.
@@ -176,6 +220,7 @@ Holdout 규칙:
     - holdout row는 model fitting에 사용하지 않는다.
 18. run metadata 저장.
     - command, data file, trajectory parameter, calibration file, Simscape model, code version, acceptance decision을 포함한다.
+    - Run 01-pre에서 Arduino/controller position gain을 적용한 경우 gain value와 적용 위치를 포함한다.
 
 ## 5. Run별 중지 조건
 - base stop conditions 적용: yes.
@@ -192,7 +237,7 @@ Holdout 규칙:
   - 현재 hardware-safe provisional range `-45 deg <= theta_i <= 90 deg`를 지킨다.
   - controller 또는 observer가 range violation을 확인하면 즉시 중지한다.
 - target range threshold:
-  - Run 01-pre: `±10 mm`를 넘지 않는다.
+  - Run 01-pre: `±40 mm`를 넘지 않는다.
   - Run 01-main/holdout: 계획된 범위를 넘지 않는다. 기본 범위는 `±20 mm` 또는 `r=15 mm`다.
 - hardware safety:
   - link interference, abnormal vibration, servo stalling, abnormal noise, operator safety judgment가 있으면 즉시 중지한다.
@@ -236,7 +281,7 @@ Holdout 규칙:
 
 ## 7. Run Metadata
 - run_id: run별 TBD.
-- operator: TBD.
+- operator / team lead: S.
 - date/time: TBD.
 - phase: `pre`, `main`, 또는 `holdout`.
 - trajectory name: run별 TBD.
@@ -262,3 +307,4 @@ Holdout 규칙:
 - notes:
   - Run 01-main 수집 전 Run 01-pre가 반드시 통과해야 한다.
   - Run 01-holdout은 training과 validation fitting에서 제외해야 한다.
+  - 현재 `run01_main_logger.py`는 pre trajectory만 지원하므로 Run 01-main/holdout 실행 전 trajectory 지원 추가가 필요하다.

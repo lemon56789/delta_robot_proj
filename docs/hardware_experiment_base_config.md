@@ -8,7 +8,7 @@
 - `sB`, `sP` 같은 외곽 치수는 참고값이며, IK/FK 기준값은 `wB`, `uP`를 우선한다.
 - Run 00 상세 절차는 `docs/hardware_experiment_run_00_commissioning.md`를 따른다. SoT `theta_i = 0 deg`에 대응하는 servo 기준값은 `center_cmd_i`로 기록한다.
 
-## 1. 로봇 기하 - 담당자: T / L
+## 1. 로봇 기하 - 담당자: S / T / N / L
 - measured `L` [mm]: 125
   - 실제 측정한 upper arm length.
 - measured `l` [mm]: 300
@@ -30,7 +30,7 @@
   - 소프트웨어의 `base_frame` 정의와 실제 장비 표시 방향이 일치하는지 수동으로 +x/+y 방향 target을 넣어 확인한다.
   - +z는 base에서 바깥으로 나오는 방향이며, 실제 작업공간 방향은 -z로 둔다.
 
-## 2. 모터 - 담당자: S / N
+## 2. 모터 - 담당자: S / N / Y
 - motor model: Feetech FT5330M
 - motor type: DC servo
 - 권장/공칭 전압 [V]: 7.4
@@ -71,7 +71,7 @@
 - fault condition notes:
   - fault pin이 없으므로 비정상 소음, 진동, stall, 예상 밖 움직임, 전원 상태를 관찰해 판단한다.
 
-## 4. 전원 - 담당자: S / Y
+## 4. 전원/배선 - 담당자: Y / S / N
 - power supply model:
   - servo power: 2S Li-Po battery, nominal 7.4 V, fully charged 8.4 V.
   - pump power: DC power supply, 12 V.
@@ -105,7 +105,7 @@
   - servo는 Arduino 5 V pin에서 전원을 공급하지 않는다.
   - pump는 Arduino digital output pin에 직접 연결하지 않는다.
 
-## 5. 기계적 제한 - 담당자: T / N
+## 5. 기계적 제한 - 담당자: S / T / N
 - hardware-confirmed theta1 range [deg]: TBD
 - hardware-confirmed theta2 range [deg]: TBD
 - hardware-confirmed theta3 range [deg]: TBD
@@ -378,7 +378,7 @@
   - static point test에서는 정지 구간 평균값을 비교한다.
   - moving trajectory test에서는 이동 시작/정지 시점이 서로 일치하는지 확인한다.
 
-## 12. 공통 중지 조건 - 담당자: S / N / T
+## 12. 공통 중지 조건 - 담당자: S / N / T / Y
 - emergency stop / power cutoff:
   - Run 00 motor-powered test는 Y가 power cutoff operator로 참석해야 한다.
   - Y가 전원 담당으로 실험 중 즉시 물리 차단을 수행한다.

@@ -154,26 +154,32 @@ def build_trajectory_points(
             )
         ]
 
-    if trajectory == "cross_pm10_pre":
+    if trajectory in ("cross_pm10_pre", "cross_pm40_pre"):
+        amplitude_mm = 10.0 if trajectory == "cross_pm10_pre" else 40.0
         point_specs = [
             ("home_1", 0.0, 0.0),
-            ("x_plus_stop", 10.0, 0.0),
+            ("x_plus_stop", amplitude_mm, 0.0),
             ("home_2", 0.0, 0.0),
-            ("x_minus_stop", -10.0, 0.0),
+            ("x_minus_stop", -amplitude_mm, 0.0),
             ("home_3", 0.0, 0.0),
-            ("y_plus_stop", 0.0, 10.0),
+            ("y_plus_stop", 0.0, amplitude_mm),
             ("home_4", 0.0, 0.0),
-            ("y_minus_stop", 0.0, -10.0),
+            ("y_minus_stop", 0.0, -amplitude_mm),
             ("home_5", 0.0, 0.0),
         ]
-    elif trajectory == "square_pm10_pre":
+    elif trajectory in ("square_pm10_pre", "square_pm40_pre"):
+        square_amplitudes_mm = {
+            "square_pm10_pre": 10.0,
+            "square_pm40_pre": 40.0,
+        }
+        amplitude_mm = square_amplitudes_mm[trajectory]
         point_specs = [
             ("home_1", 0.0, 0.0),
-            ("x_plus_y_plus", 10.0, 10.0),
-            ("x_minus_y_plus", -10.0, 10.0),
-            ("x_minus_y_minus", -10.0, -10.0),
-            ("x_plus_y_minus", 10.0, -10.0),
-            ("x_plus_y_plus_2", 10.0, 10.0),
+            ("q1_x_plus_y_plus", amplitude_mm, amplitude_mm),
+            ("q2_x_minus_y_plus", -amplitude_mm, amplitude_mm),
+            ("q3_x_minus_y_minus", -amplitude_mm, -amplitude_mm),
+            ("q4_x_plus_y_minus", amplitude_mm, -amplitude_mm),
+            ("q1_x_plus_y_plus_2", amplitude_mm, amplitude_mm),
             ("home_2", 0.0, 0.0),
         ]
     else:
@@ -517,7 +523,13 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "trajectory",
-        choices=("static_center_pre", "cross_pm10_pre", "square_pm10_pre"),
+        choices=(
+            "static_center_pre",
+            "cross_pm10_pre",
+            "square_pm10_pre",
+            "cross_pm40_pre",
+            "square_pm40_pre",
+        ),
     )
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--port", default=None, help="Arduino COM port, e.g. COM3.")

@@ -1,6 +1,6 @@
 {
   "run_id": "2026-06-05_run01_pre_square_pm40_r01",
-  "trajectory": "square_pm10_pre",
+  "trajectory": "square_pm40_pre",
   "output_csv": "main_2026-06-05_run01_pre_square_pm40_r01.csv",
   "serial_log": "serial_2026-06-05_run01_pre_square_pm40_r01.txt",
   "row_count": 350,

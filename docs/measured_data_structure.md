@@ -34,8 +34,8 @@
 실제 구동 중 controller/robot 기준 데이터를 보존한다.
 
 ### Path Convention
-- raw main log 저장 위치는 후속 hardware logger 구현에서 확정한다.
-- 권장 파일명 형식은 `main_<run_id>.csv`다.
+- raw main log 저장 위치: `data/real/raw/`
+- 파일명 형식: `main_<run_id>.csv`
 
 ### Minimum Fields
 - `run_id`
@@ -88,6 +88,10 @@
 ### Purpose
 `theta*_meas`에서 FK 또는 estimator를 통해 position estimate를 생성한다.
 
+### Path Convention
+- 저장 위치: `data/real/derived/`
+- 파일명 형식: `measured_position_<run_id>.csv`
+
 ### Minimum Fields
 - `run_id`
 - `time`
@@ -102,10 +106,15 @@
 - `measured_x_est`, `measured_y_est`는 보조 추정값이며, 초기 XY ground-truth는 vision 기반 `vision_x/y`를 우선한다.
 - 이 계층은 외부 ground-truth가 아니라 angle-derived estimate이다.
 - `estimator_method`에는 사용한 FK 함수 또는 estimator 이름과 버전을 기록한다.
+- Run 01-pre provisional logger의 `theta*_meas`는 실제 encoder가 아니라 `command_echo_no_encoder`였으므로, 해당 run의 angle-derived position은 pipeline validation용으로만 해석한다.
 
 ## 6. Processed Merged Dataset
 ### Purpose
 학습/평가에 사용하는 최종 row-level dataset을 생성한다.
+
+### Path Convention
+- 저장 위치: `data/processed/`
+- 파일명 형식: `merged_<run_id>.csv`
 
 ### Fixed Column Order
 현재 final CSV contract의 16개 컬럼 순서를 유지한다.
@@ -143,9 +152,20 @@
 - Simscape output은 같은 target/command trajectory 기준으로 `time`에 보간한다.
 - 현재 fake pipeline comparison에서 관찰된 `20 ms` lag는 provisional이며, real hardware log에서 재검증한다.
 - timestamp 누락, marker miss, invalid row는 processed merged dataset에서 제외한다.
+- Run 01-pre preprocessing에서는 vision 로그 시작 시각을 main 첫 timestamp에 맞추는 provisional relative-time alignment를 사용했다. Run 01-main/holdout에서는 이 alignment 품질을 trajectory plot과 marker valid ratio로 다시 확인한다.
 
-## 8. Open Questions
-1. real main log의 실제 저장 경로를 어디로 고정할 것인가?
-2. `theta*_meas`의 실제 출처를 encoder로 둘 것인가, 초기에는 estimation으로 둘 것인가?
-3. `estimator_method` 기록 형식을 어떤 문자열 규칙으로 고정할 것인가?
-4. processed merged dataset의 저장 경로와 파일명 규칙을 어떻게 둘 것인가?
+## 8. Current Implementation
+- Run 01-pre processing script: `experiments/run01_preprocess.py`
+- 입력:
+  - `data/real/raw/main_<run_id>.csv`
+  - `data/vision/raw/vision_<run_id>.csv`
+  - `data/simulation/raw/simscape_<run_id>.csv`
+- 출력:
+  - `data/real/derived/measured_position_<run_id>.csv`
+  - `data/processed/merged_<run_id>.csv`
+- Run 01-pre static/cross/square merged CSV는 `virtual_sensor/check_dataset.py` 기준 16-column shape와 `has_nan=False`를 확인했다.
+
+## 9. Open Questions
+1. Run 01-main 이후 `theta*_meas`의 실제 출처를 encoder로 확보할 수 있는가, 아니면 당분간 command echo 또는 estimator로 유지할 것인가?
+2. `estimator_method` 기록 형식을 어떤 문자열 규칙으로 더 엄격히 고정할 것인가?
+3. Run 01-main/holdout에서 vision-main alignment 품질을 어떤 plot/metric으로 pass 처리할 것인가?
