@@ -206,6 +206,27 @@ Run 00에서 vision system은 marker 검출뿐 아니라 좌표계 방향 확인
 - 작은 +x/+y 수동 이동을 만들었을 때 vision 좌표 증가 방향이 SoT 좌표계와 일치해야 한다.
 - 초기 motor direction/zeroing 확인 단계에서 marker loss는 hard stop은 아니지만, vision 위치 확인 단계에서 `1 s` 이상 marker가 연속 미검출되거나 좌표 방향이 반대이면 해당 run은 invalid로 표시하고 trajectory test로 넘어가지 않는다.
 
+WSL/Windows 비전 실행 방침:
+- repo의 Source of Truth는 WSL의 `/home/lemon56789/delta_robot`에 둔다.
+- Windows 환경은 C-pre camera I/O 실행에만 사용한다. repo 전체를 Windows로 복제하지 않는다.
+- WSL에서 webcam이 `/dev/video*`로 노출되지 않을 수 있으므로, C-pre에서는 Windows Python에서 OpenCV를 실행하는 방식을 우선한다.
+- Windows Python에서 `opencv-contrib-python`과 `numpy`를 설치한 뒤 camera open, ArUco ID detection, platform marker pixel CSV 저장을 확인한다.
+- C-pre pixel log는 homography 전 사전 점검용이며, Run 00 C 최종 `vision_x/y` mm 로그와 구분한다.
+- C-pre pixel CSV 권장 컬럼:
+  - `run_id`
+  - `vision_time`
+  - `frame_id`
+  - `marker_id`
+  - `marker_px`
+  - `marker_py`
+  - `marker_detected`
+  - `valid`
+- C-pre pixel CSV 권장 파일명: `data/vision/raw/vision_pixel_<run_id>.csv`
+- Windows에서 WSL repo에 바로 저장할 경우 예시 경로:
+  - `\\wsl$\<distro>\home\lemon56789\delta_robot\data\vision\raw`
+  - `<distro>` 이름은 PowerShell의 `wsl -l -v`로 확인한다.
+- `\\wsl$` 경로 저장이 느리거나 권한 문제가 있으면 Windows 임시 경로에 저장한 뒤 WSL repo로 복사한다.
+
 ## 8) IK 구조 정리 상태
 현재 기준 문서: `docs/ik_structure_note.md`
 

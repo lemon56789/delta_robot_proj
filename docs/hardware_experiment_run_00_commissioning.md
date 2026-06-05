@@ -18,6 +18,8 @@ Run 00은 위치 정확도 평가가 아니라 방향성, 조립 안정성, 로�
   - 안전하게 확인한 최대 joint angle 범위.
   - A/B/C 단계별 pass/fail와 issue list.
   - main log와 vision log 사용 가능 여부.
+  - main log: `data/real/raw/main_<run_id>.csv`
+  - vision log: `data/vision/raw/vision_<run_id>.csv`
 - target stage: Stage 7 실제 데이터 수집 전 hardware commissioning.
 - responsible members:
   - operator: TBD
@@ -106,7 +108,8 @@ Preconditions:
 - A 단계가 pass여야 한다.
 - target 기반 command가 Arduino/controller에서 사용 가능한 상태여야 한다.
 - `z0`는 현재 하드웨어에서 안전한 기준 높이로 정한다.
-  - z reference: current safe home z, TBD.
+  - z reference: A 단계 통과 후 현재 안전 home pose의 기준 z로 기록한다.
+  - status: A 단계 수행 후 작성.
 
 Test displacement:
 - initial: `±3 mm` in x/y direction.
@@ -172,6 +175,7 @@ Preconditions:
 - B 단계가 pass여야 한다.
 - camera, marker, homography/calibration file이 준비되어야 한다.
 - vision logger가 main log와 같은 `run_id`를 기록해야 한다.
+  - vision calibration/homography file status: pending. 다음 정보 수신 후 작성한다.
 
 Vision checks:
 - marker_detected: yes/no.
@@ -237,12 +241,14 @@ Fail / stop criteria:
    - servo 2S Li-Po power.
    - pump power는 Run 00에서 필요할 때만 켠다.
 6. Start Arduino/controller.
-   - firmware path/status를 기록한다.
+   - firmware path/status는 Y 확인 전까지 pending으로 둔다.
    - baud rate `9600 bps`를 확인한다.
 7. Move to zero.
    - `ALL 0 0 0` 또는 `CENTER`.
    - `theta_i=0 deg` 자세와 `center_cmd_i` 기준을 확인한다.
 8. Start main logger if available.
+   - main log path: `data/real/raw/main_<run_id>.csv`.
+   - vision log path if used: `data/vision/raw/vision_<run_id>.csv`.
    - file path와 `run_id`를 기록한다.
 9. Execute A.
    - assembled joint small-angle check.
@@ -276,40 +282,53 @@ Fail / stop criteria:
 
 ## 7. Post-Run Validation
 - A result:
-  - passed: yes/no.
-  - maximum checked joint range: `±3 deg` or `±5 deg`.
-  - motor direction verified: yes/no.
-  - zero return verified: yes/no.
-  - interference/vibration/stalling: yes/no.
+  - passed: yes.
+  - basis: 사용자 보고 기준.
+  - maximum checked joint range: `±5 deg`.
+  - motor direction verified: yes.
+  - zero return verified: yes.
+  - interference/vibration/stalling: no issue reported.
 - B result:
-  - passed: yes/no.
-  - tested displacement: `±3 mm` or `±5 mm`.
-  - x direction match: yes/no.
-  - y direction match: yes/no.
-  - parallel motion acceptable by visual check: yes/no.
+  - passed: yes.
+  - basis: 사용자 보고 기준.
+  - tested displacement: `±5 mm`.
+  - x direction match: yes.
+  - y direction match: yes.
+  - parallel motion acceptable by visual check: yes.
 - C result:
-  - passed: yes/no.
-  - marker_detected: yes/no.
+  - passed: pending.
+  - marker_detected: pending.
   - valid=true row ratio: TBD.
-  - vision_x direction match: yes/no.
-  - vision_y direction match: yes/no.
+  - vision_x direction match: pending.
+  - vision_y direction match: pending.
   - static coordinate noise: TBD mm.
-  - same run_id as main log: yes/no.
+  - same run_id as main log: pending.
 - main log valid:
-  - required command/state fields recorded: yes/no.
-  - timestamp present: yes/no.
+  - required command/state fields recorded: TBD.
+  - timestamp present: TBD.
 - Run 01 readiness:
-  - ready for vision-based baseline data collection: yes/no.
-  - reason if no: TBD.
+  - ready for vision-based baseline data collection: no.
+  - reason if no: C 단계 vision readiness check가 아직 완료되지 않았다.
 - issues found:
-  - TBD.
+  - A/B 단계에서 사용자 보고 기준 issue 없음.
+  - C 단계는 pending.
 
 ## 8. Run Metadata
 - run_id: TBD
 - operator: TBD
 - date/time: TBD
 - hardware configuration version: `docs/hardware_experiment_base_config.md`, 2026-06-04 기준
-- firmware version or commit: TBD
-- z reference `z0`: TBD
-- vision calibration file: TBD
-- notes: TBD
+- firmware version or commit:
+  - status: pending Y confirmation.
+  - note: repo 추가 여부와 실제 uploaded sketch 정보를 확인한 뒤 기록한다.
+- z reference `z0`:
+  - status: A 단계 수행 후 작성.
+  - note: A 단계 통과 후 현재 안전 home pose의 기준 z를 기록한다.
+- main log path: `data/real/raw/main_<run_id>.csv`
+- vision log path: `data/vision/raw/vision_<run_id>.csv`
+- vision calibration file:
+  - status: pending.
+  - note: camera calibration/homography file 정보 수신 후 작성한다.
+- notes:
+  - 2026-06-05: A/B gate는 사용자 보고 기준으로 pass 기록.
+  - C gate는 homography 적용 vision logger와 방향 확인 후 별도 기록.
