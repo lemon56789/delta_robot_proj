@@ -1,0 +1,786 @@
+{
+  "run_id": "2026-06-06_run01_holdout_circle_r40_r01",
+  "trajectory": "circle_r40_holdout",
+  "output_csv": "data\\real\\raw\\main_2026-06-06_run01_holdout_circle_r40_r01.csv",
+  "serial_log": "data\\real\\raw\\serial_2026-06-06_run01_holdout_circle_r40_r01.txt",
+  "row_count": 363,
+  "time_source": "pc_elapsed_ms",
+  "theta_meas_source": "command_echo_no_encoder",
+  "command_protocol": "Arduino serial line: ALL theta1 theta2 theta3",
+  "dry_run": false,
+  "serial": {
+    "port": "COM3",
+    "baudrate": 9600,
+    "ready_wait_s": 2.0
+  },
+  "sampling": {
+    "sample_period_s": 0.1,
+    "static_duration_s": 30.0,
+    "hold_s": 5.0,
+    "circle_points": 72,
+    "circle_duration_s": 30.0
+  },
+  "ik": {
+    "target_z_mm": -263.27731514697575,
+    "theta_min_deg": -45.0,
+    "theta_max_deg": 90.0,
+    "geometry": {
+      "upper_arm_length_mm": 125.0,
+      "parallelogram_link_length_mm": 300.0,
+      "base_center_to_side_mm": 46.0,
+      "platform_center_to_vertex_mm": 27.177
+    }
+  },
+  "points": [
+    {
+      "phase": "home_1",
+      "target_x": 0.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 0,
+      "theta2_cmd": 0,
+      "theta3_cmd": 0,
+      "hold_s": 0.0
+    },
+    {
+      "phase": "circle_start_x_plus",
+      "target_x": 40.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 1,
+      "theta2_cmd": -7,
+      "theta3_cmd": 10,
+      "hold_s": 0.0
+    },
+    {
+      "phase": "circle_ccw_001",
+      "target_x": 39.84778792366982,
+      "target_y": 3.4862297099063264,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 2,
+      "theta2_cmd": -8,
+      "theta3_cmd": 9,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_002",
+      "target_x": 39.39231012048832,
+      "target_y": 6.945927106677213,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 3,
+      "theta2_cmd": -8,
+      "theta3_cmd": 9,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_003",
+      "target_x": 38.63703305156273,
+      "target_y": 10.35276180410083,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 4,
+      "theta2_cmd": -8,
+      "theta3_cmd": 8,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_004",
+      "target_x": 37.58770483143634,
+      "target_y": 13.680805733026748,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 5,
+      "theta2_cmd": -8,
+      "theta3_cmd": 8,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_005",
+      "target_x": 36.252311481465995,
+      "target_y": 16.904730469627978,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 6,
+      "theta2_cmd": -9,
+      "theta3_cmd": 7,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_006",
+      "target_x": 34.64101615137755,
+      "target_y": 19.999999999999996,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 6,
+      "theta2_cmd": -9,
+      "theta3_cmd": 6,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_007",
+      "target_x": 32.76608177155967,
+      "target_y": 22.943057454041842,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 7,
+      "theta2_cmd": -9,
+      "theta3_cmd": 6,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_008",
+      "target_x": 30.64177772475912,
+      "target_y": 25.71150438746157,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 8,
+      "theta2_cmd": -8,
+      "theta3_cmd": 5,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_009",
+      "target_x": 28.284271247461902,
+      "target_y": 28.284271247461902,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 8,
+      "theta2_cmd": -8,
+      "theta3_cmd": 4,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_010",
+      "target_x": 25.711504387461574,
+      "target_y": 30.64177772475912,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 9,
+      "theta2_cmd": -8,
+      "theta3_cmd": 3,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_011",
+      "target_x": 22.943057454041845,
+      "target_y": 32.76608177155967,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 9,
+      "theta2_cmd": -8,
+      "theta3_cmd": 2,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_012",
+      "target_x": 20.000000000000004,
+      "target_y": 34.64101615137754,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 10,
+      "theta2_cmd": -7,
+      "theta3_cmd": 1,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_013",
+      "target_x": 16.904730469627978,
+      "target_y": 36.252311481465995,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 10,
+      "theta2_cmd": -7,
+      "theta3_cmd": 1,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_014",
+      "target_x": 13.680805733026753,
+      "target_y": 37.587704831436334,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 11,
+      "theta2_cmd": -6,
+      "theta3_cmd": 0,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_015",
+      "target_x": 10.352761804100838,
+      "target_y": 38.637033051562724,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 11,
+      "theta2_cmd": -6,
+      "theta3_cmd": -1,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_016",
+      "target_x": 6.945927106677217,
+      "target_y": 39.39231012048832,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 11,
+      "theta2_cmd": -5,
+      "theta3_cmd": -2,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_017",
+      "target_x": 3.4862297099063255,
+      "target_y": 39.84778792366982,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 11,
+      "theta2_cmd": -4,
+      "theta3_cmd": -3,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_018",
+      "target_x": 0.0,
+      "target_y": 40.0,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 11,
+      "theta2_cmd": -4,
+      "theta3_cmd": -4,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_019",
+      "target_x": -3.4862297099063206,
+      "target_y": 39.84778792366982,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 11,
+      "theta2_cmd": -3,
+      "theta3_cmd": -4,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_020",
+      "target_x": -6.945927106677212,
+      "target_y": 39.39231012048832,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 11,
+      "theta2_cmd": -2,
+      "theta3_cmd": -5,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_021",
+      "target_x": -10.352761804100833,
+      "target_y": 38.63703305156273,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 11,
+      "theta2_cmd": -1,
+      "theta3_cmd": -6,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_022",
+      "target_x": -13.68080573302674,
+      "target_y": 37.58770483143634,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 11,
+      "theta2_cmd": 0,
+      "theta3_cmd": -6,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_023",
+      "target_x": -16.904730469627975,
+      "target_y": 36.252311481466,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 10,
+      "theta2_cmd": 1,
+      "theta3_cmd": -7,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_024",
+      "target_x": -19.999999999999993,
+      "target_y": 34.64101615137755,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 10,
+      "theta2_cmd": 1,
+      "theta3_cmd": -7,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_025",
+      "target_x": -22.943057454041845,
+      "target_y": 32.76608177155967,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 9,
+      "theta2_cmd": 2,
+      "theta3_cmd": -8,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_026",
+      "target_x": -25.711504387461574,
+      "target_y": 30.64177772475912,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 9,
+      "theta2_cmd": 3,
+      "theta3_cmd": -8,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_027",
+      "target_x": -28.2842712474619,
+      "target_y": 28.284271247461902,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 8,
+      "theta2_cmd": 4,
+      "theta3_cmd": -8,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_028",
+      "target_x": -30.641777724759116,
+      "target_y": 25.71150438746158,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 8,
+      "theta2_cmd": 5,
+      "theta3_cmd": -8,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_029",
+      "target_x": -32.766081771559676,
+      "target_y": 22.94305745404184,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 7,
+      "theta2_cmd": 6,
+      "theta3_cmd": -9,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_030",
+      "target_x": -34.64101615137754,
+      "target_y": 20.000000000000014,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 6,
+      "theta2_cmd": 6,
+      "theta3_cmd": -9,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_031",
+      "target_x": -36.252311481465995,
+      "target_y": 16.904730469627978,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 6,
+      "theta2_cmd": 7,
+      "theta3_cmd": -9,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_032",
+      "target_x": -37.587704831436334,
+      "target_y": 13.680805733026755,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 5,
+      "theta2_cmd": 8,
+      "theta3_cmd": -8,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_033",
+      "target_x": -38.63703305156273,
+      "target_y": 10.352761804100822,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 4,
+      "theta2_cmd": 8,
+      "theta3_cmd": -8,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_034",
+      "target_x": -39.39231012048832,
+      "target_y": 6.945927106677211,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 3,
+      "theta2_cmd": 9,
+      "theta3_cmd": -8,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_035",
+      "target_x": -39.84778792366982,
+      "target_y": 3.4862297099063277,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 2,
+      "theta2_cmd": 9,
+      "theta3_cmd": -8,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_036",
+      "target_x": -40.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 1,
+      "theta2_cmd": 10,
+      "theta3_cmd": -7,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_037",
+      "target_x": -39.84778792366982,
+      "target_y": -3.4862297099063175,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 1,
+      "theta2_cmd": 10,
+      "theta3_cmd": -7,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_038",
+      "target_x": -39.392310120488325,
+      "target_y": -6.9459271066772015,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 0,
+      "theta2_cmd": 11,
+      "theta3_cmd": -6,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_039",
+      "target_x": -38.63703305156274,
+      "target_y": -10.352761804100814,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -1,
+      "theta2_cmd": 11,
+      "theta3_cmd": -6,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_040",
+      "target_x": -37.58770483143634,
+      "target_y": -13.680805733026746,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -2,
+      "theta2_cmd": 11,
+      "theta3_cmd": -5,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_041",
+      "target_x": -36.25231148146601,
+      "target_y": -16.904730469627957,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -3,
+      "theta2_cmd": 11,
+      "theta3_cmd": -4,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_042",
+      "target_x": -34.64101615137754,
+      "target_y": -20.000000000000004,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -4,
+      "theta2_cmd": 11,
+      "theta3_cmd": -4,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_043",
+      "target_x": -32.76608177155968,
+      "target_y": -22.943057454041835,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -4,
+      "theta2_cmd": 11,
+      "theta3_cmd": -3,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_044",
+      "target_x": -30.641777724759134,
+      "target_y": -25.711504387461556,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -5,
+      "theta2_cmd": 11,
+      "theta3_cmd": -2,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_045",
+      "target_x": -28.28427124746191,
+      "target_y": -28.2842712474619,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -6,
+      "theta2_cmd": 11,
+      "theta3_cmd": -1,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_046",
+      "target_x": -25.71150438746158,
+      "target_y": -30.641777724759116,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -6,
+      "theta2_cmd": 11,
+      "theta3_cmd": 0,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_047",
+      "target_x": -22.943057454041824,
+      "target_y": -32.76608177155968,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -7,
+      "theta2_cmd": 10,
+      "theta3_cmd": 1,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_048",
+      "target_x": -20.000000000000018,
+      "target_y": -34.64101615137754,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -7,
+      "theta2_cmd": 10,
+      "theta3_cmd": 1,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_049",
+      "target_x": -16.904730469628,
+      "target_y": -36.25231148146599,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -8,
+      "theta2_cmd": 9,
+      "theta3_cmd": 2,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_050",
+      "target_x": -13.680805733026741,
+      "target_y": -37.58770483143634,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -8,
+      "theta2_cmd": 9,
+      "theta3_cmd": 3,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_051",
+      "target_x": -10.352761804100826,
+      "target_y": -38.63703305156273,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -8,
+      "theta2_cmd": 8,
+      "theta3_cmd": 4,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_052",
+      "target_x": -6.945927106677213,
+      "target_y": -39.39231012048832,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -8,
+      "theta2_cmd": 8,
+      "theta3_cmd": 5,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_053",
+      "target_x": -3.48622970990633,
+      "target_y": -39.84778792366982,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -9,
+      "theta2_cmd": 7,
+      "theta3_cmd": 6,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_054",
+      "target_x": 0.0,
+      "target_y": -40.0,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -9,
+      "theta2_cmd": 6,
+      "theta3_cmd": 6,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_055",
+      "target_x": 3.4862297099063158,
+      "target_y": -39.84778792366982,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -9,
+      "theta2_cmd": 6,
+      "theta3_cmd": 7,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_056",
+      "target_x": 6.945927106677199,
+      "target_y": -39.392310120488325,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -8,
+      "theta2_cmd": 5,
+      "theta3_cmd": 8,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_057",
+      "target_x": 10.352761804100812,
+      "target_y": -38.63703305156274,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -8,
+      "theta2_cmd": 4,
+      "theta3_cmd": 8,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_058",
+      "target_x": 13.680805733026759,
+      "target_y": -37.587704831436334,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -8,
+      "theta2_cmd": 3,
+      "theta3_cmd": 9,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_059",
+      "target_x": 16.904730469627953,
+      "target_y": -36.25231148146601,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -8,
+      "theta2_cmd": 2,
+      "theta3_cmd": 9,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_060",
+      "target_x": 19.99999999999997,
+      "target_y": -34.64101615137756,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -7,
+      "theta2_cmd": 1,
+      "theta3_cmd": 10,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_061",
+      "target_x": 22.943057454041842,
+      "target_y": -32.76608177155967,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -7,
+      "theta2_cmd": 1,
+      "theta3_cmd": 10,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_062",
+      "target_x": 25.71150438746157,
+      "target_y": -30.641777724759123,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -6,
+      "theta2_cmd": 0,
+      "theta3_cmd": 11,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_063",
+      "target_x": 28.284271247461895,
+      "target_y": -28.28427124746191,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -6,
+      "theta2_cmd": -1,
+      "theta3_cmd": 11,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_064",
+      "target_x": 30.641777724759113,
+      "target_y": -25.711504387461584,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -5,
+      "theta2_cmd": -2,
+      "theta3_cmd": 11,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_065",
+      "target_x": 32.76608177155966,
+      "target_y": -22.94305745404186,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -4,
+      "theta2_cmd": -3,
+      "theta3_cmd": 11,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_066",
+      "target_x": 34.641016151377556,
+      "target_y": -19.999999999999986,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -4,
+      "theta2_cmd": -4,
+      "theta3_cmd": 11,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_067",
+      "target_x": 36.25231148146599,
+      "target_y": -16.904730469628,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -3,
+      "theta2_cmd": -4,
+      "theta3_cmd": 11,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_068",
+      "target_x": 37.58770483143634,
+      "target_y": -13.680805733026745,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -2,
+      "theta2_cmd": -5,
+      "theta3_cmd": 11,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_069",
+      "target_x": 38.63703305156273,
+      "target_y": -10.352761804100828,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -1,
+      "theta2_cmd": -6,
+      "theta3_cmd": 11,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_070",
+      "target_x": 39.39231012048832,
+      "target_y": -6.945927106677216,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 0,
+      "theta2_cmd": -6,
+      "theta3_cmd": 11,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_071",
+      "target_x": 39.84778792366982,
+      "target_y": -3.4862297099063326,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 1,
+      "theta2_cmd": -7,
+      "theta3_cmd": 10,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "circle_ccw_072",
+      "target_x": 40.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 1,
+      "theta2_cmd": -7,
+      "theta3_cmd": 10,
+      "hold_s": 0.4166666666666667
+    },
+    {
+      "phase": "home_2",
+      "target_x": 0.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 0,
+      "theta2_cmd": 0,
+      "theta3_cmd": 0,
+      "hold_s": 0.0
+    }
+  ]
+}
