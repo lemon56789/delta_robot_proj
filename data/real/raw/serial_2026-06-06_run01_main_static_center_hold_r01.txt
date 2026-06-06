@@ -1,0 +1,14 @@
+0,TX,ALL 0 0 0
+0,RX,Delta Robot IK Firmware Start
+0,RX,Commands:
+0,RX,CENTER
+0,RX,ALL theta1 theta2 theta3
+0,RX,XYZ x y z        -> IK solve and move
+0,RX,IK x y z         -> IK solve only, no move
+0,RX,1 theta / 2 theta / 3 theta
+0,RX,SWEEP
+0,RX,STATE
+0,RX,PON / POFF
+0,RX,Ready. Initial HOME command sent.
+79,RX,SMOOTH ALL theta -> 0.00, 0.00,
+94,RX,0.00 | servo cmd -> 84, 86, 88

@@ -1,0 +1,43 @@
+16,TX,ALL 0 0 0
+16,RX,Delta Robot IK Firmware Start
+16,RX,Commands:
+16,RX,CENTER
+16,RX,ALL theta1 theta2 theta3
+16,RX,XYZ x y z        -> IK solve and move
+16,RX,IK x y z         -> IK solve only, no move
+16,RX,1 theta / 2 theta / 3 theta
+16,RX,SWEEP
+16,RX,STATE
+16,RX,PON / POFF
+16,RX,Ready. Initial HOME command sent.
+94,RX,SMOOTH ALL theta -> 0.00, 0.00,
+109,RX,0.00 | servo cmd -> 84, 86, 88
+5016,TX,ALL -7 16 -1
+5500,RX,SMOOTH ALL theta -> -7.00, 16.00
+5516,RX,, -1.00 | servo cmd -> 93, 66, 89
+10016,TX,ALL -9 6 6
+10359,RX,SMOOTH ALL theta -> -9.00, 6.00,
+10375,RX,6.00 | servo cmd -> 95, 79, 81
+15016,TX,ALL -7 -1 16
+15344,RX,SMOOTH ALL theta -> -7.00, -1.00
+15359,RX,, 16.00 | servo cmd -> 93, 87, 68
+20016,TX,ALL 1 10 -7
+20672,RX,SMOOTH ALL theta -> 1.00, 10.00,
+20703,RX,-7.00 | servo cmd -> 83, 74, 97
+25016,TX,ALL 0 0 0
+25328,RX,SMOOTH ALL theta -> 0.00, 0.00,
+25344,RX,0.00 | servo cmd -> 84, 86, 88
+30016,TX,ALL 1 -7 10
+30344,RX,SMOOTH ALL theta -> 1.00, -7.00,
+30359,RX,10.00 | servo cmd -> 83, 95, 76
+35016,TX,ALL 13 6 -11
+35609,RX,SMOOTH ALL theta -> 13.00, 6.00,
+35625,RX,-11.00 | servo cmd -> 68, 79, 102
+40016,TX,ALL 11 -4 -4
+40344,RX,SMOOTH ALL theta -> 11.00, -4.00
+40359,RX,, -4.00 | servo cmd -> 70, 91, 93
+45016,TX,ALL 13 -11 6
+45344,RX,SMOOTH ALL theta -> 13.00, -11.00, 6.00 | servo cmd -> 68, 100, 81
+50016,TX,ALL 0 0 0
+50406,RX,SMOOTH ALL theta -> 0.00, 0.00,
+50422,RX,0.00 | servo cmd -> 84, 86, 88
