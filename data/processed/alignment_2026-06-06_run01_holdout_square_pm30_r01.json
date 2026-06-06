@@ -1,0 +1,82 @@
+{
+  "run_id": "2026-06-06_run01_holdout_square_pm30_r01",
+  "method": "phase_departure_to_command_arrival_to_sim_settle",
+  "main_csv": "data/real/raw/main_2026-06-06_run01_holdout_square_pm30_r01.csv",
+  "vision_csv": "data/vision/raw/vision_2026-06-06_run01_holdout_square_pm30_r01.csv",
+  "simscape_csv": "data/simulation/raw/simscape_2026-06-06_run01_holdout_square_pm30_r01.csv",
+  "source_total_vision_rows": 281,
+  "source_valid_vision_rows": 259,
+  "aligned_vision_rows": 161,
+  "main_rows": 350,
+  "merged_rows": 252,
+  "anchors": [
+    {
+      "vision_time_ms": 1780712690563.599,
+      "main_time_ms": 4906.0
+    },
+    {
+      "vision_time_ms": 1780712690973.5251,
+      "main_time_ms": 5000.0
+    },
+    {
+      "vision_time_ms": 1780712691405.8289,
+      "main_time_ms": 5110.0
+    },
+    {
+      "vision_time_ms": 1780712695524.404,
+      "main_time_ms": 9906.0
+    },
+    {
+      "vision_time_ms": 1780712696225.7559,
+      "main_time_ms": 10000.0
+    },
+    {
+      "vision_time_ms": 1780712696804.2979,
+      "main_time_ms": 10110.0
+    },
+    {
+      "vision_time_ms": 1780712700624.247,
+      "main_time_ms": 14906.0
+    },
+    {
+      "vision_time_ms": 1780712701183.359,
+      "main_time_ms": 15000.0
+    },
+    {
+      "vision_time_ms": 1780712701476.4458,
+      "main_time_ms": 15110.0
+    },
+    {
+      "vision_time_ms": 1780712705587.504,
+      "main_time_ms": 19906.0
+    },
+    {
+      "vision_time_ms": 1780712706001.3782,
+      "main_time_ms": 20000.0
+    },
+    {
+      "vision_time_ms": 1780712706438.288,
+      "main_time_ms": 20110.0
+    },
+    {
+      "vision_time_ms": 1780712710545.824,
+      "main_time_ms": 24906.0
+    },
+    {
+      "vision_time_ms": 1780712711105.609,
+      "main_time_ms": 25000.0
+    },
+    {
+      "vision_time_ms": 1780712711397.239,
+      "main_time_ms": 25110.0
+    },
+    {
+      "vision_time_ms": 1780712715634.2249,
+      "main_time_ms": 29906.0
+    },
+    {
+      "vision_time_ms": 1780712715926.41,
+      "main_time_ms": 30000.0
+    }
+  ]
+}

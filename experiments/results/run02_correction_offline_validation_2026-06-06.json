@@ -1,0 +1,992 @@
+{
+  "report_type": "run02_correction_offline_validation",
+  "model_path": "virtual_sensor/models/ridge_run01_main_2026-06-06.npz",
+  "model_alpha": 100.0,
+  "feature_columns": [
+    "theta1_cmd",
+    "theta2_cmd",
+    "theta3_cmd",
+    "theta1_meas",
+    "theta2_meas",
+    "theta3_meas",
+    "sim_x",
+    "sim_y",
+    "sim_z"
+  ],
+  "target_columns": [
+    "error_x",
+    "error_y",
+    "error_z"
+  ],
+  "correction_policy": {
+    "equation": "target_xy - gain * predicted_error_xy",
+    "xy_clamp": "vector_norm",
+    "z_correction_enabled": false,
+    "fallback": "nominal target and nominal theta command",
+    "theta_limits_deg": [
+      -45.0,
+      90.0
+    ]
+  },
+  "input_groups": {
+    "main": {
+      "role": "configuration safety analysis",
+      "files": [
+        "data/processed/merged_2026-06-06_run01_main_circle_r40_r01.csv",
+        "data/processed/merged_2026-06-06_run01_main_circle_r40_r02.csv",
+        "data/processed/merged_2026-06-06_run01_main_circle_r40_r03.csv",
+        "data/processed/merged_2026-06-06_run01_main_cross_pm40_r01.csv",
+        "data/processed/merged_2026-06-06_run01_main_cross_pm40_r02.csv",
+        "data/processed/merged_2026-06-06_run01_main_cross_pm40_r03.csv",
+        "data/processed/merged_2026-06-06_run01_main_grid_3x3_pm40_r01.csv",
+        "data/processed/merged_2026-06-06_run01_main_grid_3x3_pm40_r02.csv",
+        "data/processed/merged_2026-06-06_run01_main_grid_3x3_pm40_r03.csv",
+        "data/processed/merged_2026-06-06_run01_main_square_pm40_r01.csv",
+        "data/processed/merged_2026-06-06_run01_main_square_pm40_r02.csv",
+        "data/processed/merged_2026-06-06_run01_main_square_pm40_r03.csv",
+        "data/processed/merged_2026-06-06_run01_main_static_center_hold_r01.csv",
+        "data/processed/merged_2026-06-06_run01_main_static_center_hold_r02.csv",
+        "data/processed/merged_2026-06-06_run01_main_static_center_hold_r03.csv"
+      ],
+      "row_count": 5158
+    },
+    "holdout": {
+      "role": "replay compatibility and IK safety only",
+      "files": [
+        "data/processed/merged_2026-06-06_run01_holdout_cross_pm30_r01.csv",
+        "data/processed/merged_2026-06-06_run01_holdout_grid_3x3_pm40_r01.csv",
+        "data/processed/merged_2026-06-06_run01_holdout_square_pm30_r01.csv",
+        "data/processed/merged_2026-06-06_run01_holdout_static_center_hold_r01.csv"
+      ],
+      "row_count": 1356,
+      "target_error_columns_used": false
+    }
+  },
+  "candidate_grid": {
+    "gains": [
+      0.25,
+      0.5,
+      1.0
+    ],
+    "max_xy_correction_mm": [
+      2.0,
+      4.0,
+      6.0
+    ],
+    "ranking_by_holdout_error": false
+  },
+  "candidates": [
+    {
+      "gain": 0.25,
+      "max_xy_correction_mm": 2.0,
+      "main": {
+        "row_count": 5158,
+        "prediction_xy_norm_mm": {
+          "mean": 3.466688677026201,
+          "p50": 3.1416792632461448,
+          "p90": 4.998472554254396,
+          "p95": 6.736971167962026,
+          "p99": 6.7370842280359655,
+          "max": 10.850717293665223
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 0.8666721692565502,
+          "p50": 0.7854198158115362,
+          "p90": 1.249618138563599,
+          "p95": 1.6842427919905065,
+          "p99": 1.6842710570089914,
+          "max": 2.712679323416306
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 0.8664995058361663,
+          "p50": 0.7854198158115362,
+          "p90": 1.249618138563599,
+          "p95": 1.6842427919905065,
+          "p99": 1.6842710570089914,
+          "max": 2.0
+        },
+        "clamp_count": 4,
+        "clamp_rate_percent": 0.07754943776657619,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 5154,
+          "applied_clamped": 4
+        },
+        "corrected_theta_min_deg": [
+          -8.593208921468111,
+          -10.991875519560017,
+          -10.759939469339955
+        ],
+        "corrected_theta_max_deg": [
+          13.05854700672969,
+          15.894711029289088,
+          16.17314127780117
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      },
+      "holdout_safety_only": {
+        "row_count": 1356,
+        "prediction_xy_norm_mm": {
+          "mean": 3.25293133354224,
+          "p50": 2.7468488791205403,
+          "p90": 4.998351985601186,
+          "p95": 5.475056922470596,
+          "p99": 6.737079063665776,
+          "max": 6.738104405626143
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 0.81323283338556,
+          "p50": 0.6867122197801351,
+          "p90": 1.2495879964002965,
+          "p95": 1.368764230617649,
+          "p99": 1.684269765916444,
+          "max": 1.6845261014065358
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 0.81323283338556,
+          "p50": 0.6867122197801351,
+          "p90": 1.2495879964002965,
+          "p95": 1.368764230617649,
+          "p99": 1.684269765916444,
+          "max": 1.6845261014065358
+        },
+        "clamp_count": 0,
+        "clamp_rate_percent": 0.0,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 1356
+        },
+        "corrected_theta_min_deg": [
+          -8.593207967620701,
+          -10.962535040523003,
+          -10.75958294694987
+        ],
+        "corrected_theta_max_deg": [
+          12.694940191551582,
+          15.894705725749143,
+          16.17310607866346
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      }
+    },
+    {
+      "gain": 0.25,
+      "max_xy_correction_mm": 4.0,
+      "main": {
+        "row_count": 5158,
+        "prediction_xy_norm_mm": {
+          "mean": 3.466688677026201,
+          "p50": 3.1416792632461448,
+          "p90": 4.998472554254396,
+          "p95": 6.736971167962026,
+          "p99": 6.7370842280359655,
+          "max": 10.850717293665223
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 0.8666721692565502,
+          "p50": 0.7854198158115362,
+          "p90": 1.249618138563599,
+          "p95": 1.6842427919905065,
+          "p99": 1.6842710570089914,
+          "max": 2.712679323416306
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 0.8666721692565502,
+          "p50": 0.7854198158115362,
+          "p90": 1.249618138563599,
+          "p95": 1.6842427919905065,
+          "p99": 1.6842710570089914,
+          "max": 2.712679323416306
+        },
+        "clamp_count": 0,
+        "clamp_rate_percent": 0.0,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 5158
+        },
+        "corrected_theta_min_deg": [
+          -8.593208921468111,
+          -10.991875519560017,
+          -10.759939469339955
+        ],
+        "corrected_theta_max_deg": [
+          13.05854700672969,
+          15.894711029289088,
+          16.17314127780117
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      },
+      "holdout_safety_only": {
+        "row_count": 1356,
+        "prediction_xy_norm_mm": {
+          "mean": 3.25293133354224,
+          "p50": 2.7468488791205403,
+          "p90": 4.998351985601186,
+          "p95": 5.475056922470596,
+          "p99": 6.737079063665776,
+          "max": 6.738104405626143
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 0.81323283338556,
+          "p50": 0.6867122197801351,
+          "p90": 1.2495879964002965,
+          "p95": 1.368764230617649,
+          "p99": 1.684269765916444,
+          "max": 1.6845261014065358
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 0.81323283338556,
+          "p50": 0.6867122197801351,
+          "p90": 1.2495879964002965,
+          "p95": 1.368764230617649,
+          "p99": 1.684269765916444,
+          "max": 1.6845261014065358
+        },
+        "clamp_count": 0,
+        "clamp_rate_percent": 0.0,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 1356
+        },
+        "corrected_theta_min_deg": [
+          -8.593207967620701,
+          -10.962535040523003,
+          -10.75958294694987
+        ],
+        "corrected_theta_max_deg": [
+          12.694940191551582,
+          15.894705725749143,
+          16.17310607866346
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      }
+    },
+    {
+      "gain": 0.25,
+      "max_xy_correction_mm": 6.0,
+      "main": {
+        "row_count": 5158,
+        "prediction_xy_norm_mm": {
+          "mean": 3.466688677026201,
+          "p50": 3.1416792632461448,
+          "p90": 4.998472554254396,
+          "p95": 6.736971167962026,
+          "p99": 6.7370842280359655,
+          "max": 10.850717293665223
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 0.8666721692565502,
+          "p50": 0.7854198158115362,
+          "p90": 1.249618138563599,
+          "p95": 1.6842427919905065,
+          "p99": 1.6842710570089914,
+          "max": 2.712679323416306
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 0.8666721692565502,
+          "p50": 0.7854198158115362,
+          "p90": 1.249618138563599,
+          "p95": 1.6842427919905065,
+          "p99": 1.6842710570089914,
+          "max": 2.712679323416306
+        },
+        "clamp_count": 0,
+        "clamp_rate_percent": 0.0,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 5158
+        },
+        "corrected_theta_min_deg": [
+          -8.593208921468111,
+          -10.991875519560017,
+          -10.759939469339955
+        ],
+        "corrected_theta_max_deg": [
+          13.05854700672969,
+          15.894711029289088,
+          16.17314127780117
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      },
+      "holdout_safety_only": {
+        "row_count": 1356,
+        "prediction_xy_norm_mm": {
+          "mean": 3.25293133354224,
+          "p50": 2.7468488791205403,
+          "p90": 4.998351985601186,
+          "p95": 5.475056922470596,
+          "p99": 6.737079063665776,
+          "max": 6.738104405626143
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 0.81323283338556,
+          "p50": 0.6867122197801351,
+          "p90": 1.2495879964002965,
+          "p95": 1.368764230617649,
+          "p99": 1.684269765916444,
+          "max": 1.6845261014065358
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 0.81323283338556,
+          "p50": 0.6867122197801351,
+          "p90": 1.2495879964002965,
+          "p95": 1.368764230617649,
+          "p99": 1.684269765916444,
+          "max": 1.6845261014065358
+        },
+        "clamp_count": 0,
+        "clamp_rate_percent": 0.0,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 1356
+        },
+        "corrected_theta_min_deg": [
+          -8.593207967620701,
+          -10.962535040523003,
+          -10.75958294694987
+        ],
+        "corrected_theta_max_deg": [
+          12.694940191551582,
+          15.894705725749143,
+          16.17310607866346
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      }
+    },
+    {
+      "gain": 0.5,
+      "max_xy_correction_mm": 2.0,
+      "main": {
+        "row_count": 5158,
+        "prediction_xy_norm_mm": {
+          "mean": 3.466688677026201,
+          "p50": 3.1416792632461448,
+          "p90": 4.998472554254396,
+          "p95": 6.736971167962026,
+          "p99": 6.7370842280359655,
+          "max": 10.850717293665223
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 1.7333443385131004,
+          "p50": 1.5708396316230724,
+          "p90": 2.499236277127198,
+          "p95": 3.368485583981013,
+          "p99": 3.3685421140179828,
+          "max": 5.425358646832612
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 1.575423580558247,
+          "p50": 1.5708396316230724,
+          "p90": 2.0,
+          "p95": 2.0,
+          "p99": 2.0000000000000004,
+          "max": 2.0000000000000004
+        },
+        "clamp_count": 1596,
+        "clamp_rate_percent": 30.9422256688639,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 3562,
+          "applied_clamped": 1596
+        },
+        "corrected_theta_min_deg": [
+          -8.581471570967986,
+          -11.101333795910856,
+          -10.697409100057868
+        ],
+        "corrected_theta_max_deg": [
+          13.204914435109398,
+          15.736624169649277,
+          16.196130616071645
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      },
+      "holdout_safety_only": {
+        "row_count": 1356,
+        "prediction_xy_norm_mm": {
+          "mean": 3.25293133354224,
+          "p50": 2.7468488791205403,
+          "p90": 4.998351985601186,
+          "p95": 5.475056922470596,
+          "p99": 6.737079063665776,
+          "max": 6.738104405626143
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 1.62646566677112,
+          "p50": 1.3734244395602702,
+          "p90": 2.499175992800593,
+          "p95": 2.737528461235298,
+          "p99": 3.368539531832888,
+          "max": 3.3690522028130716
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 1.5051831991268196,
+          "p50": 1.3734244395602702,
+          "p90": 2.0,
+          "p95": 2.0,
+          "p99": 2.0000000000000004,
+          "max": 2.0000000000000004
+        },
+        "clamp_count": 297,
+        "clamp_rate_percent": 21.902654867256636,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 1059,
+          "applied_clamped": 297
+        },
+        "corrected_theta_min_deg": [
+          -8.581469679719657,
+          -11.101333174070882,
+          -10.696708431762241
+        ],
+        "corrected_theta_max_deg": [
+          12.796127378023236,
+          15.73661355256893,
+          16.19608474921524
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      }
+    },
+    {
+      "gain": 0.5,
+      "max_xy_correction_mm": 4.0,
+      "main": {
+        "row_count": 5158,
+        "prediction_xy_norm_mm": {
+          "mean": 3.466688677026201,
+          "p50": 3.1416792632461448,
+          "p90": 4.998472554254396,
+          "p95": 6.736971167962026,
+          "p99": 6.7370842280359655,
+          "max": 10.850717293665223
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 1.7333443385131004,
+          "p50": 1.5708396316230724,
+          "p90": 2.499236277127198,
+          "p95": 3.368485583981013,
+          "p99": 3.3685421140179828,
+          "max": 5.425358646832612
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 1.7329990116723326,
+          "p50": 1.5708396316230724,
+          "p90": 2.499236277127198,
+          "p95": 3.368485583981013,
+          "p99": 3.3685421140179828,
+          "max": 4.0
+        },
+        "clamp_count": 4,
+        "clamp_rate_percent": 0.07754943776657619,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 5154,
+          "applied_clamped": 4
+        },
+        "corrected_theta_min_deg": [
+          -8.581471570967986,
+          -11.157573328911637,
+          -10.697409100057868
+        ],
+        "corrected_theta_max_deg": [
+          13.525392170262448,
+          15.736624169649277,
+          16.297644337402808
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      },
+      "holdout_safety_only": {
+        "row_count": 1356,
+        "prediction_xy_norm_mm": {
+          "mean": 3.25293133354224,
+          "p50": 2.7468488791205403,
+          "p90": 4.998351985601186,
+          "p95": 5.475056922470596,
+          "p99": 6.737079063665776,
+          "max": 6.738104405626143
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 1.62646566677112,
+          "p50": 1.3734244395602702,
+          "p90": 2.499175992800593,
+          "p95": 2.737528461235298,
+          "p99": 3.368539531832888,
+          "max": 3.3690522028130716
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 1.62646566677112,
+          "p50": 1.3734244395602702,
+          "p90": 2.499175992800593,
+          "p95": 2.737528461235298,
+          "p99": 3.368539531832888,
+          "max": 3.3690522028130716
+        },
+        "clamp_count": 0,
+        "clamp_rate_percent": 0.0,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 1356
+        },
+        "corrected_theta_min_deg": [
+          -8.581469679719657,
+          -11.101333174070882,
+          -10.696708431762241
+        ],
+        "corrected_theta_max_deg": [
+          12.796127378023236,
+          15.73661355256893,
+          16.297574265880176
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      }
+    },
+    {
+      "gain": 0.5,
+      "max_xy_correction_mm": 6.0,
+      "main": {
+        "row_count": 5158,
+        "prediction_xy_norm_mm": {
+          "mean": 3.466688677026201,
+          "p50": 3.1416792632461448,
+          "p90": 4.998472554254396,
+          "p95": 6.736971167962026,
+          "p99": 6.7370842280359655,
+          "max": 10.850717293665223
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 1.7333443385131004,
+          "p50": 1.5708396316230724,
+          "p90": 2.499236277127198,
+          "p95": 3.368485583981013,
+          "p99": 3.3685421140179828,
+          "max": 5.425358646832612
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 1.7333443385131004,
+          "p50": 1.5708396316230724,
+          "p90": 2.499236277127198,
+          "p95": 3.368485583981013,
+          "p99": 3.3685421140179828,
+          "max": 5.425358646832612
+        },
+        "clamp_count": 0,
+        "clamp_rate_percent": 0.0,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 5158
+        },
+        "corrected_theta_min_deg": [
+          -8.581471570967986,
+          -11.157573328911637,
+          -10.697409100057868
+        ],
+        "corrected_theta_max_deg": [
+          13.525392170262448,
+          15.736624169649277,
+          16.297644337402808
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      },
+      "holdout_safety_only": {
+        "row_count": 1356,
+        "prediction_xy_norm_mm": {
+          "mean": 3.25293133354224,
+          "p50": 2.7468488791205403,
+          "p90": 4.998351985601186,
+          "p95": 5.475056922470596,
+          "p99": 6.737079063665776,
+          "max": 6.738104405626143
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 1.62646566677112,
+          "p50": 1.3734244395602702,
+          "p90": 2.499175992800593,
+          "p95": 2.737528461235298,
+          "p99": 3.368539531832888,
+          "max": 3.3690522028130716
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 1.62646566677112,
+          "p50": 1.3734244395602702,
+          "p90": 2.499175992800593,
+          "p95": 2.737528461235298,
+          "p99": 3.368539531832888,
+          "max": 3.3690522028130716
+        },
+        "clamp_count": 0,
+        "clamp_rate_percent": 0.0,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 1356
+        },
+        "corrected_theta_min_deg": [
+          -8.581469679719657,
+          -11.101333174070882,
+          -10.696708431762241
+        ],
+        "corrected_theta_max_deg": [
+          12.796127378023236,
+          15.73661355256893,
+          16.297574265880176
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      }
+    },
+    {
+      "gain": 1.0,
+      "max_xy_correction_mm": 2.0,
+      "main": {
+        "row_count": 5158,
+        "prediction_xy_norm_mm": {
+          "mean": 3.466688677026201,
+          "p50": 3.1416792632461448,
+          "p90": 4.998472554254396,
+          "p95": 6.736971167962026,
+          "p99": 6.7370842280359655,
+          "max": 10.850717293665223
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 3.466688677026201,
+          "p50": 3.1416792632461448,
+          "p90": 4.998472554254396,
+          "p95": 6.736971167962026,
+          "p99": 6.7370842280359655,
+          "max": 10.850717293665223
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 1.9968854427502098,
+          "p50": 2.0,
+          "p90": 2.0,
+          "p95": 2.0000000000000004,
+          "p99": 2.0000000000000004,
+          "max": 2.0000000000000004
+        },
+        "clamp_count": 5092,
+        "clamp_rate_percent": 98.72043427685149,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 66,
+          "applied_clamped": 5092
+        },
+        "corrected_theta_min_deg": [
+          -8.57924411039635,
+          -11.120858810134731,
+          -10.62192851375954
+        ],
+        "corrected_theta_max_deg": [
+          13.204914435109398,
+          15.540410829055993,
+          16.196130616071645
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      },
+      "holdout_safety_only": {
+        "row_count": 1356,
+        "prediction_xy_norm_mm": {
+          "mean": 3.25293133354224,
+          "p50": 2.7468488791205403,
+          "p90": 4.998351985601186,
+          "p95": 5.475056922470596,
+          "p99": 6.737079063665776,
+          "max": 6.738104405626143
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 3.25293133354224,
+          "p50": 2.7468488791205403,
+          "p90": 4.998351985601186,
+          "p95": 5.475056922470596,
+          "p99": 6.737079063665776,
+          "max": 6.738104405626143
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 1.9989476199956149,
+          "p50": 2.0,
+          "p90": 2.0,
+          "p95": 2.0000000000000004,
+          "p99": 2.0000000000000004,
+          "max": 2.0000000000000004
+        },
+        "clamp_count": 1354,
+        "clamp_rate_percent": 99.85250737463127,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 2,
+          "applied_clamped": 1354
+        },
+        "corrected_theta_min_deg": [
+          -8.579241898995539,
+          -11.120772825535647,
+          -10.621926930028266
+        ],
+        "corrected_theta_max_deg": [
+          12.877384112288544,
+          15.540362692302352,
+          16.19608474921524
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      }
+    },
+    {
+      "gain": 1.0,
+      "max_xy_correction_mm": 4.0,
+      "main": {
+        "row_count": 5158,
+        "prediction_xy_norm_mm": {
+          "mean": 3.466688677026201,
+          "p50": 3.1416792632461448,
+          "p90": 4.998472554254396,
+          "p95": 6.736971167962026,
+          "p99": 6.7370842280359655,
+          "max": 10.850717293665223
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 3.466688677026201,
+          "p50": 3.1416792632461448,
+          "p90": 4.998472554254396,
+          "p95": 6.736971167962026,
+          "p99": 6.7370842280359655,
+          "max": 10.850717293665223
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 3.150847161116494,
+          "p50": 3.1416792632461448,
+          "p90": 4.0,
+          "p95": 4.0,
+          "p99": 4.000000000000001,
+          "max": 4.000000000000001
+        },
+        "clamp_count": 1596,
+        "clamp_rate_percent": 30.9422256688639,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 3562,
+          "applied_clamped": 1596
+        },
+        "corrected_theta_min_deg": [
+          -8.553589196439953,
+          -11.373408636738539,
+          -10.57062564912935
+        ],
+        "corrected_theta_max_deg": [
+          13.820211113883436,
+          15.421888421812676,
+          16.34552256156809
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      },
+      "holdout_safety_only": {
+        "row_count": 1356,
+        "prediction_xy_norm_mm": {
+          "mean": 3.25293133354224,
+          "p50": 2.7468488791205403,
+          "p90": 4.998351985601186,
+          "p95": 5.475056922470596,
+          "p99": 6.737079063665776,
+          "max": 6.738104405626143
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 3.25293133354224,
+          "p50": 2.7468488791205403,
+          "p90": 4.998351985601186,
+          "p95": 5.475056922470596,
+          "p99": 6.737079063665776,
+          "max": 6.738104405626143
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 3.0103663982536393,
+          "p50": 2.7468488791205403,
+          "p90": 4.0,
+          "p95": 4.0,
+          "p99": 4.000000000000001,
+          "max": 4.000000000000001
+        },
+        "clamp_count": 297,
+        "clamp_rate_percent": 21.902654867256636,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 1059,
+          "applied_clamped": 297
+        },
+        "corrected_theta_min_deg": [
+          -8.553585479710204,
+          -11.373407437461733,
+          -10.569273845890516
+        ],
+        "corrected_theta_max_deg": [
+          13.001022086181296,
+          15.421867148094261,
+          16.34543092202889
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      }
+    },
+    {
+      "gain": 1.0,
+      "max_xy_correction_mm": 6.0,
+      "main": {
+        "row_count": 5158,
+        "prediction_xy_norm_mm": {
+          "mean": 3.466688677026201,
+          "p50": 3.1416792632461448,
+          "p90": 4.998472554254396,
+          "p95": 6.736971167962026,
+          "p99": 6.7370842280359655,
+          "max": 10.850717293665223
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 3.466688677026201,
+          "p50": 3.1416792632461448,
+          "p90": 4.998472554254396,
+          "p95": 6.736971167962026,
+          "p99": 6.7370842280359655,
+          "max": 10.850717293665223
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 3.4219087092196183,
+          "p50": 3.1416792632461448,
+          "p90": 4.998472554254396,
+          "p95": 6.0,
+          "p99": 6.000000000000001,
+          "max": 6.000000000000001
+        },
+        "clamp_count": 305,
+        "clamp_rate_percent": 5.913144629701435,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 4853,
+          "applied_clamped": 305
+        },
+        "corrected_theta_min_deg": [
+          -8.553589196439953,
+          -11.467231803733826,
+          -10.57062564912935
+        ],
+        "corrected_theta_max_deg": [
+          14.44040643317119,
+          15.421888421812676,
+          16.50143812068347
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      },
+      "holdout_safety_only": {
+        "row_count": 1356,
+        "prediction_xy_norm_mm": {
+          "mean": 3.25293133354224,
+          "p50": 2.7468488791205403,
+          "p90": 4.998351985601186,
+          "p95": 5.475056922470596,
+          "p99": 6.737079063665776,
+          "max": 6.738104405626143
+        },
+        "requested_correction_xy_norm_mm": {
+          "mean": 3.25293133354224,
+          "p50": 2.7468488791205403,
+          "p90": 4.998351985601186,
+          "p95": 5.475056922470596,
+          "p99": 6.737079063665776,
+          "max": 6.738104405626143
+        },
+        "applied_correction_xy_norm_mm": {
+          "mean": 3.226077624149206,
+          "p50": 2.7468488791205403,
+          "p90": 4.998351985601186,
+          "p95": 5.475056922470596,
+          "p99": 6.0,
+          "max": 6.000000000000001
+        },
+        "clamp_count": 50,
+        "clamp_rate_percent": 3.687315634218289,
+        "fallback_count": 0,
+        "fallback_rate_percent": 0.0,
+        "correction_limit_violation_count": 0,
+        "theta_limit_violation_count": 0,
+        "status_counts": {
+          "applied": 1306,
+          "applied_clamped": 50
+        },
+        "corrected_theta_min_deg": [
+          -8.553585479710204,
+          -11.373407437461733,
+          -10.569273845890516
+        ],
+        "corrected_theta_max_deg": [
+          13.001022086181296,
+          15.421867148094261,
+          16.50130080620541
+        ],
+        "max_abs_applied_z_correction_mm": 0.0
+      }
+    }
+  ],
+  "provisional_hardware_start_candidate": {
+    "gain": 0.25,
+    "max_xy_correction_mm": 2.0,
+    "main_clamp_rate_percent": 0.07754943776657619,
+    "main_fallback_rate_percent": 0.0
+  },
+  "start_candidate_policy": "main-only safety filter: zero fallback, zero limit violation, at most 5 percent clamp rate; then lowest gain and lowest clamp",
+  "commands": {
+    "offline_validation": "/home/lemon56789/delta_robot/venv/bin/python3 experiments/run02_offline_validate.py"
+  },
+  "code_version": {
+    "commit": "873f9033af7c416ed09673985d0e0f42112a9019",
+    "dirty": true
+  },
+  "limitations": [
+    "offline replay does not prove real hardware improvement",
+    "theta*_meas is command_echo_no_encoder",
+    "holdout labels are not read or used to tune gain or clamp",
+    "physical execution still requires a staged low-gain hardware gate"
+  ]
+}

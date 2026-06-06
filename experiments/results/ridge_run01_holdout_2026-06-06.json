@@ -1,0 +1,205 @@
+{
+  "report_type": "ridge_run01_holdout",
+  "evaluation_status": "preliminary_complete_only",
+  "circle_evaluation_pending": true,
+  "model_path": "virtual_sensor/models/ridge_run01_main_2026-06-06.npz",
+  "model_alpha": 100.0,
+  "model_training_run_ids": [
+    "2026-06-06_run01_main_circle_r40_r01",
+    "2026-06-06_run01_main_circle_r40_r02",
+    "2026-06-06_run01_main_circle_r40_r03",
+    "2026-06-06_run01_main_cross_pm40_r01",
+    "2026-06-06_run01_main_cross_pm40_r02",
+    "2026-06-06_run01_main_cross_pm40_r03",
+    "2026-06-06_run01_main_grid_3x3_pm40_r01",
+    "2026-06-06_run01_main_grid_3x3_pm40_r02",
+    "2026-06-06_run01_main_grid_3x3_pm40_r03",
+    "2026-06-06_run01_main_square_pm40_r01",
+    "2026-06-06_run01_main_square_pm40_r02",
+    "2026-06-06_run01_main_square_pm40_r03",
+    "2026-06-06_run01_main_static_center_hold_r01",
+    "2026-06-06_run01_main_static_center_hold_r02",
+    "2026-06-06_run01_main_static_center_hold_r03"
+  ],
+  "holdout_run_ids": [
+    "2026-06-06_run01_holdout_cross_pm30_r01",
+    "2026-06-06_run01_holdout_grid_3x3_pm40_r01",
+    "2026-06-06_run01_holdout_square_pm30_r01",
+    "2026-06-06_run01_holdout_static_center_hold_r01"
+  ],
+  "holdout_isolation_confirmed": true,
+  "feature_columns": [
+    "theta1_cmd",
+    "theta2_cmd",
+    "theta3_cmd",
+    "theta1_meas",
+    "theta2_meas",
+    "theta3_meas",
+    "sim_x",
+    "sim_y",
+    "sim_z"
+  ],
+  "target_columns": [
+    "error_x",
+    "error_y",
+    "error_z"
+  ],
+  "complete_runs": [
+    {
+      "run_id": "2026-06-06_run01_holdout_cross_pm30_r01",
+      "trajectory": "cross_pm30",
+      "status": "complete",
+      "row_count": 352,
+      "csv_path": "data/processed/merged_2026-06-06_run01_holdout_cross_pm30_r01.csv",
+      "baseline_zero_prediction_metrics": {
+        "x_rmse": 3.1569113435303886,
+        "y_rmse": 1.526223301118021,
+        "xy_rmse": 3.5064863889350026,
+        "x_mae": 2.5802030761597754,
+        "y_mae": 1.1939737296421618,
+        "xy_mae": 3.1484713689316624,
+        "xy_max_error": 7.293613319665956,
+        "z_rmse": 0.044001309162151926,
+        "z_mae": 0.006592927124160173
+      },
+      "model_metrics": {
+        "x_rmse": 2.0596357337085256,
+        "y_rmse": 2.059593449026107,
+        "xy_rmse": 2.9127348885266424,
+        "x_mae": 1.6758203096595623,
+        "y_mae": 1.825166566780301,
+        "xy_mae": 2.835112753207443,
+        "xy_max_error": 5.896485485510004,
+        "z_rmse": 0.04576905285730262,
+        "z_mae": 0.031742890294349166
+      },
+      "xy_rmse_improvement_percent": 16.932947530667462
+    },
+    {
+      "run_id": "2026-06-06_run01_holdout_grid_3x3_pm40_r01",
+      "trajectory": "grid_3x3_pm40",
+      "status": "complete",
+      "row_count": 452,
+      "csv_path": "data/processed/merged_2026-06-06_run01_holdout_grid_3x3_pm40_r01.csv",
+      "baseline_zero_prediction_metrics": {
+        "x_rmse": 4.045224965122854,
+        "y_rmse": 2.9835792110223385,
+        "xy_rmse": 5.026488826894761,
+        "x_mae": 3.588516874849688,
+        "y_mae": 2.29668479714311,
+        "xy_mae": 4.536513912577514,
+        "xy_max_error": 22.17189319068405,
+        "z_rmse": 0.18740650874657708,
+        "z_mae": 0.021848904831077733
+      },
+      "model_metrics": {
+        "x_rmse": 2.118982401529918,
+        "y_rmse": 1.7047206173008722,
+        "xy_rmse": 2.719587983692413,
+        "x_mae": 1.5140880680829751,
+        "y_mae": 1.2735557062304492,
+        "xy_mae": 2.214435541019575,
+        "xy_max_error": 21.000875992151467,
+        "z_rmse": 0.16387354992965614,
+        "z_mae": 0.06338466518383465
+      },
+      "xy_rmse_improvement_percent": 45.89487657585212
+    },
+    {
+      "run_id": "2026-06-06_run01_holdout_square_pm30_r01",
+      "trajectory": "square_pm30",
+      "status": "complete",
+      "row_count": 252,
+      "csv_path": "data/processed/merged_2026-06-06_run01_holdout_square_pm30_r01.csv",
+      "baseline_zero_prediction_metrics": {
+        "x_rmse": 2.8223998616764883,
+        "y_rmse": 3.4999084298619794,
+        "xy_rmse": 4.49614279094986,
+        "x_mae": 2.501468354373024,
+        "y_mae": 3.044638005649024,
+        "xy_mae": 4.063400037384138,
+        "xy_max_error": 13.323491950618068,
+        "z_rmse": 0.15491479580447606,
+        "z_mae": 0.022984575829871894
+      },
+      "model_metrics": {
+        "x_rmse": 1.259231431632084,
+        "y_rmse": 2.5818576822442654,
+        "xy_rmse": 2.8725690400360997,
+        "x_mae": 0.7953220459122725,
+        "y_mae": 2.155061122877863,
+        "xy_mae": 2.3762093925016923,
+        "xy_max_error": 11.780410011958995,
+        "z_rmse": 0.1366589202310594,
+        "z_mae": 0.06801464181711563
+      },
+      "xy_rmse_improvement_percent": 36.11036896296531
+    },
+    {
+      "run_id": "2026-06-06_run01_holdout_static_center_hold_r01",
+      "trajectory": "static_center_hold",
+      "status": "complete",
+      "row_count": 300,
+      "csv_path": "data/processed/merged_2026-06-06_run01_holdout_static_center_hold_r01.csv",
+      "baseline_zero_prediction_metrics": {
+        "x_rmse": 5.100292719483573,
+        "y_rmse": 0.2081459070367326,
+        "xy_rmse": 5.104538230147099,
+        "x_mae": 5.098975937775067,
+        "y_mae": 0.19572290388655209,
+        "xy_mae": 5.103245300948138,
+        "xy_max_error": 5.250003428570309,
+        "z_rmse": 5.006551388763047e-10,
+        "z_mae": 8.130371043078801e-11
+      },
+      "model_metrics": {
+        "x_rmse": 2.8598548574603453,
+        "y_rmse": 0.4007751594448525,
+        "xy_rmse": 2.8878002933318605,
+        "x_mae": 2.857505834696432,
+        "y_mae": 0.38476236305581607,
+        "xy_mae": 2.8855416946306667,
+        "xy_max_error": 3.0243101672443014,
+        "z_rmse": 0.029639194106376575,
+        "z_mae": 0.02963919410637657
+      },
+      "xy_rmse_improvement_percent": 43.42680643908819
+    }
+  ],
+  "partial_diagnostic_runs": [],
+  "complete_baseline_macro_average": {
+    "mean_x_rmse": 3.781207222453326,
+    "mean_y_rmse": 2.054464212259768,
+    "mean_xy_rmse": 4.5334140592316805,
+    "mean_x_mae": 3.4422910607893886,
+    "mean_y_mae": 1.6827548590802122,
+    "mean_xy_mae": 4.212907654960363,
+    "mean_xy_max_error": 12.009750472384596,
+    "mean_z_rmse": 0.09658065355346505,
+    "mean_z_mae": 0.01285660196660338
+  },
+  "complete_model_macro_average": {
+    "mean_x_rmse": 2.074426106082718,
+    "mean_y_rmse": 1.686736727004024,
+    "mean_xy_rmse": 2.848173051396754,
+    "mean_x_mae": 1.7106840645878107,
+    "mean_y_mae": 1.4096364397361072,
+    "mean_xy_mae": 2.577824845339844,
+    "mean_xy_max_error": 10.425520414216193,
+    "mean_z_rmse": 0.09398517928109869,
+    "mean_z_mae": 0.048195347850419006
+  },
+  "complete_xy_rmse_improvement_percent": 37.17377203618017,
+  "commands": {
+    "evaluation": "/home/lemon56789/delta_robot/venv/bin/python3 virtual_sensor/evaluate_ridge.py"
+  },
+  "code_version": {
+    "commit": "873f9033af7c416ed09673985d0e0f42112a9019",
+    "dirty": true
+  },
+  "limitations": [
+    "circle holdout is pending and is not included in this preliminary report",
+    "theta*_meas is command_echo_no_encoder, not independent encoder data",
+    "error_z is angle-derived and diagnostic, not external 3D ground truth"
+  ]
+}

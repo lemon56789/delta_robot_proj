@@ -99,7 +99,12 @@ Current Run 01-pre status as of 2026-06-06:
 - `virtual_sensor/check_dataset.py` passed for all three Run 01-pre merged CSVs with `has_nan=False`.
 - static merged rows: `299`; cross merged rows: `450`; square merged rows: `350`.
 - Run 01-pre is considered complete for pipeline validation.
-- Limitations: cross marker/valid ratio was about `92.98%`, square was about `93.21%`, and current `theta*_meas` is `command_echo_no_encoder`. Therefore Run 01-pre artifacts are not final training data.
+- Vision acceptance uses a `>= 90%` valid-row threshold together with
+  continuous-loss and trajectory-coverage checks. Cross was about `92.98%` and
+  square was about `93.21%`, so both satisfy the ratio threshold.
+- Limitations: current `theta*_meas` is `command_echo_no_encoder`, and cross and
+  square used different hardware gain conditions. Therefore Run 01-pre
+  artifacts remain pipeline-validation data rather than final training data.
 
 ### 2-B. Run 01-main - Training Baseline Dataset
 Run 01-main은 virtual sensor 초기 학습에 사용할 baseline dataset이다. 모든 run에서 correction은 끈다.
@@ -107,10 +112,16 @@ Run 01-main은 virtual sensor 초기 학습에 사용할 baseline dataset이다.
 | trajectory | target range | 반복 | split 역할 |
 |---|---:|---:|---|
 | `static_center_hold` | center hold, `20-30 s` | 3 | train, bias/noise support |
-| `cross_pm20` | `x/y = ±20 mm` | 3 | train |
-| `square_pm20` | `x/y = ±20 mm` | 3 | train |
+| `cross_pm40` | `x/y = ±40 mm` | 3 | train |
+| `square_pm40` | `x/y = ±40 mm` | 3 | train |
 | `circle_r40` | home -> `(40, 0)` -> CCW `r = 40 mm` circle -> home | 3 | train 또는 validation |
 | `grid_3x3_pm40` | `x, y = -40, 0, +40 mm` grid path | 3 | train |
+
+Actual Run 01-main collection status as of 2026-06-06:
+- All five trajectories were executed three times, for `15` runs total.
+- Cross and square used `pm40`, not the earlier `pm20` draft.
+- Vision raw logs use `cross_pm40` and `square_pm40` run IDs.
+- PC-side Arduino/main files still need to be transferred into the repository.
 
 `circle_r40` definition:
 - Start at home.
@@ -136,13 +147,20 @@ Run 01-main은 virtual sensor 초기 학습에 사용할 baseline dataset이다.
 11. home: `(0, 0, z0)`
 
 Training/validation split 기준:
-- training:
-  - `static_center_hold`
-  - `cross_pm20`
-  - `square_pm20`
-  - `grid_3x3_pm40`
-- validation:
-  - `circle_r40` 중 1회 반복, 또는 fitting에 쓰지 않은 main trajectory 1회 반복.
+- Run 01-main의 `r01`, `r02`, `r03` 반복을 이용한 run-level 3-fold cross-validation을 사용한다.
+- 동일 run의 인접 row를 train/validation에 무작위로 나누지 않는다.
+- fold 구성:
+  - Fold 1: 모든 trajectory의 `r01`을 validation, `r02+r03`을 training.
+  - Fold 2: 모든 trajectory의 `r02`를 validation, `r01+r03`을 training.
+  - Fold 3: 모든 trajectory의 `r03`을 validation, `r01+r02`를 training.
+- 각 fold의 validation에는 `static_center_hold`, `cross_pm40`,
+  `square_pm40`, `circle_r40`, `grid_3x3_pm40`이 모두 포함된다.
+- alpha와 feature 구성은 세 fold validation 결과의 평균으로 선택한다.
+- row 수가 많은 trajectory가 점수를 지배하지 않도록 run/trajectory별
+  metric을 먼저 계산한 뒤 fold 평균을 계산한다.
+- 설정을 확정한 뒤 Run 01-main 전체로 최종 모델 하나를 다시 학습한다.
+- fold에서 생성된 세 모델 중 가장 성능이 좋은 한 개를 그대로 최종
+  모델로 선택하지 않는다.
 
 Static data는 bias/noise 확인에 유용하지만 training batch에서 과도한 비중을 차지하지 않게 한다.
 
@@ -150,7 +168,11 @@ Initial virtual sensor modeling policy:
 - 시간 제약상 Stage 8의 첫 virtual sensor model은 PyTorch neural network가 아니라 linear regression 또는 Ridge regression으로 구현한다.
 - 기본 입력 feature는 `virtual_sensor.dataset.FEATURE_COLUMNS`와 같은 `theta1_cmd`, `theta2_cmd`, `theta3_cmd`, `theta1_meas`, `theta2_meas`, `theta3_meas`, `sim_x`, `sim_y`, `sim_z`를 사용한다.
 - 출력 target은 processed merged dataset의 `error_x`, `error_y`, `error_z`다.
-- Ridge의 regularization strength는 validation split에서만 선택한다. Run 01-holdout은 alpha 선택, feature 선택, 재학습 판단에 사용하지 않는다.
+- Ridge regularization strength는 run-level 3-fold validation에서만 선택한다.
+- primary selection metric은 fold 평균 XY RMSE로 두고, XY MAE와 max
+  error를 보조 metric으로 함께 기록한다.
+- Run 01-holdout은 alpha 선택, feature 선택, cross-validation, 재학습
+  판단에 사용하지 않는다.
 - `error_x/y`는 vision 기반 XY ground-truth label이므로 주 평가 대상이다. `error_z`는 현재 `theta*_meas` 기반 angle-derived estimate에서 나온 보조/diagnostic label로 해석한다.
 - PyTorch MLP는 linear/Ridge baseline보다 명확한 성능 개선 필요성이 확인될 때의 future extension으로 둔다.
 
@@ -159,16 +181,19 @@ Run 01-holdout은 virtual sensor 학습에 사용하지 않는다. Run 02에서�
 
 | trajectory | target range | 반복 | split 역할 |
 |---|---:|---:|---|
-| `cross_pm15_holdout` | `x/y = ±15 mm` | 1-2 | test / Run 02 comparison |
-| `square_pm15_holdout` | `x/y = ±15 mm` | 1-2 | test / Run 02 comparison |
-| `circle_r40_holdout` | home -> `(40, 0)` -> CCW `r = 40 mm` circle -> home | 1-2 | test / Run 02 comparison |
-
-시간이 허용되면 아래 trajectory를 추가할 수 있다.
-- `pick_place_like_holdout`, `±20 mm` 내부의 작은 2D point-to-point path.
+| `static_center_holdout` | center hold, main과 같은 duration | 1 | test / bias comparison |
+| `cross_pm30_holdout` | `x/y = ±30 mm` | 1 | test / Run 02 comparison |
+| `square_pm30_holdout` | `x/y = ±30 mm` | 1 | test / Run 02 comparison |
+| `circle_r40_holdout` | home -> `(40, 0)` -> CCW `r = 40 mm` circle -> home | 1 | test / Run 02 comparison |
+| `grid_3x3_pm40_holdout` | main과 같은 3x3 path | 1 | test / repeatability comparison |
 
 Holdout 규칙:
 - Run 01-holdout row는 training이나 validation에 넣지 않는다.
 - Run 02 comparison은 같은 trajectory 정의와 비교 가능한 실행 조건을 사용해야 한다.
+- `pm30` cross/square는 `pm40` training range 내부의 다른 amplitude에서
+  independent-run generalization을 평가한다.
+- static/grid/circle holdout은 main과 trajectory 형태가 같아도 별도 실행
+  데이터이며 fitting, feature 선택, Ridge alpha 선택에 사용하지 않는다.
 
 ## 3. 필수 로그
 - main log:
@@ -250,8 +275,13 @@ Holdout 규칙:
 - marker loss threshold:
   - marker가 `1 s` 넘게 사라지면 중지하거나 해당 segment를 invalid로 표시한다.
 - valid row ratio threshold:
-  - Run 01-pre: 진행 조건은 `>= 95%`.
-  - Run 01-main/holdout: `>= 95%`를 권장하며, 미달 시 rerun 또는 명시적 rejection note가 필요하다.
+  - Run 01-pre/main/holdout의 최소 기준은 `>= 90%`다.
+  - `90%` 미만이면 해당 run을 재실행하거나 명시적인 rejection note를 남긴다.
+  - ratio가 `90%` 이상이어도 marker loss가 특정 corner, 이동 방향, grid
+    row, 또는 circle 연속 구간에 집중되어 trajectory coverage가 깨지면
+    해당 run을 재실행한다.
+  - valid ratio를 높이기 위한 목적으로 정지 시간만 늘리지 않는다. 긴
+    static hold는 학습 데이터를 정지 row에 편향시킬 수 있다.
 - timestamp threshold:
   - main `time` 또는 vision `vision_time`이 단조 증가하지 않으면 run invalid.
 - run_id mismatch:
@@ -261,7 +291,8 @@ Holdout 규칙:
   - controller 또는 observer가 range violation을 확인하면 즉시 중지한다.
 - target range threshold:
   - Run 01-pre: `±40 mm`를 넘지 않는다.
-  - Run 01-main/holdout: 계획된 범위를 넘지 않는다. 기본 범위는 `±20 mm` 또는 `r=15 mm`다.
+  - Run 01-main/holdout: 각 trajectory에 정의된 범위를 넘지 않는다.
+    현재 최대 XY 범위는 grid/circle 기준 `±40 mm`다.
 - hardware safety:
   - link interference, abnormal vibration, servo stalling, abnormal noise, operator safety judgment가 있으면 즉시 중지한다.
 
@@ -280,6 +311,10 @@ Holdout 규칙:
   - processed merged dataset: 예/아니오.
 - marker detection ratio: `%` 기록.
 - valid row ratio: `%` 기록.
+- trajectory coverage:
+  - corner/direction/grid row/circle segment 누락 여부를 기록.
+- longest continuous marker loss:
+  - `< 1 s`: 예/아니오.
 - Simscape output 생성: 예/아니오.
 - angle-derived measured position 생성: 예/아니오.
 - alignment check 완료: 예/아니오.

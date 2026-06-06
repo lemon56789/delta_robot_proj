@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-06-06_run01_main_circle_r40_r01",
+  "method": "circle_motion_radius_10mm",
+  "main_csv": "data/real/raw/main_2026-06-06_run01_main_circle_r40_r01.csv",
+  "vision_csv": "data/vision/raw/vision_2026-06-06_run01_main_circle_r40_r01.csv",
+  "simscape_csv": "data/simulation/raw/simscape_2026-06-06_run01_simscape_circle_r40_r01.csv",
+  "source_total_vision_rows": 269,
+  "source_valid_vision_rows": 249,
+  "aligned_vision_rows": 197,
+  "main_rows": 363,
+  "merged_rows": 363,
+  "anchors": [
+    {
+      "vision_time_ms": 1780711094456.218,
+      "main_time_ms": 0.0
+    },
+    {
+      "vision_time_ms": 1780711124362.315,
+      "main_time_ms": 30406.0
+    }
+  ]
+}

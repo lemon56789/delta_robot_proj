@@ -152,7 +152,20 @@
 - Simscape output은 같은 target/command trajectory 기준으로 `time`에 보간한다.
 - 현재 fake pipeline comparison에서 관찰된 `20 ms` lag는 provisional이며, real hardware log에서 재검증한다.
 - timestamp 누락, marker miss, invalid row는 processed merged dataset에서 제외한다.
-- Run 01-pre preprocessing에서는 vision 로그 시작 시각을 main 첫 timestamp에 맞추는 provisional relative-time alignment를 사용했다. Run 01-main/holdout에서는 이 alignment 품질을 trajectory plot과 marker valid ratio로 다시 확인한다.
+- Run 01-pre preprocessing에서는 vision 로그 시작 시각을 main 첫 timestamp에 맞추는 provisional relative-time alignment를 사용했다.
+- Run 01-main preprocessing은 trajectory-aware alignment를 사용한다.
+  - cross/square/grid: vision phase의 stable 위치에서 `5 mm` 이탈하는
+    departure event를 다음 main command phase 시작에 mapping한다. departure
+    직전 stable sample은 현재 main phase 끝에 mapping하고, 새 vision phase의
+    첫 valid sample은 Simscape가 새 target XY의 `3 mm` 이내에 도달한
+    timestamp에 mapping한다.
+  - vision phase 내부에 departure sample이 없으면 해당 phase의 마지막
+    valid timestamp를 boundary edge로 사용한다.
+  - epoch-millisecond timestamp anchor의 동일성 비교는 상대오차가 아니라
+    절대오차 `1e-9 ms` 이하만 동일 timestamp로 처리한다.
+  - circle: 초기 home 위치에서 반경 `10 mm`를 넘는 첫/마지막 vision sample을 원운동 구간으로 검출해 main 시간축에 mapping한다.
+  - static: 전체 vision duration을 전체 main duration에 mapping한다.
+- 각 Run 01-main alignment 결과는 `data/processed/alignment_<run_id>.json`에 method, source file, anchor, row count와 함께 기록한다.
 
 ## 8. Current Implementation
 - Run 01-pre processing script: `experiments/run01_preprocess.py`

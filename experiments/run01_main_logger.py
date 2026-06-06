@@ -152,7 +152,11 @@ def build_trajectory_points(
     if circle_duration_s <= 0.0:
         raise ValueError("circle_duration_s must be positive.")
 
-    if trajectory in ("static_center_pre", "static_center_hold"):
+    if trajectory in (
+        "static_center_pre",
+        "static_center_hold",
+        "static_center_holdout",
+    ):
         return [
             make_point(
                 phase=trajectory,
@@ -165,12 +169,21 @@ def build_trajectory_points(
             )
         ]
 
-    if trajectory in ("cross_pm10_pre", "cross_pm40_pre", "cross_pm20", "cross_pm15_holdout"):
+    if trajectory in (
+        "cross_pm10_pre",
+        "cross_pm40_pre",
+        "cross_pm20",
+        "cross_pm40",
+        "cross_pm15_holdout",
+        "cross_pm30_holdout",
+    ):
         cross_amplitudes_mm = {
             "cross_pm10_pre": 10.0,
             "cross_pm40_pre": 40.0,
             "cross_pm20": 20.0,
+            "cross_pm40": 40.0,
             "cross_pm15_holdout": 15.0,
+            "cross_pm30_holdout": 30.0,
         }
         amplitude_mm = cross_amplitudes_mm[trajectory]
         point_specs = [
@@ -184,12 +197,21 @@ def build_trajectory_points(
             ("y_minus_stop", 0.0, -amplitude_mm),
             ("home_5", 0.0, 0.0),
         ]
-    elif trajectory in ("square_pm10_pre", "square_pm40_pre", "square_pm20", "square_pm15_holdout"):
+    elif trajectory in (
+        "square_pm10_pre",
+        "square_pm40_pre",
+        "square_pm20",
+        "square_pm40",
+        "square_pm15_holdout",
+        "square_pm30_holdout",
+    ):
         square_amplitudes_mm = {
             "square_pm10_pre": 10.0,
             "square_pm40_pre": 40.0,
             "square_pm20": 20.0,
+            "square_pm40": 40.0,
             "square_pm15_holdout": 15.0,
+            "square_pm30_holdout": 30.0,
         }
         amplitude_mm = square_amplitudes_mm[trajectory]
         point_specs = [
@@ -210,7 +232,7 @@ def build_trajectory_points(
             theta_min_deg=theta_min_deg,
             theta_max_deg=theta_max_deg,
         )
-    elif trajectory == "grid_3x3_pm40":
+    elif trajectory in ("grid_3x3_pm40", "grid_3x3_pm40_holdout"):
         point_specs = [
             ("home_1", 0.0, 0.0),
             ("x_minus_y_minus", -40.0, -40.0),
@@ -622,11 +644,17 @@ def parse_args() -> argparse.Namespace:
             "static_center_hold",
             "cross_pm20",
             "square_pm20",
+            "cross_pm40",
+            "square_pm40",
             "circle_r40",
             "grid_3x3_pm40",
+            "static_center_holdout",
             "cross_pm15_holdout",
             "square_pm15_holdout",
+            "cross_pm30_holdout",
+            "square_pm30_holdout",
             "circle_r40_holdout",
+            "grid_3x3_pm40_holdout",
         ),
     )
     parser.add_argument("--run-id", required=True)
