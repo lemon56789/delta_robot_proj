@@ -107,26 +107,26 @@ python .\run01_main_logger.py static_center_hold `
   --serial-log .\serial_2026-06-06_run01_main_static_center_hold_r01.txt
 ```
 
-### cross `±20 mm`
+### cross `±40 mm`
 ```powershell
-python .\run01_main_logger.py cross_pm20 `
-  --run-id 2026-06-06_run01_main_cross_pm20_r01 `
+python .\run01_main_logger.py cross_pm40 `
+  --run-id 2026-06-06_run01_main_cross_pm40_r01 `
   --port COM3 `
   --hold-s 1 `
-  --output-csv .\main_2026-06-06_run01_main_cross_pm20_r01.csv `
-  --metadata-json .\main_2026-06-06_run01_main_cross_pm20_r01.json `
-  --serial-log .\serial_2026-06-06_run01_main_cross_pm20_r01.txt
+  --output-csv .\main_2026-06-06_run01_main_cross_pm40_r01.csv `
+  --metadata-json .\main_2026-06-06_run01_main_cross_pm40_r01.json `
+  --serial-log .\serial_2026-06-06_run01_main_cross_pm40_r01.txt
 ```
 
-### square `±20 mm`
+### square `±40 mm`
 ```powershell
-python .\run01_main_logger.py square_pm20 `
-  --run-id 2026-06-06_run01_main_square_pm20_r01 `
+python .\run01_main_logger.py square_pm40 `
+  --run-id 2026-06-06_run01_main_square_pm40_r01 `
   --port COM3 `
   --hold-s 1 `
-  --output-csv .\main_2026-06-06_run01_main_square_pm20_r01.csv `
-  --metadata-json .\main_2026-06-06_run01_main_square_pm20_r01.json `
-  --serial-log .\serial_2026-06-06_run01_main_square_pm20_r01.txt
+  --output-csv .\main_2026-06-06_run01_main_square_pm40_r01.csv `
+  --metadata-json .\main_2026-06-06_run01_main_square_pm40_r01.json `
+  --serial-log .\serial_2026-06-06_run01_main_square_pm40_r01.txt
 ```
 
 ### circle `r = 40 mm`, counterclockwise
@@ -161,14 +161,21 @@ python .\run01_main_logger.py grid_3x3_pm40 `
 holdout은 학습 또는 tuning에 사용하지 않는다.
 
 ```powershell
-python .\run01_main_logger.py cross_pm15_holdout `
-  --run-id 2026-06-06_run01_holdout_cross_pm15_r01 `
+python .\run01_main_logger.py static_center_holdout `
+  --run-id 2026-06-06_run01_holdout_static_center_hold_r01 `
+  --port COM3 `
+  --duration-s 30
+```
+
+```powershell
+python .\run01_main_logger.py cross_pm30_holdout `
+  --run-id 2026-06-06_run01_holdout_cross_pm30_r01 `
   --port COM3
 ```
 
 ```powershell
-python .\run01_main_logger.py square_pm15_holdout `
-  --run-id 2026-06-06_run01_holdout_square_pm15_r01 `
+python .\run01_main_logger.py square_pm30_holdout `
+  --run-id 2026-06-06_run01_holdout_square_pm30_r01 `
   --port COM3
 ```
 
@@ -178,6 +185,12 @@ python .\run01_main_logger.py circle_r40_holdout `
   --port COM3 `
   --circle-points 72 `
   --circle-duration-s 30
+```
+
+```powershell
+python .\run01_main_logger.py grid_3x3_pm40_holdout `
+  --run-id 2026-06-06_run01_holdout_grid_3x3_pm40_r01 `
+  --port COM3
 ```
 
 ## 9. 생성 파일 전달

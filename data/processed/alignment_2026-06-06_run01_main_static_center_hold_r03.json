@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-06-06_run01_main_static_center_hold_r03",
+  "method": "full_duration_static_or_fallback",
+  "main_csv": "data/real/raw/main_2026-06-06_run01_main_static_center_hold_r03.csv",
+  "vision_csv": "data/vision/raw/vision_2026-06-06_run01_main_static_center_hold_r03.csv",
+  "simscape_csv": "data/simulation/raw/simscape_2026-06-06_run01_simscape_static_center_hold_r03.csv",
+  "source_total_vision_rows": 212,
+  "source_valid_vision_rows": 212,
+  "aligned_vision_rows": 212,
+  "main_rows": 300,
+  "merged_rows": 300,
+  "anchors": [
+    {
+      "vision_time_ms": 1780710351641.0771,
+      "main_time_ms": 0.0
+    },
+    {
+      "vision_time_ms": 1780710381545.258,
+      "main_time_ms": 29906.0
+    }
+  ]
+}

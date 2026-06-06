@@ -13,24 +13,155 @@
 - correction enabled: (작성: corrected run이므로 원칙적으로 `yes`)
 
 ## 2. Correction Setup
-- virtual sensor model: (작성: 사용할 모델 파일, 버전, 학습 데이터셋을 적는다)
-- correction input fields: (작성: 모델 입력으로 사용할 필드를 적는다)
-- correction output fields: (작성: 모델 출력 또는 적용할 correction 필드를 적는다)
-- correction injection point: (작성: correction을 target position에 적용하는 위치와 방식을 적는다)
-- safety clamp: (작성: correction 최대 허용값과 clamp 방식을 적는다)
-- fallback behavior: (작성: 모델 추론 실패 시 uncorrected target 사용 등 fallback을 적는다)
+- virtual sensor model:
+  `virtual_sensor/models/ridge_run01_main_2026-06-06.npz`, alpha `100`,
+  Run 01-main 15 runs / `5,158` rows
+- correction input fields: artifact order의 `theta1_cmd`, `theta2_cmd`,
+  `theta3_cmd`, `theta1_meas`, `theta2_meas`, `theta3_meas`, `sim_x`,
+  `sim_y`, `sim_z`
+- correction output fields: predicted `error_x/y/z`; 제어 적용은 XY만 사용
+- correction injection point:
+  `corrected_target_xy = target_xy - gain * predicted_error_xy`, 이후 IK
+- safety clamp: XY vector norm clamp. 초기 hardware gate 후보는 gain
+  `0.25`, clamp `2 mm`이며 최종 실행값은 hardware gate 전에 고정한다.
+- fallback behavior: feature/inference 오류 또는 corrected-target IK reject
+  시 uncorrected target과 nominal theta command 사용
+- Z policy: `error_z`는 diagnostic으로만 기록하고 Z correction은 적용하지
+  않는다.
+- current control classification: `theta*_meas=command_echo_no_encoder`이므로
+  encoder feedback closed loop가 아닌 PC-side feedforward correction이다.
+
+### 2-A. Offline Preparation Result
+
+- command: `python3 experiments/run02_offline_validate.py`
+- report:
+  `experiments/results/run02_correction_offline_validation_2026-06-06.json`
+- input: Run 01-main 15 runs / `5,158` rows, complete holdout 4 runs /
+  `1,356` rows
+- candidates: gain `0.25/0.5/1.0` x XY clamp `2/4/6 mm`
+- 모든 후보에서 fallback, correction limit violation, theta limit
+  violation은 `0`
+- corrected theta 전체 범위: 약 `-11.467 deg` to `16.501 deg`
+- provisional hardware start candidate:
+  - gain `0.25`
+  - XY vector clamp `2 mm`
+  - main clamp `4/5,158` rows (`0.077549%`)
+  - holdout clamp `0/1,356` rows
+- holdout의 `error_*` label은 설정 선택에 사용하지 않았다. 이 결과는
+  수치/IK 안전성 검증이며 실제 성능 개선 검증은 아니다.
+
+### 2-B. Correction Auxiliary Log Fields
+
+Run 02 serial-enabled logger는 fixed 16-column processed CSV와 별도로 다음
+auxiliary correction log를 남긴다.
+
+- `run_id`, `time`
+- `target_x`, `target_y`, `target_z`
+- `predicted_error_x`, `predicted_error_y`, `predicted_error_z`
+- `requested_correction_x`, `requested_correction_y`,
+  `requested_correction_z`
+- `applied_correction_x`, `applied_correction_y`, `applied_correction_z`
+- `corrected_target_x`, `corrected_target_y`, `corrected_target_z`
+- `corrected_theta1`, `corrected_theta2`, `corrected_theta3`
+- `correction_gain`, `max_xy_correction_mm`
+- `correction_clamped`, `fallback_used`, `correction_status`
+
+이 auxiliary log는 processed merged dataset의 fixed 16-column contract를
+변경하지 않는다.
 
 ## 3. Trajectory
-- trajectory name: (작성: baseline과 동일하거나 대응되는 trajectory 이름을 적는다)
-- target range `x` [mm]: (작성: x 목표 범위를 적는다)
-- target range `y` [mm]: (작성: y 목표 범위를 적는다)
-- target range `z` [mm]: (작성: z 목표 범위를 적는다)
-- duration [s]: (작성: 1회 실행 시간을 적는다)
-- repeat count: (작성: 반복 횟수를 적는다)
-- command rate [Hz]: (작성: command 전송 주파수를 적는다)
-- max velocity: (작성: trajectory 최대 속도를 적는다)
-- max acceleration: (작성: trajectory 최대 가속도를 적는다)
-- expected theta range: (작성: 예상되는 `theta1/2/3` 범위를 적는다)
+
+### 3-A. Optional 24-Run Candidate
+
+아래 구성은 재사용을 위해 기록한 candidate이며 아직 최종 Run 02 실행
+구성으로 확정하지 않았다.
+
+| trajectory | correction state | repetitions | run count |
+|---|---|---:|---:|
+| cross `+/-30 mm` | OFF / ON | 상태별 3회 | 6 |
+| reverse grid 3x3 `+/-40 mm` | OFF / ON | 상태별 3회 | 6 |
+| diamond `+/-35 mm` | OFF / ON | 상태별 3회 | 6 |
+| circle `r=40 mm` | OFF / ON | 상태별 3회 | 6 |
+| **total** | | | **24** |
+
+계산: 4 trajectories x 2 correction states x 3 repetitions = 24 runs.
+
+### 3-B. Waypoint and Direction Definitions
+
+모든 좌표 단위는 `mm`이며 XY 좌표만 아래에 표시한다. Z는 Run 02 실행
+전에 확정한 공통 `target_z`를 유지한다.
+
+#### Cross `+/-30 mm`
+
+기존 `cross_pm30_holdout` 순서를 유지한다.
+
+```text
+home
+-> (30, 0)
+-> home
+-> (-30, 0)
+-> home
+-> (0, 30)
+-> home
+-> (0, -30)
+-> home
+```
+
+#### Reverse Grid 3x3 `+/-40 mm`
+
+기존 `grid_3x3_pm40` waypoint 목록의 정확한 역순이다. 기존 경로와
+마찬가지로 row 전환 시 긴 대각 이동이 포함되며 serpentine 경로가 아니다.
+
+```text
+home
+-> (40, 40)
+-> (0, 40)
+-> (-40, 40)
+-> (40, 0)
+-> (0, 0)
+-> (-40, 0)
+-> (40, -40)
+-> (0, -40)
+-> (-40, -40)
+-> home
+```
+
+#### Diamond `+/-35 mm`
+
+`(35, 0)`에서 시작해 `base_frame` 기준 반시계 방향으로 한 바퀴 이동한다.
+
+```text
+home
+-> (35, 0)
+-> (0, 35)
+-> (-35, 0)
+-> (0, -35)
+-> (35, 0)
+-> home
+```
+
+#### Circle `r=40 mm`
+
+기존 circle 정의와 동일하게 `(40, 0)`에서 시작해 반시계 방향으로 한
+바퀴 이동한다.
+
+```text
+home
+-> (40, 0)
+-> counterclockwise radius-40 circle
+-> home
+```
+
+### 3-C. Items to Freeze Before Implementation
+
+- optional candidate 사용 여부
+- 공통 `target_z`
+- waypoint hold time
+- circle duration과 point count
+- command/sample rate
+- OFF/ON 실행 순서
+- run_id와 repetition naming
+- max velocity/acceleration 및 예상 theta 범위
 
 ## 4. Required Logs
 - corrected main log: (작성: correction on 상태의 main log 경로를 적는다)

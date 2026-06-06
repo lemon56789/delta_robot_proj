@@ -1,0 +1,106 @@
+{
+  "run_id": "2026-06-06_run01_holdout_cross_pm30_r01",
+  "method": "phase_departure_to_command_arrival_to_sim_settle",
+  "main_csv": "data/real/raw/main_2026-06-06_run01_holdout_cross_pm30_r01.csv",
+  "vision_csv": "data/vision/raw/vision_2026-06-06_run01_holdout_cross_pm30_r01.csv",
+  "simscape_csv": "data/simulation/raw/simscape_2026-06-06_run01_holdout_cross_pm30_r01.csv",
+  "source_total_vision_rows": 366,
+  "source_valid_vision_rows": 354,
+  "aligned_vision_rows": 238,
+  "main_rows": 450,
+  "merged_rows": 352,
+  "anchors": [
+    {
+      "vision_time_ms": 1780712619542.9968,
+      "main_time_ms": 4906.0
+    },
+    {
+      "vision_time_ms": 1780712619959.087,
+      "main_time_ms": 5000.0
+    },
+    {
+      "vision_time_ms": 1780712620248.1,
+      "main_time_ms": 5110.0
+    },
+    {
+      "vision_time_ms": 1780712624501.104,
+      "main_time_ms": 9906.0
+    },
+    {
+      "vision_time_ms": 1780712624774.3909,
+      "main_time_ms": 10000.0
+    },
+    {
+      "vision_time_ms": 1780712625059.998,
+      "main_time_ms": 10110.0
+    },
+    {
+      "vision_time_ms": 1780712629447.169,
+      "main_time_ms": 14906.0
+    },
+    {
+      "vision_time_ms": 1780712629732.1812,
+      "main_time_ms": 15000.0
+    },
+    {
+      "vision_time_ms": 1780712630024.938,
+      "main_time_ms": 15110.0
+    },
+    {
+      "vision_time_ms": 1780712634404.706,
+      "main_time_ms": 19906.0
+    },
+    {
+      "vision_time_ms": 1780712634841.008,
+      "main_time_ms": 20000.0
+    },
+    {
+      "vision_time_ms": 1780712634985.634,
+      "main_time_ms": 20110.0
+    },
+    {
+      "vision_time_ms": 1780712639509.335,
+      "main_time_ms": 24906.0
+    },
+    {
+      "vision_time_ms": 1780712639799.2239,
+      "main_time_ms": 25000.0
+    },
+    {
+      "vision_time_ms": 1780712640086.218,
+      "main_time_ms": 25110.0
+    },
+    {
+      "vision_time_ms": 1780712644471.122,
+      "main_time_ms": 29906.0
+    },
+    {
+      "vision_time_ms": 1780712644763.675,
+      "main_time_ms": 30000.0
+    },
+    {
+      "vision_time_ms": 1780712645051.6328,
+      "main_time_ms": 30110.0
+    },
+    {
+      "vision_time_ms": 1780712649436.445,
+      "main_time_ms": 34906.0
+    },
+    {
+      "vision_time_ms": 1780712649868.9128,
+      "main_time_ms": 35000.0
+    },
+    {
+      "vision_time_ms": 1780712650284.668,
+      "main_time_ms": 35110.0
+    },
+    {
+      "vision_time_ms": 1780712654395.124,
+      "main_time_ms": 39906.0
+    },
+    {
+      "vision_time_ms": 1780712654825.632,
+      "main_time_ms": 40000.0
+    }
+  ]
+}

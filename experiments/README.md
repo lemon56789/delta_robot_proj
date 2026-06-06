@@ -7,6 +7,8 @@
 - `run01_main_logger.py`: 컴퓨터 2(Y)에서 Arduino serial에 `ALL theta1 theta2 theta3` 명령을 보내고 Run 01 main CSV를 저장하는 PC-side logger
 - `run01_main_logger_computer2_powershell.md`: 컴퓨터 2(Y)에 전달할 PowerShell 실행 안내
 - `run01_preprocess.py`: Run 01 raw main, vision, Simscape CSV를 읽어 angle-derived measured position과 processed merged dataset을 생성하는 스크립트
+- `run02_offline_validate.py`: serial 없이 gain/clamp 후보, corrected-target
+  IK, fallback을 Run 01-main/holdout에서 replay하는 검증기
 
 ## Run 01 main logger
 
@@ -29,8 +31,9 @@ Run 01-main/holdout trajectory도 같은 logger로 실행한다.
 
 지원 trajectory:
 - pre: `static_center_pre`, `cross_pm10_pre`, `square_pm10_pre`, `cross_pm40_pre`, `square_pm40_pre`
-- main: `static_center_hold`, `cross_pm20`, `square_pm20`, `circle_r40`, `grid_3x3_pm40`
-- holdout: `cross_pm15_holdout`, `square_pm15_holdout`, `circle_r40_holdout`
+- current main: `static_center_hold`, `cross_pm40`, `square_pm40`, `circle_r40`, `grid_3x3_pm40`
+- current holdout: `static_center_holdout`, `cross_pm30_holdout`, `square_pm30_holdout`, `circle_r40_holdout`, `grid_3x3_pm40_holdout`
+- compatibility: `cross_pm20`, `square_pm20`, `cross_pm15_holdout`, `square_pm15_holdout`
 
 `circle_r40`은 home -> `(40, 0)` -> 반지름 `40 mm` 반시계 방향 원 -> home 순서다. 원 회전 시간은 아직 고정하지 않았으므로 `--circle-duration-s`로 지정하고 metadata에 남긴다. 현재 Arduino serial protocol은 setpoint command만 지원하므로 logger는 원을 여러 setpoint로 나누어 천천히 전송한다.
 
@@ -52,3 +55,20 @@ python experiments/run01_preprocess.py --run-id 2026-06-05_run01_pre_cross_pm40_
 - `data/processed/merged_<run_id>.csv`
 
 Run 01-main/holdout에서도 같은 후처리 흐름을 재사용한다. Run 01-main/holdout 수집용 main logger trajectory는 `run01_main_logger.py`에 포함되어 있다.
+
+## Run 02 offline correction validation
+
+```bash
+python3 experiments/run02_offline_validate.py
+```
+
+기본 후보는 gain `0.25/0.5/1.0`, XY vector clamp `2/4/6 mm`다. main은
+configuration safety 분석에 사용하고, holdout은 replay/IK 호환성만
+확인한다. 검증기는 holdout `error_*` label을 읽지 않는다.
+
+산출물:
+
+- `experiments/results/run02_correction_offline_validation_2026-06-06.json`
+
+현재 main-only 초기 hardware gate 후보는 gain `0.25`, XY clamp `2 mm`다.
+이 단계는 serial command를 전송하지 않는다.

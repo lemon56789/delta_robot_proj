@@ -1,0 +1,82 @@
+{
+  "run_id": "2026-06-06_run01_main_square_pm40_r03",
+  "method": "phase_departure_to_command_arrival_to_sim_settle",
+  "main_csv": "data/real/raw/main_2026-06-06_run01_main_square_pm40_r03.csv",
+  "vision_csv": "data/vision/raw/vision_2026-06-06_run01_main_square_pm40_r03.csv",
+  "simscape_csv": "data/simulation/raw/simscape_2026-06-06_run01_simscape_square_pm40_r03.csv",
+  "source_total_vision_rows": 298,
+  "source_valid_vision_rows": 279,
+  "aligned_vision_rows": 162,
+  "main_rows": 352,
+  "merged_rows": 253,
+  "anchors": [
+    {
+      "vision_time_ms": 1780711009471.069,
+      "main_time_ms": 4922.0
+    },
+    {
+      "vision_time_ms": 1780711010030.7642,
+      "main_time_ms": 5016.0
+    },
+    {
+      "vision_time_ms": 1780711010314.51,
+      "main_time_ms": 5125.0
+    },
+    {
+      "vision_time_ms": 1780711014431.318,
+      "main_time_ms": 9922.0
+    },
+    {
+      "vision_time_ms": 1780711015135.419,
+      "main_time_ms": 10016.0
+    },
+    {
+      "vision_time_ms": 1780711015419.197,
+      "main_time_ms": 10125.0
+    },
+    {
+      "vision_time_ms": 1780711019517.561,
+      "main_time_ms": 14922.0
+    },
+    {
+      "vision_time_ms": 1780711020091.239,
+      "main_time_ms": 15016.0
+    },
+    {
+      "vision_time_ms": 1780711020378.928,
+      "main_time_ms": 15125.0
+    },
+    {
+      "vision_time_ms": 1780711024474.646,
+      "main_time_ms": 19922.0
+    },
+    {
+      "vision_time_ms": 1780711025050.838,
+      "main_time_ms": 20016.0
+    },
+    {
+      "vision_time_ms": 1780711025198.771,
+      "main_time_ms": 20125.0
+    },
+    {
+      "vision_time_ms": 1780711029434.932,
+      "main_time_ms": 24922.0
+    },
+    {
+      "vision_time_ms": 1780711030159.551,
+      "main_time_ms": 25016.0
+    },
+    {
+      "vision_time_ms": 1780711030426.471,
+      "main_time_ms": 25141.0
+    },
+    {
+      "vision_time_ms": 1780711034542.1199,
+      "main_time_ms": 30031.0
+    },
+    {
+      "vision_time_ms": 1780711034971.148,
+      "main_time_ms": 30032.0
+    }
+  ]
+}

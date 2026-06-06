@@ -1,0 +1,70 @@
+{
+  "run_id": "2026-06-06_run01_main_square_pm40_r02",
+  "method": "phase_departure_to_command_arrival_to_sim_settle",
+  "main_csv": "data/real/raw/main_2026-06-06_run01_main_square_pm40_r02.csv",
+  "vision_csv": "data/vision/raw/vision_2026-06-06_run01_main_square_pm40_r02.csv",
+  "simscape_csv": "data/simulation/raw/simscape_2026-06-06_run01_simscape_square_pm40_r02.csv",
+  "source_total_vision_rows": 309,
+  "source_valid_vision_rows": 285,
+  "aligned_vision_rows": 208,
+  "main_rows": 350,
+  "merged_rows": 252,
+  "anchors": [
+    {
+      "vision_time_ms": 1780710852651.832,
+      "main_time_ms": 4921.0
+    },
+    {
+      "vision_time_ms": 1780710852779.766,
+      "main_time_ms": 5015.0
+    },
+    {
+      "vision_time_ms": 1780710859870.94,
+      "main_time_ms": 5125.0
+    },
+    {
+      "vision_time_ms": 1780710864127.666,
+      "main_time_ms": 9921.0
+    },
+    {
+      "vision_time_ms": 1780710864688.812,
+      "main_time_ms": 10015.0
+    },
+    {
+      "vision_time_ms": 1780710864833.025,
+      "main_time_ms": 10125.0
+    },
+    {
+      "vision_time_ms": 1780710869088.351,
+      "main_time_ms": 15015.0
+    },
+    {
+      "vision_time_ms": 1780710869793.03,
+      "main_time_ms": 15125.0
+    },
+    {
+      "vision_time_ms": 1780710874192.414,
+      "main_time_ms": 20015.0
+    },
+    {
+      "vision_time_ms": 1780710874747.291,
+      "main_time_ms": 20125.0
+    },
+    {
+      "vision_time_ms": 1780710879152.639,
+      "main_time_ms": 25015.0
+    },
+    {
+      "vision_time_ms": 1780710879855.7031,
+      "main_time_ms": 25125.0
+    },
+    {
+      "vision_time_ms": 1780710884111.501,
+      "main_time_ms": 29937.0
+    },
+    {
+      "vision_time_ms": 1780710884672.643,
+      "main_time_ms": 30015.0
+    }
+  ]
+}
