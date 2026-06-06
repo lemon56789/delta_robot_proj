@@ -3,14 +3,19 @@
 이 문서는 가상센싱 보정을 적용한 뒤 baseline 데이터와 비교할 검증 데이터를 수집하기 위한 run protocol이다.
 
 ## 1. Experiment Scope
-- experiment purpose: (작성: 보정 적용 후 baseline 대비 성능 개선을 확인하는 목적을 적는다)
-- expected output: (작성: corrected main CSV, vision CSV, processed dataset, comparison report 등 산출물을 적는다)
-- target stage: (작성: Stage 9 폐루프 적용 및 성능 검증 등으로 적는다)
-- responsible members: (작성: 실험 진행, virtual sensor, Arduino, vision, data analysis 담당자를 적는다)
-- date: (작성: 실험 수행일을 `YYYY-MM-DD`로 적는다)
-- run_id: (작성: 이번 run 식별자를 적는다)
-- baseline run_id: (작성: 비교 대상 baseline run_id를 적는다)
-- correction enabled: (작성: corrected run이므로 원칙적으로 `yes`)
+- experiment purpose: 동일한 fresh trajectory를 correction OFF/ON으로
+  반복 실행해 PC-side virtual sensing correction의 실제 XY 성능을
+  비교한다.
+- expected output: 24개 main raw CSV, vision raw CSV, correction auxiliary
+  CSV, metadata/serial log, processed dataset, OFF/ON comparison report.
+- target stage: Stage 9 correction 적용 및 실제 하드웨어 성능 검증.
+- responsible members: 실험/하드웨어 담당, Arduino/serial 담당,
+  vision 담당, virtual sensor/data analysis 담당.
+- date: 실제 실행일을 `YYYY-MM-DD`로 각 metadata에 기록한다.
+- run count: `4 trajectories x OFF/ON x 3 repetitions = 24`.
+- comparison policy: Run 02 내부의 같은 trajectory/repetition OFF/ON pair를
+  우선 비교한다. Run 01 circle 결과는 시간 정렬 불확실성 때문에 Run 02
+  성능 기준으로 사용하지 않는다.
 
 ## 2. Correction Setup
 - virtual sensor model:
@@ -56,6 +61,7 @@ Run 02 serial-enabled logger는 fixed 16-column processed CSV와 별도로 다�
 auxiliary correction log를 남긴다.
 
 - `run_id`, `time`
+- `actual_elapsed_ms`, `schedule_lag_ms`, `command_sent`
 - `target_x`, `target_y`, `target_z`
 - `predicted_error_x`, `predicted_error_y`, `predicted_error_z`
 - `requested_correction_x`, `requested_correction_y`,
@@ -71,10 +77,9 @@ auxiliary correction log를 남긴다.
 
 ## 3. Trajectory
 
-### 3-A. Optional 24-Run Candidate
+### 3-A. Finalized 24-Run Matrix
 
-아래 구성은 재사용을 위해 기록한 candidate이며 아직 최종 Run 02 실행
-구성으로 확정하지 않았다.
+아래 구성을 최종 Run 02 실행 구성으로 사용한다.
 
 | trajectory | correction state | repetitions | run count |
 |---|---|---:|---:|
@@ -85,6 +90,20 @@ auxiliary correction log를 남긴다.
 | **total** | | | **24** |
 
 계산: 4 trajectories x 2 correction states x 3 repetitions = 24 runs.
+
+실행 순서는 각 repetition 안에서 trajectory별 OFF 직후 ON을 수행한다.
+
+```text
+r01: cross OFF -> ON
+     reverse grid OFF -> ON
+     diamond OFF -> ON
+     circle OFF -> ON
+r02: same order
+r03: same order
+```
+
+이 순서는 OFF/ON 사이의 camera, marker, calibration, gain, 배선 및 기구
+상태 변화를 줄이기 위한 것이다.
 
 ### 3-B. Waypoint and Direction Definitions
 
@@ -143,64 +162,115 @@ home
 #### Circle `r=40 mm`
 
 기존 circle 정의와 동일하게 `(40, 0)`에서 시작해 반시계 방향으로 한
-바퀴 이동한다.
+바퀴 이동한다. 정렬 event를 명확히 하기 위해 원 시작점과 종료점에서
+각각 `2 s` 정지한다.
 
 ```text
-home
--> (40, 0)
+home hold 5 s
+-> (40, 0) hold 2 s
 -> counterclockwise radius-40 circle
--> home
+-> (40, 0) hold 2 s
+-> home hold 5 s
 ```
 
-### 3-C. Items to Freeze Before Implementation
+### 3-C. Frozen Execution Parameters
 
-- optional candidate 사용 여부
-- 공통 `target_z`
-- waypoint hold time
-- circle duration과 point count
-- command/sample rate
-- OFF/ON 실행 순서
-- run_id와 repetition naming
-- max velocity/acceleration 및 예상 theta 범위
+- common `target_z`: `-263.27731514697575 mm`
+- non-circle waypoint hold: `5 s`
+- circle home hold: `5 s`
+- circle start/end hold at `(40, 0)`: `2 s` each
+- circle discretization: `72` points, `30 s` revolution
+- PC data schedule/sample period: `0.1 s`
+- serial command update: phase 전환 시 또는 최대 `0.5 s` 간격
+- serial: `9600 baud`, `ALL theta1 theta2 theta3`
+- correction gain: `0.25`
+- XY vector clamp: `2 mm`
+- Z correction: disabled
+- theta safety range: `-45 deg` to `90 deg`
+- run ID:
+  `YYYY-MM-DD_run02_<trajectory>_<off|on>_r01..r03`
+- trajectories:
+  `cross_pm30`, `reverse_grid_3x3_pm40`, `diamond_pm35`, `circle_r40`
+
+Nominal theta 범위 dry-run 결과:
+
+| trajectory | min theta | max theta | rows |
+|---|---:|---:|---:|
+| cross | `-7 deg` | `8 deg` | 450 |
+| reverse grid | `-11 deg` | `16 deg` | 550 |
+| diamond | `-8 deg` | `10 deg` | 350 |
+| circle | `-9 deg` | `11 deg` | 500 |
+
+### 3-D. Deterministic Schedule and Simscape
+
+- `experiments/run02_logger.py`는 실제 wall-clock 측정값 대신 deterministic
+  scheduled milliseconds를 main CSV `time`에 기록한다.
+- 실제 송신 시각과 schedule lag는 correction auxiliary/serial log에
+  별도로 기록한다.
+- Arduino `ALL` smooth move가 blocking이므로 모든 0.1초 row마다 명령을
+  보내지 않는다. `command_sent`로 실제 갱신 row를 구분한다.
+- correction ON은 schedule과 `time` 축이 정확히 같은 Simscape CSV가
+  없으면 실행하지 않는다.
+- 네 trajectory별 nominal Simscape CSV를 한 번씩 생성하고 세 repetition
+  및 OFF/ON pair에서 공통 사용한다.
+- 권장 경로:
+  `data/simulation/raw/simscape_run02_nominal_<trajectory>.csv`
+- 이 파일은 nominal target/theta schedule의 simulation이며 corrected
+  target simulation으로 대체하지 않는다.
 
 ## 4. Required Logs
-- corrected main log: (작성: correction on 상태의 main log 경로를 적는다)
-- vision raw log: (작성: corrected run의 vision CSV 경로를 적는다)
-- correction log: (작성: model input/output, clamp 여부, fallback 여부를 저장할 로그 경로를 적는다)
-- angle-derived position log: (작성: `measured_z_est` 생성 로그 경로를 적는다)
-- processed merged dataset: (작성: corrected processed dataset 경로를 적는다)
-- comparison report: (작성: baseline 대비 비교 결과 저장 경로를 적는다)
+- main raw: `data/real/raw/main_<run_id>.csv`
+- main metadata: `data/real/raw/main_<run_id>.json`
+- serial: `data/real/raw/serial_<run_id>.txt`
+- correction auxiliary: `data/real/raw/correction_<run_id>.csv`
+- vision raw: `data/vision/raw/vision_<run_id>.csv`
+- nominal Simscape:
+  `data/simulation/raw/simscape_run02_nominal_<trajectory>.csv`
+- angle-derived position:
+  `data/real/derived/measured_position_<run_id>.csv`
+- processed merged: `data/processed/merged_<run_id>.csv`
+- comparison report: `experiments/results/run02_comparison_<date>.json`
 
 ## 5. Run Procedure
-1. Assign `run_id`: (작성: corrected run_id를 정한다)
-2. Load baseline reference: (작성: 비교 대상 baseline run_id와 dataset을 확인한다)
-3. Load virtual sensor model: (작성: 모델 파일과 설정을 로드한다)
-4. Power on and zero: (작성: 전원 인가와 zeroing 수행 결과를 적는다)
-5. Start main logger: (작성: main logger 시작 명령과 저장 파일을 적는다)
-6. Start vision logger: (작성: vision logger 시작 명령과 저장 파일을 적는다)
-7. Start correction logger: (작성: correction log 시작 방법을 적는다)
-8. Trigger common start event: (작성: 정렬용 공통 시작 이벤트를 적는다)
-9. Execute corrected trajectory: (작성: correction on 상태의 trajectory 실행 명령을 적는다)
-10. Trigger common stop event: (작성: 정렬용 공통 종료 이벤트를 적는다)
-11. Stop loggers: (작성: logger 종료와 파일 저장 확인 방법을 적는다)
-12. Generate processed merged dataset: (작성: alignment와 merge 실행 방법을 적는다)
-13. Compare against baseline: (작성: RMSE, max error, trajectory error 비교 방법을 적는다)
-14. Save run metadata: (작성: metadata 저장 위치를 적는다)
+1. `manifest` 명령으로 실행일 기준 24개 run ID를 생성한다.
+2. 네 trajectory의 OFF dry-run schedule을 생성한다.
+3. schedule별 nominal Simscape CSV를 만들고 exact time-axis 검증을 한다.
+4. camera/marker/calibration과 robot zero를 고정한다.
+5. vision logger를 먼저 시작해 초기 home hold를 포함시킨다.
+6. 해당 pair의 OFF logger를 실행한다.
+7. 파일과 stop condition을 확인한 직후 같은 trajectory ON logger를
+   실행한다.
+8. ON 실행에서는 frozen model, gain `0.25`, clamp `2 mm`, 해당 nominal
+   Simscape CSV를 명시한다.
+9. correction log의 fallback, clamp, schedule lag를 확인한다.
+10. 같은 절차를 r01-r03에 반복한다.
+11. OFF/ON 모두 같은 calibration과 동일 alignment 정책으로 처리한다.
+12. trajectory/repetition pair별 XY RMSE, MAE, max error를 계산하고
+    aggregate는 trajectory별 세 repetition을 동일 가중한다.
 
 ## 6. Run-Specific Stop Conditions
-- use base stop conditions: (작성: base config의 공통 중지 조건을 적용하는지 적는다)
-- correction clamp exceeded: (작성: correction이 어느 기준을 넘으면 중지할지 적는다)
-- model inference failure: (작성: 추론 실패가 몇 번 발생하면 중지할지 적는다)
-- tracking error threshold: (작성: vision 기준 오차가 어느 값을 넘으면 중지할지 적는다)
+- base config의 공통 hardware stop condition을 모두 적용한다.
+- applied XY correction이 `2 mm`를 넘으면 즉시 invalid 처리한다.
+- corrected theta가 `-45..90 deg`를 벗어나면 즉시 중지한다.
+- fallback이 연속 `3`회 또는 한 run에서 총 `5`회 발생하면 중지한다.
+- schedule lag가 `500 ms`를 초과하면 해당 run을 중지하고 원인을
+  확인한다.
+- marker가 `1 s` 넘게 연속 소실되면 중지하거나 run을 rejection한다.
+- abnormal noise, vibration, link interference, servo stall 발생 시 즉시
+  중지한다.
 
 ## 7. Post-Run Validation
-- required files exist: (작성: 필요한 파일이 모두 생성됐는지 확인한다)
-- correction log valid: (작성: correction input/output, clamp, fallback 로그가 정상인지 확인한다)
-- processed dataset generated: (작성: corrected processed dataset 생성 여부를 확인한다)
-- baseline comparison completed: (작성: baseline 대비 비교가 완료됐는지 확인한다)
-- RMSE comparison: (작성: baseline/corrected RMSE를 적는다)
-- max error comparison: (작성: baseline/corrected max error를 적는다)
-- corrected run accepted: (작성: 성능 비교 데이터로 채택할지 여부와 이유를 적는다)
+- 24개 run ID와 required file 존재 여부 확인
+- main/correction row count 및 scheduled time axis 일치
+- vision timestamp 단조 증가 및 valid ratio `>=90%`
+- longest continuous marker loss `<1 s`
+- correction norm `<=2 mm`, Z correction `0`
+- fallback/clamp/status count 기록
+- schedule lag max/mean 기록
+- processed dataset fixed 16-column, finite, timestamp monotonic 확인
+- OFF/ON pair별 XY RMSE, MAE, max error 비교
+- circle은 start/end hold anchor가 모두 검출된 경우에만 채택
+- rejection 시 reason과 rerun 여부 기록
 
 ## 8. Run Metadata
 - run_id: (작성: 실험 실행 식별자를 적는다)

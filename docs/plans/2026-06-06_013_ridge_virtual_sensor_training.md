@@ -157,7 +157,17 @@ all Run 01-main data, and isolated Run 01-holdout evaluation.
 - Preliminary complete-run macro XY RMSE changed from `11.945516 mm` with zero
   correction prediction to `11.033113 mm` with the frozen Ridge model, a
   `7.638%` improvement.
-- Circle evaluation remains pending and must be added with the same frozen
-  model; no retraining or tuning is allowed.
+- Circle evaluation was completed with the same frozen post-plan-015 model.
+  The observed partial interval produced `350` merged rows and was retained as
+  `partial_diagnostic`, not as a complete holdout.
+- Partial circle XY RMSE changed from `6.664867 mm` with zero prediction to
+  `7.872045 mm` with Ridge, an `18.113%` degradation. This result was not used
+  for retraining, alpha selection, feature selection, or preprocessing changes.
+- Excluding the first `0.5 s` did not remove the circle degradation:
+  `5.688084 -> 7.045994 mm`, or `23.873%` worse than zero prediction.
+- Across all five available files (`1,706` rows), the diagnostic row-weighted
+  XY RMSE changed from `5.090411 mm` to `4.371378 mm`, a `14.125%`
+  improvement. The official complete-run macro result remains the four-run
+  `37.174%` improvement because circle coverage is partial.
 - Current post-plan-015 model uses `alpha=100`; see
   `2026-06-06_015_phase_boundary_realignment_retrain.md`.
