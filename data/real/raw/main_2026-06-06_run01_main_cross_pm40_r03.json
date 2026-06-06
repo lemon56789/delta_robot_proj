@@ -1,0 +1,126 @@
+{
+  "run_id": "2026-06-06_run01_main_cross_pm40_r03",
+  "trajectory": "cross_pm40",
+  "output_csv": "data\\real\\raw\\main_2026-06-06_run01_main_cross_pm40_r03.csv",
+  "serial_log": "data\\real\\raw\\serial_2026-06-06_run01_main_cross_pm40_r03.txt",
+  "row_count": 450,
+  "time_source": "pc_elapsed_ms",
+  "theta_meas_source": "command_echo_no_encoder",
+  "command_protocol": "Arduino serial line: ALL theta1 theta2 theta3",
+  "dry_run": false,
+  "serial": {
+    "port": "COM3",
+    "baudrate": 9600,
+    "ready_wait_s": 2.0
+  },
+  "sampling": {
+    "sample_period_s": 0.1,
+    "static_duration_s": 30.0,
+    "hold_s": 5.0,
+    "circle_points": 72,
+    "circle_duration_s": 30.0
+  },
+  "ik": {
+    "target_z_mm": -263.27731514697575,
+    "theta_min_deg": -45.0,
+    "theta_max_deg": 90.0,
+    "geometry": {
+      "upper_arm_length_mm": 125.0,
+      "parallelogram_link_length_mm": 300.0,
+      "base_center_to_side_mm": 46.0,
+      "platform_center_to_vertex_mm": 27.177
+    }
+  },
+  "points": [
+    {
+      "phase": "home_1",
+      "target_x": 0.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 0,
+      "theta2_cmd": 0,
+      "theta3_cmd": 0,
+      "hold_s": 5.0
+    },
+    {
+      "phase": "x_plus_stop",
+      "target_x": 40.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 1,
+      "theta2_cmd": -7,
+      "theta3_cmd": 10,
+      "hold_s": 5.0
+    },
+    {
+      "phase": "home_2",
+      "target_x": 0.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 0,
+      "theta2_cmd": 0,
+      "theta3_cmd": 0,
+      "hold_s": 5.0
+    },
+    {
+      "phase": "x_minus_stop",
+      "target_x": -40.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 1,
+      "theta2_cmd": 10,
+      "theta3_cmd": -7,
+      "hold_s": 5.0
+    },
+    {
+      "phase": "home_3",
+      "target_x": 0.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 0,
+      "theta2_cmd": 0,
+      "theta3_cmd": 0,
+      "hold_s": 5.0
+    },
+    {
+      "phase": "y_plus_stop",
+      "target_x": 0.0,
+      "target_y": 40.0,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 11,
+      "theta2_cmd": -4,
+      "theta3_cmd": -4,
+      "hold_s": 5.0
+    },
+    {
+      "phase": "home_4",
+      "target_x": 0.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 0,
+      "theta2_cmd": 0,
+      "theta3_cmd": 0,
+      "hold_s": 5.0
+    },
+    {
+      "phase": "y_minus_stop",
+      "target_x": 0.0,
+      "target_y": -40.0,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": -9,
+      "theta2_cmd": 6,
+      "theta3_cmd": 6,
+      "hold_s": 5.0
+    },
+    {
+      "phase": "home_5",
+      "target_x": 0.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "theta1_cmd": 0,
+      "theta2_cmd": 0,
+      "theta3_cmd": 0,
+      "hold_s": 5.0
+    }
+  ]
+}
