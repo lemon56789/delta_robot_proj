@@ -1,7 +1,7 @@
 {
   "report_type": "ridge_run01_holdout",
-  "evaluation_status": "preliminary_complete_only",
-  "circle_evaluation_pending": true,
+  "evaluation_status": "final_with_partial_circle",
+  "circle_evaluation_pending": false,
   "model_path": "virtual_sensor/models/ridge_run01_main_2026-06-06.npz",
   "model_alpha": 100.0,
   "model_training_run_ids": [
@@ -22,6 +22,7 @@
     "2026-06-06_run01_main_static_center_hold_r03"
   ],
   "holdout_run_ids": [
+    "2026-06-06_run01_holdout_circle_r40_r01",
     "2026-06-06_run01_holdout_cross_pm30_r01",
     "2026-06-06_run01_holdout_grid_3x3_pm40_r01",
     "2026-06-06_run01_holdout_square_pm30_r01",
@@ -166,7 +167,38 @@
       "xy_rmse_improvement_percent": 43.42680643908819
     }
   ],
-  "partial_diagnostic_runs": [],
+  "partial_diagnostic_runs": [
+    {
+      "run_id": "2026-06-06_run01_holdout_circle_r40_r01",
+      "trajectory": "circle_r40",
+      "status": "partial_diagnostic",
+      "row_count": 350,
+      "csv_path": "data/processed/merged_2026-06-06_run01_holdout_circle_r40_r01.csv",
+      "baseline_zero_prediction_metrics": {
+        "x_rmse": 4.768947478163274,
+        "y_rmse": 4.6559197123333425,
+        "xy_rmse": 6.664866721636228,
+        "x_mae": 3.132464579605708,
+        "y_mae": 4.0697944875087755,
+        "xy_mae": 5.545531629656254,
+        "xy_max_error": 38.25934189188309,
+        "z_rmse": 0.22280936135594595,
+        "z_mae": 0.08531442140310187
+      },
+      "model_metrics": {
+        "x_rmse": 5.899868647528998,
+        "y_rmse": 5.211587886864954,
+        "xy_rmse": 7.872045373383791,
+        "x_mae": 4.106432649746914,
+        "y_mae": 4.352817909810097,
+        "xy_mae": 6.462617486453048,
+        "xy_max_error": 40.44780842964158,
+        "z_rmse": 0.22552939857379828,
+        "z_mae": 0.1369046509018326
+      },
+      "xy_rmse_improvement_percent": -18.112570020773052
+    }
+  ],
   "complete_baseline_macro_average": {
     "mean_x_rmse": 3.781207222453326,
     "mean_y_rmse": 2.054464212259768,
@@ -194,11 +226,11 @@
     "evaluation": "/home/lemon56789/delta_robot/venv/bin/python3 virtual_sensor/evaluate_ridge.py"
   },
   "code_version": {
-    "commit": "873f9033af7c416ed09673985d0e0f42112a9019",
+    "commit": "4419b82fc743a91ad91e641b8cb3b7b879146842",
     "dirty": true
   },
   "limitations": [
-    "circle holdout is pending and is not included in this preliminary report",
+    "circle_r40_holdout_r01 has incomplete final circle/home vision coverage",
     "theta*_meas is command_echo_no_encoder, not independent encoder data",
     "error_z is angle-derived and diagnostic, not external 3D ground truth"
   ]

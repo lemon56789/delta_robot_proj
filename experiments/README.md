@@ -9,6 +9,11 @@
 - `run01_preprocess.py`: Run 01 raw main, vision, Simscape CSV를 읽어 angle-derived measured position과 processed merged dataset을 생성하는 스크립트
 - `run02_offline_validate.py`: serial 없이 gain/clamp 후보, corrected-target
   IK, fallback을 Run 01-main/holdout에서 replay하는 검증기
+- `run02_logger.py`: 확정된 Run 02 24회 matrix의 deterministic OFF/ON
+  serial logger와 manifest 생성기
+- `run02_logger_computer2_powershell.md`: Computer 2 실행 안내
+- `run02_computer2_codex_handoff.md`: Git 없이 Computer 2 실행 환경을
+  재구성하는 Codex용 독립형 인수인계
 
 ## Run 01 main logger
 
@@ -72,3 +77,37 @@ configuration safety 분석에 사용하고, holdout은 replay/IK 호환성만
 
 현재 main-only 초기 hardware gate 후보는 gain `0.25`, XY clamp `2 mm`다.
 이 단계는 serial command를 전송하지 않는다.
+
+## Run 02 serial logger
+
+24개 run ID manifest:
+
+```bash
+python3 experiments/run02_logger.py manifest \
+  --date 2026-06-07 \
+  --output experiments/run02_24_run_manifest.json
+```
+
+OFF dry-run:
+
+```bash
+python3 experiments/run02_logger.py run cross_pm30 \
+  --correction off \
+  --run-id 2026-06-07_run02_cross_pm30_off_r01 \
+  --dry-run
+```
+
+ON 실행은 deterministic schedule과 time axis가 정확히 같은 nominal
+Simscape CSV가 필수다.
+
+```bash
+python3 experiments/run02_logger.py run cross_pm30 \
+  --correction on \
+  --run-id 2026-06-07_run02_cross_pm30_on_r01 \
+  --simscape-csv data/simulation/raw/simscape_run02_nominal_cross_pm30.csv \
+  --port COM3
+```
+
+최종 matrix는 cross, reverse grid, diamond, circle 각각 OFF/ON 3회로
+총 24회다. 기본값은 gain `0.25`, XY clamp `2 mm`, waypoint hold `5 s`,
+circle `72` points / `30 s`, circle start/end hold `2 s`다.

@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-06-06_run01_holdout_circle_r40_r01",
+  "method": "partial_circle_observed_angular_coverage",
+  "main_csv": "data/real/raw/main_2026-06-06_run01_holdout_circle_r40_r01.csv",
+  "vision_csv": "data/vision/raw/vision_2026-06-06_run01_holdout_circle_r40_r01.csv",
+  "simscape_csv": "data/simulation/raw/simscape_2026-06-06_run01_holdout_circle_r40_r01.csv",
+  "source_total_vision_rows": 298,
+  "source_valid_vision_rows": 283,
+  "aligned_vision_rows": 202,
+  "main_rows": 363,
+  "merged_rows": 350,
+  "anchors": [
+    {
+      "vision_time_ms": 1780742643871.9832,
+      "main_time_ms": 16.0
+    },
+    {
+      "vision_time_ms": 1780742673921.268,
+      "main_time_ms": 29365.836762908544
+    }
+  ]
+}
