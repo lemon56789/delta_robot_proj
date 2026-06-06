@@ -27,6 +27,8 @@ THETA_MIN_DEG = -45.0
 THETA_MAX_DEG = 90.0
 TIME_SOURCE = "pc_elapsed_ms"
 THETA_MEAS_SOURCE = "command_echo_no_encoder"
+DEFAULT_CIRCLE_POINTS = 72
+DEFAULT_CIRCLE_DURATION_S = 30.0
 
 FIELDNAMES = [
     "run_id",
@@ -99,6 +101,8 @@ def main() -> int:
         target_z_mm=args.target_z_mm,
         static_duration_s=args.duration_s,
         hold_s=args.hold_s,
+        circle_points=args.circle_points,
+        circle_duration_s=args.circle_duration_s,
         theta_min_deg=args.theta_min_deg,
         theta_max_deg=args.theta_max_deg,
     )
@@ -138,13 +142,20 @@ def build_trajectory_points(
     target_z_mm: float,
     static_duration_s: float,
     hold_s: float,
+    circle_points: int,
+    circle_duration_s: float,
     theta_min_deg: float,
     theta_max_deg: float,
 ) -> list[TrajectoryPoint]:
-    if trajectory == "static_center_pre":
+    if circle_points < 8:
+        raise ValueError("circle_points must be at least 8.")
+    if circle_duration_s <= 0.0:
+        raise ValueError("circle_duration_s must be positive.")
+
+    if trajectory in ("static_center_pre", "static_center_hold"):
         return [
             make_point(
-                phase="static_center",
+                phase=trajectory,
                 x_mm=0.0,
                 y_mm=0.0,
                 z_mm=target_z_mm,
@@ -154,8 +165,14 @@ def build_trajectory_points(
             )
         ]
 
-    if trajectory in ("cross_pm10_pre", "cross_pm40_pre"):
-        amplitude_mm = 10.0 if trajectory == "cross_pm10_pre" else 40.0
+    if trajectory in ("cross_pm10_pre", "cross_pm40_pre", "cross_pm20", "cross_pm15_holdout"):
+        cross_amplitudes_mm = {
+            "cross_pm10_pre": 10.0,
+            "cross_pm40_pre": 40.0,
+            "cross_pm20": 20.0,
+            "cross_pm15_holdout": 15.0,
+        }
+        amplitude_mm = cross_amplitudes_mm[trajectory]
         point_specs = [
             ("home_1", 0.0, 0.0),
             ("x_plus_stop", amplitude_mm, 0.0),
@@ -167,10 +184,12 @@ def build_trajectory_points(
             ("y_minus_stop", 0.0, -amplitude_mm),
             ("home_5", 0.0, 0.0),
         ]
-    elif trajectory in ("square_pm10_pre", "square_pm40_pre"):
+    elif trajectory in ("square_pm10_pre", "square_pm40_pre", "square_pm20", "square_pm15_holdout"):
         square_amplitudes_mm = {
             "square_pm10_pre": 10.0,
             "square_pm40_pre": 40.0,
+            "square_pm20": 20.0,
+            "square_pm15_holdout": 15.0,
         }
         amplitude_mm = square_amplitudes_mm[trajectory]
         point_specs = [
@@ -180,6 +199,29 @@ def build_trajectory_points(
             ("q3_x_minus_y_minus", -amplitude_mm, -amplitude_mm),
             ("q4_x_plus_y_minus", amplitude_mm, -amplitude_mm),
             ("q1_x_plus_y_plus_2", amplitude_mm, amplitude_mm),
+            ("home_2", 0.0, 0.0),
+        ]
+    elif trajectory in ("circle_r40", "circle_r40_holdout"):
+        return build_circle_points(
+            target_z_mm=target_z_mm,
+            hold_s=hold_s,
+            circle_points=circle_points,
+            circle_duration_s=circle_duration_s,
+            theta_min_deg=theta_min_deg,
+            theta_max_deg=theta_max_deg,
+        )
+    elif trajectory == "grid_3x3_pm40":
+        point_specs = [
+            ("home_1", 0.0, 0.0),
+            ("x_minus_y_minus", -40.0, -40.0),
+            ("x_center_y_minus", 0.0, -40.0),
+            ("x_plus_y_minus", 40.0, -40.0),
+            ("x_minus_y_center", -40.0, 0.0),
+            ("center", 0.0, 0.0),
+            ("x_plus_y_center", 40.0, 0.0),
+            ("x_minus_y_plus", -40.0, 40.0),
+            ("x_center_y_plus", 0.0, 40.0),
+            ("x_plus_y_plus", 40.0, 40.0),
             ("home_2", 0.0, 0.0),
         ]
     else:
@@ -197,6 +239,52 @@ def build_trajectory_points(
         )
         for phase, x_mm, y_mm in point_specs
     ]
+
+
+def build_circle_points(
+    *,
+    target_z_mm: float,
+    hold_s: float,
+    circle_points: int,
+    circle_duration_s: float,
+    theta_min_deg: float,
+    theta_max_deg: float,
+) -> list[TrajectoryPoint]:
+    point_specs: list[tuple[str, float, float, float]] = [
+        ("home_1", 0.0, 0.0, hold_s),
+        ("circle_start_x_plus", 40.0, 0.0, hold_s),
+    ]
+    step_hold_s = circle_duration_s / circle_points
+    for index in range(1, circle_points + 1):
+        angle_rad = (2.0 * math.pi * index) / circle_points
+        x_mm = 40.0 * math.cos(angle_rad)
+        y_mm = 40.0 * math.sin(angle_rad)
+        point_specs.append(
+            (
+                f"circle_ccw_{index:03d}",
+                _clean_zero(x_mm),
+                _clean_zero(y_mm),
+                step_hold_s,
+            )
+        )
+    point_specs.append(("home_2", 0.0, 0.0, hold_s))
+
+    return [
+        make_point(
+            phase=phase,
+            x_mm=x_mm,
+            y_mm=y_mm,
+            z_mm=target_z_mm,
+            hold_s=point_hold_s,
+            theta_min_deg=theta_min_deg,
+            theta_max_deg=theta_max_deg,
+        )
+        for phase, x_mm, y_mm, point_hold_s in point_specs
+    ]
+
+
+def _clean_zero(value: float) -> float:
+    return 0.0 if math.isclose(value, 0.0, abs_tol=1e-12) else value
 
 
 def make_point(
@@ -496,6 +584,8 @@ def write_metadata(
             "sample_period_s": args.sample_period_s,
             "static_duration_s": args.duration_s,
             "hold_s": args.hold_s,
+            "circle_points": args.circle_points,
+            "circle_duration_s": args.circle_duration_s,
         },
         "ik": {
             "target_z_mm": args.target_z_mm,
@@ -517,7 +607,7 @@ def write_metadata(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Run 01-pre main logger for the PC connected to Arduino. "
+            "Run 01 main logger for the PC connected to Arduino. "
             "The script sends ALL theta commands and records a main CSV."
         )
     )
@@ -529,6 +619,14 @@ def parse_args() -> argparse.Namespace:
             "square_pm10_pre",
             "cross_pm40_pre",
             "square_pm40_pre",
+            "static_center_hold",
+            "cross_pm20",
+            "square_pm20",
+            "circle_r40",
+            "grid_3x3_pm40",
+            "cross_pm15_holdout",
+            "square_pm15_holdout",
+            "circle_r40_holdout",
         ),
     )
     parser.add_argument("--run-id", required=True)
@@ -540,6 +638,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--target-z-mm", type=float, default=HOME_Z_MM)
     parser.add_argument("--duration-s", type=float, default=30.0)
     parser.add_argument("--hold-s", type=float, default=1.0)
+    parser.add_argument("--circle-points", type=int, default=DEFAULT_CIRCLE_POINTS)
+    parser.add_argument("--circle-duration-s", type=float, default=DEFAULT_CIRCLE_DURATION_S)
     parser.add_argument("--sample-period-s", type=float, default=0.1)
     parser.add_argument("--ready-wait-s", type=float, default=2.0)
     parser.add_argument("--theta-min-deg", type=float, default=THETA_MIN_DEG)
