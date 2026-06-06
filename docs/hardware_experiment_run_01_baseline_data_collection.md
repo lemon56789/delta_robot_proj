@@ -109,17 +109,40 @@ Run 01-main은 virtual sensor 초기 학습에 사용할 baseline dataset이다.
 | `static_center_hold` | center hold, `20-30 s` | 3 | train, bias/noise support |
 | `cross_pm20` | `x/y = ±20 mm` | 3 | train |
 | `square_pm20` | `x/y = ±20 mm` | 3 | train |
-| `circle_r15` | `r = 15 mm` | 3 | train 또는 validation |
-| `grid_3x3_pm20` | `x, y = -20, 0, +20 mm`, `1-2 s` hold per point | 3 | train |
+| `circle_r40` | home -> `(40, 0)` -> CCW `r = 40 mm` circle -> home | 3 | train 또는 validation |
+| `grid_3x3_pm40` | `x, y = -40, 0, +40 mm` grid path | 3 | train |
+
+`circle_r40` definition:
+- Start at home.
+- Move to `(40, 0, z0)`.
+- Rotate counterclockwise around the origin with radius `40 mm`.
+- Return to home.
+- The circle should be slow and continuous in hardware operation. Current
+  PC-side logger approximates this by streaming many small `ALL theta1 theta2
+  theta3` setpoints. The final circle duration is not fixed yet and must be
+  recorded in run metadata.
+
+`grid_3x3_pm40` target order:
+1. home: `(0, 0, z0)`
+2. `(-40, -40, z0)`
+3. `(0, -40, z0)`
+4. `(40, -40, z0)`
+5. `(-40, 0, z0)`
+6. `(0, 0, z0)`
+7. `(40, 0, z0)`
+8. `(-40, 40, z0)`
+9. `(0, 40, z0)`
+10. `(40, 40, z0)`
+11. home: `(0, 0, z0)`
 
 Training/validation split 기준:
 - training:
   - `static_center_hold`
   - `cross_pm20`
   - `square_pm20`
-  - `grid_3x3_pm20`
+  - `grid_3x3_pm40`
 - validation:
-  - `circle_r15` 중 1회 반복, 또는 fitting에 쓰지 않은 main trajectory 1회 반복.
+  - `circle_r40` 중 1회 반복, 또는 fitting에 쓰지 않은 main trajectory 1회 반복.
 
 Static data는 bias/noise 확인에 유용하지만 training batch에서 과도한 비중을 차지하지 않게 한다.
 
@@ -138,7 +161,7 @@ Run 01-holdout은 virtual sensor 학습에 사용하지 않는다. Run 02에서�
 |---|---:|---:|---|
 | `cross_pm15_holdout` | `x/y = ±15 mm` | 1-2 | test / Run 02 comparison |
 | `square_pm15_holdout` | `x/y = ±15 mm` | 1-2 | test / Run 02 comparison |
-| `circle_r15_holdout` | `r = 15 mm` | 1-2 | test / Run 02 comparison |
+| `circle_r40_holdout` | home -> `(40, 0)` -> CCW `r = 40 mm` circle -> home | 1-2 | test / Run 02 comparison |
 
 시간이 허용되면 아래 trajectory를 추가할 수 있다.
 - `pick_place_like_holdout`, `±20 mm` 내부의 작은 2D point-to-point path.
