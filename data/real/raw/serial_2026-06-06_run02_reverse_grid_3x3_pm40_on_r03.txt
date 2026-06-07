@@ -1,0 +1,339 @@
+0,,RX,Delta Robot IK Firmware Start
+0,,RX,Commands:
+0,,RX,CENTER
+0,,RX,ALL theta1 theta2 theta3
+0,,RX,XYZ x y z        -> IK solve and move
+0,,RX,IK x y z         -> IK solve only, no move
+0,,RX,1 theta / 2 theta / 3 theta
+0,,RX,SWEEP
+0,,RX,STATE
+0,,RX,PON / POFF
+0,,RX,Ready. Initial CENTER command sent.
+0,0,TX,ALL 0 0 0
+78,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+78,,RX,0.00 | servo cmd -> 84, 86, 88
+500,500,TX,ALL 0 0 0
+562,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+578,,RX,0.00 | servo cmd -> 84, 86, 88
+1000,1000,TX,ALL 0 0 0
+1062,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+1078,,RX,0.00 | servo cmd -> 84, 86, 88
+1500,1500,TX,ALL 0 0 0
+1562,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+1578,,RX,0.00 | servo cmd -> 84, 86, 88
+2000,2000,TX,ALL 0 0 0
+2062,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+2093,,RX,0.00 | servo cmd -> 84, 86, 88
+2500,2500,TX,ALL 0 0 0
+2562,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+2593,,RX,0.00 | servo cmd -> 84, 86, 88
+3000,3000,TX,ALL 0 0 0
+3062,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+3093,,RX,0.00 | servo cmd -> 84, 86, 88
+3500,3500,TX,ALL 0 0 0
+3562,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+3593,,RX,0.00 | servo cmd -> 84, 86, 88
+4000,4000,TX,ALL 0 0 0
+4062,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+4093,,RX,0.00 | servo cmd -> 84, 86, 88
+4500,4500,TX,ALL 0 0 0
+4562,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+4593,,RX,0.00 | servo cmd -> 84, 86, 88
+5000,5000,TX,ALL 13 -11 7
+5390,,RX,SMOOTH ALL theta -> 13.00, -11.0
+5406,,RX,0, 7.00 | servo cmd -> 68, 100, 79
+5500,5500,TX,ALL 13 -11 7
+5578,,RX,SMOOTH ALL theta -> 13.00, -11.0
+5593,,RX,0, 7.00 | servo cmd -> 68, 100, 79
+6000,6000,TX,ALL 13 -11 7
+6078,,RX,SMOOTH ALL theta -> 13.00, -11.0
+6093,,RX,0, 7.00 | servo cmd -> 68, 100, 79
+6500,6500,TX,ALL 13 -11 7
+6578,,RX,SMOOTH ALL theta -> 13.00, -11.0
+6593,,RX,0, 7.00 | servo cmd -> 68, 100, 79
+7000,7000,TX,ALL 13 -11 7
+7078,,RX,SMOOTH ALL theta -> 13.00, -11.0
+7093,,RX,0, 7.00 | servo cmd -> 68, 100, 79
+7500,7500,TX,ALL 13 -11 7
+7578,,RX,SMOOTH ALL theta -> 13.00, -11.0
+7593,,RX,0, 7.00 | servo cmd -> 68, 100, 79
+8000,8000,TX,ALL 13 -11 7
+8078,,RX,SMOOTH ALL theta -> 13.00, -11.0
+8093,,RX,0, 7.00 | servo cmd -> 68, 100, 79
+8500,8500,TX,ALL 13 -11 7
+8578,,RX,SMOOTH ALL theta -> 13.00, -11.0
+8593,,RX,0, 7.00 | servo cmd -> 68, 100, 79
+9000,9000,TX,ALL 13 -11 7
+9078,,RX,SMOOTH ALL theta -> 13.00, -11.0
+9093,,RX,0, 7.00 | servo cmd -> 68, 100, 79
+9500,9500,TX,ALL 13 -11 7
+9578,,RX,SMOOTH ALL theta -> 13.00, -11.0
+9593,,RX,0, 7.00 | servo cmd -> 68, 100, 79
+10000,10000,TX,ALL 11 -4 -3
+10328,,RX,SMOOTH ALL theta -> 11.00, -4.00
+10343,,RX,, -3.00 | servo cmd -> 70, 91, 92
+10500,10500,TX,ALL 11 -4 -3
+10593,,RX,SMOOTH ALL theta -> 11.00, -4.00
+10609,,RX,, -3.00 | servo cmd -> 70, 91, 92
+11000,11000,TX,ALL 11 -4 -3
+11078,,RX,SMOOTH ALL theta -> 11.00, -4.00
+11093,,RX,, -3.00 | servo cmd -> 70, 91, 92
+11500,11500,TX,ALL 11 -4 -3
+11578,,RX,SMOOTH ALL theta -> 11.00, -4.00
+11593,,RX,, -3.00 | servo cmd -> 70, 91, 92
+12000,12000,TX,ALL 11 -4 -3
+12062,,RX,SMOOTH ALL theta -> 11.00, -4.00
+12078,,RX,, -3.00 | servo cmd -> 70, 91, 92
+12500,12500,TX,ALL 11 -4 -3
+12578,,RX,SMOOTH ALL theta -> 11.00, -4.00
+12593,,RX,, -3.00 | servo cmd -> 70, 91, 92
+13000,13000,TX,ALL 11 -4 -3
+13062,,RX,SMOOTH ALL theta -> 11.00, -4.00
+13078,,RX,, -3.00 | servo cmd -> 70, 91, 92
+13500,13500,TX,ALL 11 -4 -3
+13578,,RX,SMOOTH ALL theta -> 11.00, -4.00
+13593,,RX,, -3.00 | servo cmd -> 70, 91, 92
+14000,14000,TX,ALL 11 -4 -3
+14078,,RX,SMOOTH ALL theta -> 11.00, -4.00, -3.00 | servo cmd -> 70, 91, 92
+14500,14500,TX,ALL 11 -4 -3
+14562,,RX,SMOOTH ALL theta -> 11.00, -4.00
+14578,,RX,, -3.00 | servo cmd -> 70, 91, 92
+15000,15000,TX,ALL 12 6 -11
+15312,,RX,SMOOTH ALL theta -> 12.00, 6.00,
+15328,,RX,-11.00 | servo cmd -> 69, 79, 102
+15500,15500,TX,ALL 12 6 -11
+15578,,RX,SMOOTH ALL theta -> 12.00, 6.00,
+15593,,RX,-11.00 | servo cmd -> 69, 79, 102
+16000,16000,TX,ALL 12 6 -11
+16062,,RX,SMOOTH ALL theta -> 12.00, 6.00,
+16093,,RX,-11.00 | servo cmd -> 69, 79, 102
+16500,16500,TX,ALL 12 6 -11
+16578,,RX,SMOOTH ALL theta -> 12.00, 6.00,
+16593,,RX,-11.00 | servo cmd -> 69, 79, 102
+17000,17000,TX,ALL 12 6 -11
+17062,,RX,SMOOTH ALL theta -> 12.00, 6.00,
+17093,,RX,-11.00 | servo cmd -> 69, 79, 102
+17500,17500,TX,ALL 12 6 -11
+17562,,RX,SMOOTH ALL theta -> 12.00, 6.00,
+17578,,RX,-11.00 | servo cmd -> 69, 79, 102
+18000,18000,TX,ALL 12 6 -11
+18062,,RX,SMOOTH ALL theta -> 12.00, 6.00,
+18093,,RX,-11.00 | servo cmd -> 69, 79, 102
+18500,18500,TX,ALL 12 6 -11
+18562,,RX,SMOOTH ALL theta -> 12.00, 6.00,
+18578,,RX,-11.00 | servo cmd -> 69, 79, 102
+19000,19000,TX,ALL 12 6 -11
+19078,,RX,SMOOTH ALL theta -> 12.00, 6.00,
+19093,,RX,-11.00 | servo cmd -> 69, 79, 102
+19500,19500,TX,ALL 12 6 -11
+19562,,RX,SMOOTH ALL theta -> 12.00, 6.00,
+19578,,RX,-11.00 | servo cmd -> 69, 79, 102
+20000,20000,TX,ALL 2 -7 10
+20500,20500,TX,ALL 2 -7 10
+20593,,RX,SMOOTH ALL theta -> 2.00, -7.00,
+20625,,RX,10.00 | servo cmd -> 82, 95, 76
+20656,,RX,SMOOTH ALL theta -> 2.00, -7.0
+20672,,RX,0, 10.00 | servo cmd -> 82, 95, 76
+21000,21000,TX,ALL 2 -7 10
+21062,,RX,SMOOTH ALL theta -> 2.00, -7.00,
+21078,,RX,10.00 | servo cmd -> 82, 95, 76
+21500,21500,TX,ALL 2 -7 10
+21562,,RX,SMOOTH ALL theta -> 2.00, -7.00,
+21578,,RX,10.00 | servo cmd -> 82, 95, 76
+22000,22000,TX,ALL 2 -7 10
+22062,,RX,SMOOTH ALL theta -> 2.00, -7.00,
+22078,,RX,10.00 | servo cmd -> 82, 95, 76
+22500,22500,TX,ALL 2 -7 10
+22578,,RX,SMOOTH ALL theta -> 2.00, -7.00, 10.00 | servo cmd -> 82, 95, 76
+23000,23000,TX,ALL 2 -7 10
+23078,,RX,SMOOTH ALL theta -> 2.00, -7.00,
+23078,,RX,10.00 | servo cmd -> 82, 95, 76
+23500,23500,TX,ALL 2 -7 10
+23562,,RX,SMOOTH ALL theta -> 2.00, -7.00,
+23578,,RX,10.00 | servo cmd -> 82, 95, 76
+24000,24000,TX,ALL 2 -7 10
+24062,,RX,SMOOTH ALL theta -> 2.00, -7.00,
+24078,,RX,10.00 | servo cmd -> 82, 95, 76
+24500,24500,TX,ALL 2 -7 10
+24578,,RX,SMOOTH ALL theta -> 2.00, -7.00, 10.00 | servo cmd -> 82, 95, 76
+25000,25000,TX,ALL 0 0 0
+25312,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+25328,,RX,0.00 | servo cmd -> 84, 86, 88
+25500,25500,TX,ALL 0 0 0
+25562,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+25578,,RX,0.00 | servo cmd -> 84, 86, 88
+26000,26000,TX,ALL 0 0 0
+26062,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+26078,,RX,0.00 | servo cmd -> 84, 86, 88
+26500,26500,TX,ALL 0 0 0
+26562,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+26578,,RX,0.00 | servo cmd -> 84, 86, 88
+27000,27000,TX,ALL 0 0 0
+27062,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+27078,,RX,0.00 | servo cmd -> 84, 86, 88
+27500,27500,TX,ALL 0 0 0
+27562,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+27578,,RX,0.00 | servo cmd -> 84, 86, 88
+28000,28000,TX,ALL 0 0 0
+28062,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+28078,,RX,0.00 | servo cmd -> 84, 86, 88
+28500,28500,TX,ALL 0 0 0
+28562,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+28578,,RX,0.00 | servo cmd -> 84, 86, 88
+29000,29000,TX,ALL 0 0 0
+29062,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+29078,,RX,0.00 | servo cmd -> 84, 86, 88
+29500,29500,TX,ALL 0 0 0
+29562,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+29578,,RX,0.00 | servo cmd -> 84, 86, 88
+30000,30000,TX,ALL 1 10 -7
+30312,,RX,SMOOTH ALL theta -> 1.00, 10.00,
+30328,,RX,-7.00 | servo cmd -> 83, 74, 97
+30500,30500,TX,ALL 1 10 -7
+30562,,RX,SMOOTH ALL theta -> 1.00, 10.00,
+30593,,RX,-7.00 | servo cmd -> 83, 74, 97
+31000,31000,TX,ALL 1 10 -7
+31078,,RX,SMOOTH ALL theta -> 1.00, 10.00,
+31093,,RX,-7.00 | servo cmd -> 83, 74, 97
+31500,31500,TX,ALL 1 10 -7
+31562,,RX,SMOOTH ALL theta -> 1.00, 10.00,
+31593,,RX,-7.00 | servo cmd -> 83, 74, 97
+32000,32000,TX,ALL 1 10 -7
+32062,,RX,SMOOTH ALL theta -> 1.00, 10.00,
+32078,,RX,-7.00 | servo cmd -> 83, 74, 97
+32500,32500,TX,ALL 1 10 -7
+32562,,RX,SMOOTH ALL theta -> 1.00, 10.00,
+32593,,RX,-7.00 | servo cmd -> 83, 74, 97
+33000,33000,TX,ALL 1 10 -7
+33062,,RX,SMOOTH ALL theta -> 1.00, 10.00,
+33093,,RX,-7.00 | servo cmd -> 83, 74, 97
+33500,33500,TX,ALL 1 10 -7
+33578,,RX,SMOOTH ALL theta -> 1.00, 10.00,
+33593,,RX,-7.00 | servo cmd -> 83, 74, 97
+34000,34000,TX,ALL 1 10 -7
+34078,,RX,SMOOTH ALL theta -> 1.00, 10.00,
+34078,,RX,-7.00 | servo cmd -> 83, 74, 97
+34500,34500,TX,ALL 1 10 -7
+34562,,RX,SMOOTH ALL theta -> 1.00, 10.00,
+34578,,RX,-7.00 | servo cmd -> 83, 74, 97
+35000,35000,TX,ALL -7 -1 16
+35500,35500,TX,ALL -7 -1 16
+35656,,RX,SMOOTH ALL theta -> -7.00, -1.00
+35703,,RX,, 16.00 | servo cmd -> 93, 87, 6
+35718,,RX,8
+35734,,RX,SMOOTH ALL theta -> -7.00, -1
+35750,,RX,.00, 16.00 | servo cmd -> 93, 87, 68
+36000,36000,TX,ALL -7 -1 16
+36078,,RX,SMOOTH ALL theta -> -7.00, -1.00
+36093,,RX,, 16.00 | servo cmd -> 93, 87, 68
+36500,36500,TX,ALL -7 -1 16
+36578,,RX,SMOOTH ALL theta -> -7.00, -1.00
+36593,,RX,, 16.00 | servo cmd -> 93, 87, 68
+37000,37000,TX,ALL -7 -1 16
+37062,,RX,SMOOTH ALL theta -> -7.00, -1.00
+37078,,RX,, 16.00 | servo cmd -> 93, 87, 68
+37500,37500,TX,ALL -7 -1 16
+37562,,RX,SMOOTH ALL theta -> -7.00, -1.00
+37593,,RX,, 16.00 | servo cmd -> 93, 87, 68
+38000,38000,TX,ALL -7 -1 16
+38078,,RX,SMOOTH ALL theta -> -7.00, -1.00
+38093,,RX,, 16.00 | servo cmd -> 93, 87, 68
+38500,38500,TX,ALL -7 -1 16
+38578,,RX,SMOOTH ALL theta -> -7.00, -1.00
+38593,,RX,, 16.00 | servo cmd -> 93, 87, 68
+39000,39000,TX,ALL -7 -1 16
+39078,,RX,SMOOTH ALL theta -> -7.00, -1.00
+39093,,RX,, 16.00 | servo cmd -> 93, 87, 68
+39500,39500,TX,ALL -7 -1 16
+39578,,RX,SMOOTH ALL theta -> -7.00, -1.00
+39593,,RX,, 16.00 | servo cmd -> 93, 87, 68
+40000,40000,TX,ALL -9 6 7
+40297,,RX,SMOOTH ALL theta -> -9.00, 6.00,
+40312,,RX,7.00 | servo cmd -> 95, 79, 79
+40500,40500,TX,ALL -9 6 7
+40562,,RX,SMOOTH ALL theta -> -9.00, 6.00,
+40593,,RX,7.00 | servo cmd -> 95, 79, 79
+41000,41000,TX,ALL -9 6 7
+41078,,RX,SMOOTH ALL theta -> -9.00, 6.00,
+41109,,RX,7.00 | servo cmd -> 95, 79, 79
+41500,41500,TX,ALL -9 6 7
+41578,,RX,SMOOTH ALL theta -> -9.00, 6.00,
+41609,,RX,7.00 | servo cmd -> 95, 79, 79
+42000,42000,TX,ALL -9 6 7
+42078,,RX,SMOOTH ALL theta -> -9.00, 6.00,
+42109,,RX,7.00 | servo cmd -> 95, 79, 79
+42500,42500,TX,ALL -9 6 7
+42578,,RX,SMOOTH ALL theta -> -9.00, 6.00,
+42593,,RX,7.00 | servo cmd -> 95, 79, 79
+43000,43000,TX,ALL -9 6 7
+43062,,RX,SMOOTH ALL theta -> -9.00, 6.00,
+43093,,RX,7.00 | servo cmd -> 95, 79, 79
+43500,43500,TX,ALL -9 6 7
+43578,,RX,SMOOTH ALL theta -> -9.00, 6.00,
+43593,,RX,7.00 | servo cmd -> 95, 79, 79
+44000,44000,TX,ALL -9 6 7
+44062,,RX,SMOOTH ALL theta -> -9.00, 6.00,
+44093,,RX,7.00 | servo cmd -> 95, 79, 79
+44500,44500,TX,ALL -9 6 7
+44578,,RX,SMOOTH ALL theta -> -9.00, 6.00,
+44593,,RX,7.00 | servo cmd -> 95, 79, 79
+45000,45000,TX,ALL -7 16 -1
+45343,,RX,SMOOTH ALL theta -> -7.00, 16.00
+45359,,RX,, -1.00 | servo cmd -> 93, 66, 89
+45500,45500,TX,ALL -7 16 -1
+45562,,RX,SMOOTH ALL theta -> -7.00, 16.00
+45593,,RX,, -1.00 | servo cmd -> 93, 66, 89
+46000,46000,TX,ALL -7 16 -1
+46062,,RX,SMOOTH ALL theta -> -7.00, 16.00
+46078,,RX,, -1.00 | servo cmd -> 93, 66, 89
+46500,46500,TX,ALL -7 16 -1
+46578,,RX,SMOOTH ALL theta -> -7.00, 16.00
+46593,,RX,, -1.00 | servo cmd -> 93, 66, 89
+47000,47000,TX,ALL -7 16 -1
+47078,,RX,SMOOTH ALL theta -> -7.00, 16.00
+47093,,RX,, -1.00 | servo cmd -> 93, 66, 89
+47500,47500,TX,ALL -7 16 -1
+47578,,RX,SMOOTH ALL theta -> -7.00, 16.00
+47593,,RX,, -1.00 | servo cmd -> 93, 66, 89
+48000,48000,TX,ALL -7 16 -1
+48078,,RX,SMOOTH ALL theta -> -7.00, 16.00
+48093,,RX,, -1.00 | servo cmd -> 93, 66, 89
+48500,48500,TX,ALL -7 16 -1
+48578,,RX,SMOOTH ALL theta -> -7.00, 16.00
+48593,,RX,, -1.00 | servo cmd -> 93, 66, 89
+49000,49000,TX,ALL -7 16 -1
+49093,,RX,SMOOTH ALL theta -> -7.00, 16.00
+49109,,RX,, -1.00 | servo cmd -> 93, 66, 89
+49500,49500,TX,ALL -7 16 -1
+49593,,RX,SMOOTH ALL theta -> -7.00, 16.00
+49609,,RX,, -1.00 | servo cmd -> 93, 66, 89
+50000,50000,TX,ALL 0 0 0
+50484,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+50500,,RX,0.00 | servo cmd -> 84, 86, 88
+50500,50500,TX,ALL 0 0 0
+50562,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+50578,,RX,0.00 | servo cmd -> 84, 86, 88
+51000,51000,TX,ALL 0 0 0
+51062,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+51078,,RX,0.00 | servo cmd -> 84, 86, 88
+51500,51500,TX,ALL 0 0 0
+51562,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+51578,,RX,0.00 | servo cmd -> 84, 86, 88
+52000,52000,TX,ALL 0 0 0
+52062,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+52078,,RX,0.00 | servo cmd -> 84, 86, 88
+52500,52500,TX,ALL 0 0 0
+52562,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+52593,,RX,0.00 | servo cmd -> 84, 86, 88
+53000,53000,TX,ALL 0 0 0
+53062,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+53078,,RX,0.00 | servo cmd -> 84, 86, 88
+53500,53500,TX,ALL 0 0 0
+53562,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+53578,,RX,0.00 | servo cmd -> 84, 86, 88
+54000,54000,TX,ALL 0 0 0
+54062,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+54078,,RX,0.00 | servo cmd -> 84, 86, 88
+54500,54500,TX,ALL 0 0 0
+54562,,RX,SMOOTH ALL theta -> 0.00, 0.00,
+54578,,RX,0.00 | servo cmd -> 84, 86, 88

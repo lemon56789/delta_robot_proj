@@ -1,0 +1,154 @@
+{
+  "run_id": "2026-06-06_run02_cross_pm30_on_r03",
+  "trajectory": "cross_pm30",
+  "correction": "on",
+  "output_csv": "data\\real\\raw\\main_2026-06-06_run02_cross_pm30_on_r03.csv",
+  "correction_csv": "data\\real\\raw\\correction_2026-06-06_run02_cross_pm30_on_r03.csv",
+  "serial_log": "data\\real\\raw\\serial_2026-06-06_run02_cross_pm30_on_r03.txt",
+  "simscape_csv": ".\\simscape_run02_nominal_cross_pm30.csv",
+  "model": "ridge_run01_main_2026-06-06.npz",
+  "dry_run": false,
+  "time_source": "pc_scheduled_elapsed_ms",
+  "theta_meas_source": "command_echo_no_encoder",
+  "row_count": 450,
+  "schedule_end_ms": 44900,
+  "sampling": {
+    "sample_period_s": 0.1,
+    "command_update_period_s": 0.5,
+    "hold_s": 5.0,
+    "circle_endpoint_hold_s": 2.0,
+    "circle_points": 72,
+    "circle_duration_s": 30.0
+  },
+  "correction_config": {
+    "gain": 0.25,
+    "max_xy_correction_mm": 2.0,
+    "z_correction_enabled": false
+  },
+  "ik": {
+    "target_z_mm": -263.27731514697575,
+    "theta_min_deg": -45.0,
+    "theta_max_deg": 90.0
+  },
+  "serial": {
+    "port": "COM3",
+    "baudrate": 9600,
+    "ready_wait_s": 2.0
+  },
+  "summary": {
+    "row_count": 450,
+    "fallback_count": 0,
+    "clamp_count": 0,
+    "max_schedule_lag_ms": 28
+  },
+  "points": [
+    {
+      "phase": "home_1",
+      "target_x": 0.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "nominal_theta": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hold_s": 5.0
+    },
+    {
+      "phase": "x_plus",
+      "target_x": 30.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "nominal_theta": [
+        1.0,
+        -6.0,
+        7.0
+      ],
+      "hold_s": 5.0
+    },
+    {
+      "phase": "home_2",
+      "target_x": 0.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "nominal_theta": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hold_s": 5.0
+    },
+    {
+      "phase": "x_minus",
+      "target_x": -30.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "nominal_theta": [
+        1.0,
+        7.0,
+        -6.0
+      ],
+      "hold_s": 5.0
+    },
+    {
+      "phase": "home_3",
+      "target_x": 0.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "nominal_theta": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hold_s": 5.0
+    },
+    {
+      "phase": "y_plus",
+      "target_x": 0.0,
+      "target_y": 30.0,
+      "target_z": -263.27731514697575,
+      "nominal_theta": [
+        8.0,
+        -3.0,
+        -3.0
+      ],
+      "hold_s": 5.0
+    },
+    {
+      "phase": "home_4",
+      "target_x": 0.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "nominal_theta": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hold_s": 5.0
+    },
+    {
+      "phase": "y_minus",
+      "target_x": 0.0,
+      "target_y": -30.0,
+      "target_z": -263.27731514697575,
+      "nominal_theta": [
+        -7.0,
+        5.0,
+        5.0
+      ],
+      "hold_s": 5.0
+    },
+    {
+      "phase": "home_5",
+      "target_x": 0.0,
+      "target_y": 0.0,
+      "target_z": -263.27731514697575,
+      "nominal_theta": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hold_s": 5.0
+    }
+  ]
+}
