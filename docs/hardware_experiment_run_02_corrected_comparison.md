@@ -12,6 +12,11 @@
 - responsible members: 실험/하드웨어 담당, Arduino/serial 담당,
   vision 담당, virtual sensor/data analysis 담당.
 - date: 실제 실행일을 `YYYY-MM-DD`로 각 metadata에 기록한다.
+- collected data provenance: 이번 24개 Run 02 데이터의 실제 실험일은
+  `2026-06-07`이다. 기존 준비 과정에서 사용한 식별자와의 연속성을
+  유지하기 위해 raw run ID와 calibration run ID의 `2026-06-06` 표기는
+  변경하지 않는다. 이 날짜 차이는 파일 중복이 아니라 식별자 유지에
+  따른 의도된 기록이다.
 - run count: `4 trajectories x OFF/ON x 3 repetitions = 24`.
 - comparison policy: Run 02 내부의 같은 trajectory/repetition OFF/ON pair를
   우선 비교한다. Run 01 circle 결과는 시간 정렬 불확실성 때문에 Run 02
@@ -91,19 +96,19 @@ auxiliary correction log를 남긴다.
 
 계산: 4 trajectories x 2 correction states x 3 repetitions = 24 runs.
 
-실행 순서는 각 repetition 안에서 trajectory별 OFF 직후 ON을 수행한다.
+실제 실행에서는 trajectory 하나를 선택한 뒤 `r01`부터 `r03`까지
+수집하고, 각 repetition 안에서 OFF 직후 ON을 수행했다.
 
 ```text
-r01: cross OFF -> ON
-     reverse grid OFF -> ON
-     diamond OFF -> ON
-     circle OFF -> ON
-r02: same order
-r03: same order
+cross:        r01 OFF -> ON -> r02 OFF -> ON -> r03 OFF -> ON
+reverse grid: r01 OFF -> ON -> r02 OFF -> ON -> r03 OFF -> ON
+diamond:      r01 OFF -> ON -> r02 OFF -> ON -> r03 OFF -> ON
+circle:       r01 OFF -> ON -> r02 OFF -> ON -> r03 OFF -> ON
 ```
 
-이 순서는 OFF/ON 사이의 camera, marker, calibration, gain, 배선 및 기구
-상태 변화를 줄이기 위한 것이다.
+trajectory 실행 순서는 cross, reverse grid, diamond, circle이었다.
+각 repetition의 OFF/ON을 바로 이어서 수행해 pair 사이의 camera, marker,
+calibration, gain, 배선 및 기구 상태 변화를 줄였다.
 
 ### 3-B. Waypoint and Direction Definitions
 
@@ -243,7 +248,7 @@ Nominal theta 범위 dry-run 결과:
 8. ON 실행에서는 frozen model, gain `0.25`, clamp `2 mm`, 해당 nominal
    Simscape CSV를 명시한다.
 9. correction log의 fallback, clamp, schedule lag를 확인한다.
-10. 같은 절차를 r01-r03에 반복한다.
+10. 같은 trajectory에서 r01-r03을 완료한 뒤 다음 trajectory로 이동한다.
 11. OFF/ON 모두 같은 calibration과 동일 alignment 정책으로 처리한다.
 12. trajectory/repetition pair별 XY RMSE, MAE, max error를 계산하고
     aggregate는 trajectory별 세 repetition을 동일 가중한다.
@@ -272,7 +277,273 @@ Nominal theta 범위 dry-run 결과:
 - circle은 start/end hold anchor가 모두 검출된 경우에만 채택
 - rejection 시 reason과 rerun 여부 기록
 
-## 8. Run Metadata
+## 8. Analysis Workflow
+
+### 8-A. Input Inventory and Raw Validation
+
+1. 확정된 24개 run ID를 기준으로 다음 파일의 존재 여부를 확인한다.
+   - `main_<run_id>.csv`
+   - `main_<run_id>.json`
+   - `serial_<run_id>.txt`
+   - `correction_<run_id>.csv`
+   - `vision_<run_id>.csv`
+2. trajectory별 예상 main/correction row 수를 확인한다.
+   - cross: `450`
+   - reverse grid: `550`
+   - diamond: `350`
+   - circle: `500`
+3. main과 correction의 `run_id`, row 수, scheduled `time` 축이 같은지
+   확인한다.
+4. vision은 timestamp 단조 증가, valid ratio `>=90%`, 연속 marker loss
+   `<1 s`를 확인한다.
+5. correction은 applied XY norm `<=2 mm`, applied Z `=0`, fallback,
+   clamp, status와 schedule lag를 확인한다.
+6. invalid vision row는 원본에 유지하되 정렬과 metric 계산에서는
+   제외한다. 긴 invalid 구간을 임의 보간해 복원하지 않는다.
+
+### 8-B. Pair Definition
+
+- 비교 단위는 파일 생성 순서가 아니라
+  `(trajectory, repetition)`이 같은 OFF/ON 두 run이다.
+- 총 pair 수는 `4 trajectories x 3 repetitions = 12`다.
+- 각 pair는 같은 nominal Simscape trajectory와 같은 alignment 정책을
+  사용한다.
+- trajectory가 다른 run 또는 repetition이 다른 run을 서로 pairing하지
+  않는다.
+
+### 8-C. Time Alignment
+
+#### Cross, Reverse Grid, Diamond
+
+- main의 phase 전환과 vision의 위치 departure/arrival event를 사용한다.
+- 각 waypoint의 stable 구간에서 다음 target 방향으로 출발하는 vision
+  event를 대응 main phase 시작에 연결한다.
+- alignment anchor가 순서대로 증가하는지 확인하고, waypoint 누락이나
+  잘못된 순서가 있으면 해당 run을 rejection 후보로 기록한다.
+- 정렬 후에도 vision의 실제 timestamp 간격은 보존한다.
+
+#### Circle
+
+- main 기준 `t=0`은 첫 `circle_ccw_*` phase가 시작되는 scheduled
+  timestamp다.
+- vision 기준 `t=0`은 `(40, 0)` 시작 hold의 stable 영역을 벗어나
+  반시계 원운동을 시작한 최초 유효 departure timestamp다.
+- 두 departure anchor를 같은 `t=0`으로 맞춘다.
+- vision timestamp는 `vision_time - departure_time`으로 변환하고,
+  main timestamp는 `time - circle_motion_start_time`으로 변환한다.
+- 원 시작점으로 돌아온 뒤의 end hold는 종료 anchor 검증에 사용한다.
+- 시작 anchor 정렬 이후 실제 timestamp 간격과 실제 회전 시간은
+  유지한다. 고정 10 Hz 시간축 재생성, 종료점 강제 일치, 전체 구간
+  time warping은 적용하지 않는다.
+- start/end hold가 모두 검출되지 않거나 출발 event가 불명확하면 해당
+  circle run을 metric 계산에서 제외하고 reason을 기록한다.
+
+### 8-D. Aligned Dataset Generation
+
+1. main scheduled time을 기준으로 nominal target, command angle과
+   Simscape position을 준비한다.
+2. 유효 vision XY를 trajectory별 alignment 정책으로 main 시간축에
+   대응시킨다.
+3. correction 성능 비교용 target tracking XY 오차를 계산한다. 이
+   diagnostic 이름은 processed CSV contract의 `error_x/y`와 구분한다.
+
+```text
+tracking_error_x = vision_x - target_x
+tracking_error_y = vision_y - target_y
+tracking_xy_error = sqrt(tracking_error_x^2 + tracking_error_y^2)
+```
+
+4. processed CSV의 `error_x/y`는 기존 contract대로 Simscape 기준
+   오차를 사용한다.
+
+```text
+error_x = vision_x - sim_x
+error_y = vision_y - sim_y
+```
+
+5. processed merged dataset을 생성할 경우
+   `docs/measured_data_structure.md`의 fixed 16-column contract를
+   유지한다.
+6. 각 output에는 source run ID, alignment method, anchor timestamp,
+   source/valid/output row 수를 sidecar JSON 또는 comparison report에
+   기록한다.
+
+### 8-E. Run-Level Metrics
+
+각 run에서 유효하고 정렬된 XY sample만 사용해 다음 값을 계산한다.
+
+- `tracking_x_rmse`, `tracking_y_rmse`, `tracking_xy_rmse`
+- `tracking_x_mae`, `tracking_y_mae`, `tracking_xy_mae`
+- `tracking_xy_max_error`
+- valid/aligned row count와 coverage ratio
+- trajectory duration
+- correction ON의 clamp count, fallback count, max/mean schedule lag
+
+RMSE와 MAE는 OFF와 ON에 동일한 구간 선택 규칙을 적용한다. OFF/ON 중
+한쪽에만 존재하는 긴 누락 구간을 임의 보간해 sample 수를 맞추지 않는다.
+
+### 8-F. Paired OFF/ON Comparison
+
+각 `(trajectory, repetition)` pair에 대해 다음을 계산한다.
+
+```text
+absolute_improvement = metric_off - metric_on
+improvement_percent = 100 * (metric_off - metric_on) / metric_off
+```
+
+- positive improvement는 ON 오차가 감소했음을 의미한다.
+- `metric_off = 0`인 경우 percent는 계산하지 않고 absolute difference만
+  기록한다.
+- 주 성능 지표는 `tracking_xy_rmse`, 보조 지표는
+  `tracking_xy_mae`, `tracking_xy_max_error`다.
+- 각 pair의 개선/악화 여부와 alignment/rejection note를 함께 기록한다.
+
+### 8-G. Repetition and Trajectory Summary
+
+- trajectory별 세 repetition의 pair metric을 동일 가중한다.
+- trajectory별 mean, standard deviation, 개선된 repetition 수를
+  기록한다.
+- 전체 aggregate는 먼저 trajectory별 summary를 만든 뒤 네 trajectory를
+  동일 가중한다. row 수가 많은 trajectory가 전체 결과를 지배하지
+  않도록 모든 raw row를 한 번에 합쳐 계산하지 않는다.
+- circle은 시작 departure 정렬 결과와 end hold 검출 여부를 별도로
+  보고한다.
+
+### 8-H. Outputs and Acceptance
+
+- aligned/processed data:
+  `data/processed/merged_<run_id>.csv`
+- alignment sidecar:
+  `data/processed/alignment_<run_id>.json`
+- comparison report:
+  `experiments/results/run02_comparison_<date>.json`
+- 권장 plot:
+  - OFF/ON XY trajectory overlay
+  - target, vision, Simscape의 time-series
+  - pair별 `tracking_xy_error` time-series
+  - trajectory별 repetition metric과 improvement plot
+
+Run 02 correction은 다음을 모두 만족할 때 개선으로 결론낸다.
+
+- raw/vision safety 및 quality gate를 통과한다.
+- 12개 pair의 rejection과 사용 여부가 모두 설명된다.
+- trajectory별 `tracking_xy_rmse` summary에서 ON/OFF 차이가 보고된다.
+- 전체 평균만이 아니라 repetition 간 일관성과 악화 case를 함께
+  제시한다.
+
+### 8-I. Implemented Processing Result - 2026-06-07
+
+- command:
+  `PYTHONPATH=venv/lib/python3.12/site-packages python3 experiments/run02_preprocess.py`
+- implementation: `experiments/run02_preprocess.py`
+- unit test: `experiments/test_run02_preprocess.py`
+- comparison report:
+  `experiments/results/run02_comparison_2026-06-07.json`
+- generated:
+  - measured-position CSV `24`
+  - merged fixed 16-column CSV `24`
+  - alignment sidecar JSON `24`
+  - OFF/ON pair comparison `12`
+- merged coverage: `94.6%` to `100%`
+- step maximum anchor residual: `232.522 ms`, limit `500 ms` 이내
+- circle end hold duration: `2.127 s` to `2.684 s`, 전체 6개 run 검출
+- fallback: 전체 ON run `0`
+- output validation:
+  - merged file count `24`
+  - fixed 16-column order pass
+  - finite value pass
+  - timestamp monotonic pass
+
+`tracking_xy_rmse`의 trajectory별 3회 평균 결과:
+
+| trajectory | OFF mean mm | ON mean mm | mean improvement | improved pairs |
+|---|---:|---:|---:|---:|
+| cross | `5.6003` | `5.9854` | `-7.73%` | `1/3` |
+| reverse grid | `7.9846` | `7.0663` | `+11.05%` | `3/3` |
+| diamond | `5.6410` | `4.8702` | `+13.67%` | `3/3` |
+| circle | `6.2069` | `7.7670` | `-25.41%` | `0/3` |
+
+네 trajectory 동일가중 결과는 OFF `6.3582 mm`, ON `6.4222 mm`로
+`tracking_xy_rmse`가 `2.10%` 악화됐다. `tracking_xy_mae`는 `6.03%`
+개선됐지만 `tracking_xy_max_error`는 `5.28%` 악화됐다.
+
+현재 gain `0.25`, clamp `2 mm` 설정은 reverse grid와 diamond에서는
+일관된 개선을 보였지만 cross와 circle에서는 악화됐다. 따라서 Run 02
+전체 correction이 개선됐다고 결론내리지 않으며, trajectory별 error
+phase와 correction 방향을 분석한 뒤 gain 또는 적용 정책을 재검토한다.
+
+### 8-J. Existing Data Reanalysis - 2026-06-07
+
+- command:
+  `PYTHONPATH=venv/lib/python3.12/site-packages python3 experiments/run02_reanalyze.py`
+- implementation: `experiments/run02_reanalyze.py`
+- unit test: `experiments/test_run02_reanalyze.py`
+- report: `experiments/results/run02_reanalysis_2026-06-07.json`
+- input: 기존 Run 02 raw main/correction CSV와 merged CSV 24개
+- raw, processed CSV와 기존 comparison report는 변경하지 않았다.
+- 12개 pair의 absolute `tracking_xy_rmse`는 기존 공식 comparison
+  report와 차이 `0`으로 재현됐다.
+
+각 run의 초기 `home_1`에서 `vision - target` 중앙값을 home offset으로
+정의하고 이를 전체 vision XY에서 제거한 home-normalized 결과:
+
+| trajectory | OFF mean mm | ON mean mm | improvement | improved pairs |
+|---|---:|---:|---:|---:|
+| cross | `4.2138` | `5.1725` | `-22.75%` | `1/3` |
+| reverse grid | `7.1461` | `6.9019` | `+3.42%` | `3/3` |
+| diamond | `4.8680` | `4.1399` | `+14.96%` | `3/3` |
+| circle | `5.4864` | `7.3527` | `-34.02%` | `0/3` |
+
+home-normalized metric은 zero drift 영향을 줄인 진단값이며 absolute 위치
+정확도를 대체하지 않는다. Diamond만 absolute와 normalized 결과 모두
+세 repetition에서 개선됐다. Reverse grid normalized 개선은 작고,
+cross와 circle은 초기 home 차이를 제거한 뒤에도 악화됐다.
+
+Arduino firmware의
+`round(center + sign * theta * 1.25)` mapping을 main CSV에 기록된 실제
+전송 theta에 적용한 결과:
+
+| trajectory | actual integer command changed | fractional theta theoretical |
+|---|---:|---:|
+| cross | `11.1%` | `33.3%` |
+| reverse grid | `45.5%` | `63.6%` |
+| diamond | `27.1%` | `57.1%` |
+| circle | `33.0%` | `57.0%` |
+
+따라서 fractional corrected theta가 이론상 servo command를 바꿀 수 있는
+경우도 실제 전송 theta와 최종 integer command 단계에서 추가로
+소실됐다. 특히 cross 결과는 correction model뿐 아니라 actuator command
+해상도의 영향을 크게 받는다.
+
+Step trajectory는 각 non-initial phase 시작 후 첫 `1 s`를 transition,
+나머지를 stable로 분리했다.
+
+- cross: absolute transition은 `6.68%` 개선됐지만 stable은 `9.51%`
+  악화됐다. home-normalized에서는 transition과 stable 모두 악화됐다.
+- reverse grid: absolute transition `11.64%`, stable `12.64%` 개선됐다.
+  home-normalized transition은 `9.18%` 악화되고 stable은 `5.00%`
+  개선되어 baseline drift 영향이 남아 있다.
+- diamond: absolute transition `23.29%`, stable `12.20%`, normalized
+  transition `30.97%`, stable `17.31%` 개선됐다.
+
+Circle 원운동 구간 진단:
+
+| metric | OFF mean | ON mean |
+|---|---:|---:|
+| radial error RMSE | `3.319 mm` | `2.843 mm` |
+| tangential error RMSE | `3.593 mm` | `4.442 mm` |
+| mean tangential error | `0.048 mm` | `3.037 mm` |
+| equivalent median phase lag | `2.2 ms` | `361.7 ms` |
+| diagnostic best shift | `33 ms` | `350 ms` |
+| best-shift RMSE | `4.791 mm` | `4.220 mm` |
+
+Circle ON은 radial error는 감소했지만 tangential error와 phase lag가
+증가했다. ON 세 repetition 모두 best shift가 `350 ms`였으므로 기존
+time-domain 악화가 우연한 단일 run 정렬 오류만으로 설명되지는 않는다.
+Best-shift RMSE는 path-shape diagnostic이며 실제 동적 lag를 제거하므로
+공식 time-domain 성능값을 대체하지 않는다.
+
+## 9. Run Metadata
 - run_id: (작성: 실험 실행 식별자를 적는다)
 - baseline run_id: (작성: 비교 대상 baseline run_id를 적는다)
 - operator: (작성: 실험 수행자를 적는다)
