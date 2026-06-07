@@ -34,6 +34,7 @@ const float GEOM_uP = 27.177;  // platform_center_to_vertex_mm
 const float base_x = 0;
 const float base_y = 0;
 const float base_z = -263.277;
+const float HOME_Z = -250.0;
 // 원점 좌표(플랫폼 기준) --> (0, 0, -263.277) --> 보정필요하긴 함.
 
 // =====================
@@ -44,6 +45,8 @@ float SQUARE_SIZE = 40.0;    // square 반변 길이 또는 이동 크기
 float CIRCLE_R = 40.0;       // circle radius, 60 이하 권장
 int HOLD_MS = 5000;          // 각 waypoint 정지 시간
 int STATIC_HOLD_MS = 15000; // STATIC POINT 정지시간
+int circleStepDelay = 60;   // CIRCLE 전용 느린 이동 속도
+int CIRCLE_ENDPOINT_HOLD_MS = 3000;
 
 // =====================
 // Arm outward unit vectors
@@ -67,7 +70,7 @@ const float ARM_UY[3] = {
 // Kinematic theta to servo command mapping
 // theta = 0 deg일 때 각 서보가 수평 기준 자세가 되는 실제 명령각
 // =====================
-const int SERVO1_CENTER_CMD = 88;
+const int SERVO1_CENTER_CMD = 84;
 const int SERVO2_CENTER_CMD = 86;
 const int SERVO3_CENTER_CMD = 88;
 
@@ -148,7 +151,7 @@ void setup() {
   Serial.println("SWEEP");
   Serial.println("STATE");
   Serial.println("PON / POFF");
-  Serial.println("Ready. Initial HOME command sent.");
+  Serial.println("Ready. Initial CENTER command sent.");
 }
 
 void loop() {
@@ -565,17 +568,24 @@ String getToken(String input, int index) {
 }
 
 bool parseThreeFloats(String cmd, float &a, float &b, float &c) {
-  String s1 = getToken(cmd, 1);
-  String s2 = getToken(cmd, 2);
-  String s3 = getToken(cmd, 3);
+  char buffer[64];
+  cmd.toCharArray(buffer, sizeof(buffer));
 
-  if (s1.length() == 0 || s2.length() == 0 || s3.length() == 0) {
-    return false;
-  }
+  char *savePointer;
+  char *token = strtok_r(buffer, " \t,", &savePointer);
+  if (token == NULL) return false;
 
-  a = s1.toFloat();
-  b = s2.toFloat();
-  c = s3.toFloat();
+  token = strtok_r(NULL, " \t,", &savePointer);
+  if (token == NULL) return false;
+  a = atof(token);
+
+  token = strtok_r(NULL, " \t,", &savePointer);
+  if (token == NULL) return false;
+  b = atof(token);
+
+  token = strtok_r(NULL, " \t,", &savePointer);
+  if (token == NULL) return false;
+  c = atof(token);
 
   return true;
 }
@@ -594,8 +604,12 @@ void readSerialCommand() {
   String keyword = getToken(cmd, 0);
 
 // Basic Motion Commands
-  if (keyword == "HOME") {
+  if (keyword == "CENTER") {
     moveAllThetaSmooth(0, 0, 0, defaultStepDelay);
+  }
+
+  else if (keyword == "HOME") {
+    moveToXYZ(base_x, base_y, HOME_Z);
   }
 
   else if (keyword == "STATE") {
@@ -820,6 +834,10 @@ void xyMoveTest() {
 }
 
 bool moveToXYZ(float x, float y, float z) {
+  return moveToXYZWithStepDelay(x, y, z, defaultStepDelay);
+}
+
+bool moveToXYZWithStepDelay(float x, float y, float z, int stepDelay) {
   float previousTheta[3] = {
     currentTheta1,
     currentTheta2,
@@ -853,7 +871,7 @@ bool moveToXYZ(float x, float y, float z) {
     resultTheta[0],
     resultTheta[1],
     resultTheta[2],
-    defaultStepDelay
+    stepDelay
   );
 
   return true;
@@ -960,13 +978,19 @@ void circleTest() { // 4. 궤적 확인용 CIRCLE TEST
 
   const float R = CIRCLE_R;
   const float Z = TEST_Z;
-  const int NUM_POINTS = 24;
+  const int NUM_POINTS = 72;
 
-  for (int i = 0; i <= NUM_POINTS; i++) {
+  if (!moveToXYZWithStepDelay(base_x + R, base_y, Z, circleStepDelay)) {
+    Serial.println("CIRCLE failed: IK reject at start");
+    return;
+  }
+  delay(CIRCLE_ENDPOINT_HOLD_MS);
+
+  for (int i = 1; i <= NUM_POINTS; i++) {
     float angle = 2.0 * PI * i / NUM_POINTS;
 
-    float x = R * cos(angle);
-    float y = R * sin(angle);
+    float x = base_x + R * cos(angle);
+    float y = base_y + R * sin(angle);
 
     Serial.print("Circle point ");
     Serial.print(i);
@@ -977,16 +1001,14 @@ void circleTest() { // 4. 궤적 확인용 CIRCLE TEST
     Serial.print(", ");
     Serial.println(Z);
 
-    if (!moveToXYZ(x, y, Z)) {
+    if (!moveToXYZWithStepDelay(x, y, Z, circleStepDelay)) {
       Serial.println("CIRCLE failed: IK reject");
       return;
     }
-
-    delay(HOLD_MS);
   }
 
-  moveToXYZ(base_x, base_y, Z);
-  delay(HOLD_MS);
+  delay(CIRCLE_ENDPOINT_HOLD_MS);
+  moveToXYZWithStepDelay(base_x, base_y, Z, circleStepDelay);
 
   Serial.println("CIRCLE TEST DONE");
 }
