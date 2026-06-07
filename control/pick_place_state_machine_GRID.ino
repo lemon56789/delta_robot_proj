@@ -47,11 +47,11 @@ const float HOME_Z = -250.0;
 // =====================
 float pickX = BASE_X;
 float pickY = BASE_Y;
-float pickZ = -261.0;
+float pickZ = -263.7;
 
-float placeX = BASE_X + 70.0;
-float placeY = BASE_Y;
-float placeZ = -260.0;
+float placeX = BASE_X;
+float placeY = BASE_Y + 100.0;
+float placeZ = -230.0;
 
 float travelZ = BASE_Z + 40.0;     // safe travel height, default ≈ -223.277
 
@@ -119,7 +119,8 @@ const int SERVO_CMD_MAX = 180;
 // =====================
 // Motion / timing parameters
 // =====================
-int defaultStepDelay = 35;      // ms per servo-command step
+int defaultStepDelay = 0;      // ms per servo-command step
+int pickDownStepDelay = 18;     // ms per servo-command step while descending to pick
 int suctionDelay = 1000;        // ms. Allow the vacuum cup to seal.
 int releaseDelay = 500;         // ms. Increase if stone does not release.
 int stateDelay = 100;           // ms
@@ -162,7 +163,9 @@ State currentState = IDLE;
 // =====================================================
 void readSerialCommand();
 void runStateMachine();
+bool speedTest();
 bool moveToXYZ(float x, float y, float z);
+bool moveToXYZ(float x, float y, float z, int stepDelay);
 bool solveDeltaIK(float x_mm, float y_mm, float z_mm, float previousTheta[3], float resultTheta[3]);
 bool solveSingleArmIK(int armIndex, float x_mm, float y_mm, float z_mm, float previousTheta, float &selectedTheta);
 
@@ -263,6 +266,7 @@ void printHelp() {
   Serial.println(F("HOME                    : move to safe home XYZ = 0,0,-250"));
   Serial.println(F("START                   : pick all 9 grid points and place outside"));
   Serial.println(F("TESTPICK                : pick center, place outside, return HOME"));
+  Serial.println(F("SPEEDTEST               : direct pick (0,-100,-263.3) to place (0,100,-240)"));
   Serial.println(F("STOP                    : pump off and stop cycle"));
   Serial.println(F("STATE                   : print state/targets/current theta"));
   Serial.println(F("ALL t1 t2 t3            : direct theta move"));
@@ -541,6 +545,10 @@ bool solveSingleArmIK(
 // IK move helpers
 // =====================================================
 bool moveToXYZ(float x, float y, float z) {
+  return moveToXYZ(x, y, z, defaultStepDelay);
+}
+
+bool moveToXYZ(float x, float y, float z, int stepDelay) {
   float previousTheta[3] = {currentTheta1, currentTheta2, currentTheta3};
   float resultTheta[3];
 
@@ -563,7 +571,7 @@ bool moveToXYZ(float x, float y, float z) {
   Serial.print(F(", "));
   Serial.println(resultTheta[2]);
 
-  moveAllThetaSmooth(resultTheta[0], resultTheta[1], resultTheta[2], defaultStepDelay);
+  moveAllThetaSmooth(resultTheta[0], resultTheta[1], resultTheta[2], stepDelay);
   return true;
 }
 
@@ -627,7 +635,7 @@ bool testCenterPick() {
     return false;
   }
 
-  if (!moveToXYZ(BASE_X, BASE_Y, pickZ)) {
+  if (!moveToXYZ(BASE_X, BASE_Y, pickZ, pickDownStepDelay)) {
     Serial.println(F("TESTPICK failed at center pick height"));
     pumpOff();
     return false;
@@ -667,6 +675,54 @@ bool testCenterPick() {
   }
 
   Serial.println(F("TESTPICK DONE - object placed and pump OFF"));
+  return true;
+}
+
+bool speedTest() {
+  const float speedPickX = 0.0;
+  const float speedPickY = -100.0;
+  const float speedPickZ = -263.3;
+  const float speedPlaceX = 0.0;
+  const float speedPlaceY = 100.0;
+  const float speedPlaceZ = -240.0;
+
+  Serial.println(F("SPEEDTEST START - direct PICK to PLACE"));
+  pumpOff();
+
+  if (!moveToXYZ(speedPickX, speedPickY, travelZ, 0)) {
+    Serial.println(F("SPEEDTEST failed while moving above pick"));
+    pumpOff();
+    return false;
+  }
+
+  if (!moveToXYZ(speedPickX, speedPickY, speedPickZ, 0)) {
+    Serial.println(F("SPEEDTEST failed at pick position"));
+    pumpOff();
+    return false;
+  }
+
+  vacuumOn();
+
+  if (!moveToXYZ(speedPickX, speedPickY, travelZ, 0)) {
+    Serial.println(F("SPEEDTEST failed while lifting from pick"));
+    pumpOff();
+    return false;
+  }
+
+  if (!moveToXYZ(speedPlaceX, speedPlaceY, travelZ, 0)) {
+    Serial.println(F("SPEEDTEST failed while moving above place"));
+    pumpOff();
+    return false;
+  }
+
+  if (!moveToXYZ(speedPlaceX, speedPlaceY, speedPlaceZ, 0)) {
+    Serial.println(F("SPEEDTEST failed while descending to place"));
+    pumpOff();
+    return false;
+  }
+
+  vacuumOff();
+  Serial.println(F("SPEEDTEST DONE"));
   return true;
 }
 
@@ -755,7 +811,7 @@ void runStateMachine() {
       break;
 
     case MOVE_DOWN_TO_PICK:
-      if (moveToXYZ(pickX, pickY, pickZ)) changeState(VACUUM_ON_STATE);
+      if (moveToXYZ(pickX, pickY, pickZ, pickDownStepDelay)) changeState(VACUUM_ON_STATE);
       else changeState(EMERGENCY_STOP);
       break;
 
@@ -765,8 +821,11 @@ void runStateMachine() {
       break;
 
     case LIFT_FROM_PICK:
-      if (moveToXYZ(pickX, pickY, travelZ)) changeState(MOVE_ABOVE_PLACE);
-      else changeState(EMERGENCY_STOP);
+      if (!moveToXYZ(pickX, pickY, travelZ)) {
+        changeState(EMERGENCY_STOP);
+        break;
+      }
+      changeState(MOVE_ABOVE_PLACE);
       break;
 
     case MOVE_ABOVE_PLACE:
@@ -1013,6 +1072,13 @@ void readSerialCommand() {
       Serial.println(F("TESTPICK rejected: cycle is running"));
     } else {
       testCenterPick();
+    }
+  }
+  else if (cmd == "SPEEDTEST") {
+    if (cycleRunning) {
+      Serial.println(F("SPEEDTEST rejected: cycle is running"));
+    } else {
+      speedTest();
     }
   }
   else if (cmd == "STOP") {
