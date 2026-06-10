@@ -11,9 +11,20 @@
   IK, fallback을 Run 01-main/holdout에서 replay하는 검증기
 - `run02_logger.py`: 확정된 Run 02 24회 matrix의 deterministic OFF/ON
   serial logger와 manifest 생성기
+- `run02_preprocess.py`: Run 02의 phase 없는 vision log를 trajectory
+  event로 정렬하고 24개 merged dataset과 12개 OFF/ON comparison
+  report를 생성하는 스크립트
+- `test_run02_preprocess.py`: step/circle anchor와 marker-gap interpolation
+  제한을 검증하는 단위 테스트
 - `run02_logger_computer2_powershell.md`: Computer 2 실행 안내
 - `run02_computer2_codex_handoff.md`: Git 없이 Computer 2 실행 환경을
   재구성하는 Codex용 독립형 인수인계
+- `home_repeatability_computer2_codex_handoff.md`: `+40/+60 mm` X preload
+  후 home 반복성을 6개 확정 run ID로 측정하는 Computer 2 Codex용
+  독립형 지시서
+- `home_repeatability_vision_windows_codex_handoff.md`: 같은 6개 run의
+  vision raw CSV를 Windows에서 기록하고 품질 검사하는 Vision Codex용
+  독립형 지시서
 
 ## Run 01 main logger
 
@@ -111,3 +122,36 @@ python3 experiments/run02_logger.py run cross_pm30 \
 최종 matrix는 cross, reverse grid, diamond, circle 각각 OFF/ON 3회로
 총 24회다. 기본값은 gain `0.25`, XY clamp `2 mm`, waypoint hold `5 s`,
 circle `72` points / `30 s`, circle start/end hold `2 s`다.
+
+## Run 02 preprocessing and comparison
+
+24개 raw run과 네 개 nominal Simscape CSV를 한 번에 처리한다.
+
+```bash
+PYTHONPATH=venv/lib/python3.12/site-packages \
+python3 experiments/run02_preprocess.py
+```
+
+일반 Python 환경에 `numpy`가 설치되어 있으면 `PYTHONPATH` 지정은
+필요하지 않다.
+
+정렬 정책:
+
+- cross/reverse-grid/diamond: 첫 vision position jump를 첫 main phase
+  전환에 맞추고 모든 후속 jump residual이 `500 ms` 이내인지 검증한다.
+- circle: 시작 hold에서 원운동으로 출발하는 최초 persistent departure를
+  main의 첫 `circle_ccw_*` 시작에 맞춘다. 종료 hold는 별도로 검증하며
+  time warping은 적용하지 않는다.
+- 유효 vision sample 간격이 `500 ms`를 초과하면 해당 구간은 보간하지
+  않는다.
+
+산출물:
+
+- `data/real/derived/measured_position_<run_id>.csv`
+- `data/processed/merged_<run_id>.csv`
+- `data/processed/alignment_<run_id>.json`
+- `experiments/results/run02_comparison_2026-06-07.json`
+
+비교는 같은 trajectory/repetition OFF/ON의 공통 timestamp에서 수행한다.
+주 지표는 `tracking_xy_rmse`이며 trajectory별 세 repetition과 전체
+trajectory를 동일 가중한다.

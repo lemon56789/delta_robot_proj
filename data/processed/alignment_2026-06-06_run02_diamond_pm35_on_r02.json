@@ -1,0 +1,73 @@
+{
+  "run_id": "2026-06-06_run02_diamond_pm35_on_r02",
+  "trajectory": "diamond_pm35",
+  "correction": "on",
+  "repetition": "r02",
+  "method": "step_first_jump_offset_with_all_transition_validation",
+  "main_csv": "data/real/raw/main_2026-06-06_run02_diamond_pm35_on_r02.csv",
+  "vision_csv": "data/vision/raw/vision_2026-06-06_run02_diamond_pm35_on_r02.csv",
+  "correction_csv": "data/real/raw/correction_2026-06-06_run02_diamond_pm35_on_r02.csv",
+  "simscape_csv": "data/simulation/raw/simscape_run02_nominal_diamond_pm35.csv",
+  "measured_position_csv": "data/real/derived/measured_position_2026-06-06_run02_diamond_pm35_on_r02.csv",
+  "merged_csv": "data/processed/merged_2026-06-06_run02_diamond_pm35_on_r02.csv",
+  "source_total_vision_rows": 300,
+  "source_valid_vision_rows": 286,
+  "aligned_vision_rows": 286,
+  "main_rows": 350,
+  "merged_rows": 339,
+  "merged_coverage_ratio": 0.9685714285714285,
+  "max_interpolation_gap_ms": 500.0,
+  "anchors": [
+    {
+      "vision_time_ms": 1780798302704.374,
+      "main_time_ms": 5000.0
+    }
+  ],
+  "diagnostics": {
+    "jump_threshold_mm": 10.0,
+    "event_count": 6,
+    "main_transition_times_ms": [
+      5000.0,
+      10000.0,
+      15000.0,
+      20000.0,
+      25000.0,
+      30000.0
+    ],
+    "vision_event_times_ms": [
+      1780798302704.374,
+      1780798307789.717,
+      1780798312752.685,
+      1780798317708.318,
+      1780798322817.8152,
+      1780798327628.477
+    ],
+    "vision_jump_distances_mm": [
+      33.63584196954196,
+      50.57335698764716,
+      47.44740756880191,
+      46.7836415534319,
+      48.32005531867694,
+      33.00988823064992
+    ],
+    "anchor_residuals_ms": [
+      0.0,
+      85.343017578125,
+      48.31103515625,
+      3.944091796875,
+      113.441162109375,
+      -75.89697265625
+    ],
+    "max_abs_anchor_residual_ms": 113.441162109375
+  },
+  "tracking_metrics": {
+    "row_count": 339,
+    "tracking_x_rmse": 4.444126731273939,
+    "tracking_y_rmse": 2.9971168886048822,
+    "tracking_xy_rmse": 5.3603145474481435,
+    "tracking_x_mae": 2.854157422415984,
+    "tracking_y_mae": 1.9177911190460382,
+    "tracking_xy_mae": 3.678337107378646,
+    "tracking_xy_max_error": 33.28013236169994
+  }
+}

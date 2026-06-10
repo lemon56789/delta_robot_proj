@@ -1,0 +1,7 @@
+evaluation_scope,aggregation,trajectory,status,run_count,row_count,zero_prediction_xy_rmse_mm,ridge_residual_xy_rmse_mm,absolute_reduction_mm,expected_reduction_percent,improved_run_count
+complete_holdout,trajectory,static_center_hold,complete,1,300,5.104538,2.887800,2.216738,43.426806,1
+complete_holdout,trajectory,cross_pm30,complete,1,352,3.506486,2.912735,0.593752,16.932948,1
+complete_holdout,trajectory,square_pm30,complete,1,252,4.496143,2.872569,1.623574,36.110369,1
+complete_holdout,trajectory,grid_3x3_pm40,complete,1,452,5.026489,2.719588,2.306901,45.894877,1
+complete_holdout,macro_equal_run_weight,all_complete,complete,4,1356,4.533414,2.848173,1.685241,37.173772,4
+partial_diagnostic,trajectory,circle_r40,partial_diagnostic,1,350,6.664867,7.872045,-1.207179,-18.112570,0

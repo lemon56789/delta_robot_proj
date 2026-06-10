@@ -1,0 +1,81 @@
+{
+  "run_id": "2026-06-06_run02_cross_pm30_off_r02",
+  "trajectory": "cross_pm30",
+  "correction": "off",
+  "repetition": "r02",
+  "method": "step_first_jump_offset_with_all_transition_validation",
+  "main_csv": "data/real/raw/main_2026-06-06_run02_cross_pm30_off_r02.csv",
+  "vision_csv": "data/vision/raw/vision_2026-06-06_run02_cross_pm30_off_r02.csv",
+  "correction_csv": "data/real/raw/correction_2026-06-06_run02_cross_pm30_off_r02.csv",
+  "simscape_csv": "data/simulation/raw/simscape_run02_nominal_cross_pm30.csv",
+  "measured_position_csv": "data/real/derived/measured_position_2026-06-06_run02_cross_pm30_off_r02.csv",
+  "merged_csv": "data/processed/merged_2026-06-06_run02_cross_pm30_off_r02.csv",
+  "source_total_vision_rows": 358,
+  "source_valid_vision_rows": 345,
+  "aligned_vision_rows": 345,
+  "main_rows": 450,
+  "merged_rows": 450,
+  "merged_coverage_ratio": 1.0,
+  "max_interpolation_gap_ms": 500.0,
+  "anchors": [
+    {
+      "vision_time_ms": 1780797197767.253,
+      "main_time_ms": 5000.0
+    }
+  ],
+  "diagnostics": {
+    "jump_threshold_mm": 10.0,
+    "event_count": 8,
+    "main_transition_times_ms": [
+      5000.0,
+      10000.0,
+      15000.0,
+      20000.0,
+      25000.0,
+      30000.0,
+      35000.0,
+      40000.0
+    ],
+    "vision_event_times_ms": [
+      1780797197767.253,
+      1780797202726.9521,
+      1780797207818.687,
+      1780797212778.569,
+      1780797217876.911,
+      1780797222841.2239,
+      1780797227799.207,
+      1780797232761.006
+    ],
+    "vision_jump_distances_mm": [
+      30.13054748921765,
+      26.44882912342246,
+      32.63173599427404,
+      27.04934603645715,
+      29.5513709495854,
+      27.16570243892103,
+      33.209644683434966,
+      28.318854496607027
+    ],
+    "anchor_residuals_ms": [
+      0.0,
+      -40.30078125,
+      51.43408203125,
+      11.316162109375,
+      109.657958984375,
+      73.970947265625,
+      31.9541015625,
+      -6.246826171875
+    ],
+    "max_abs_anchor_residual_ms": 109.657958984375
+  },
+  "tracking_metrics": {
+    "row_count": 450,
+    "tracking_x_rmse": 4.787998935284262,
+    "tracking_y_rmse": 2.7306347981733805,
+    "tracking_xy_rmse": 5.511923457857393,
+    "tracking_x_mae": 4.231250575170309,
+    "tracking_y_mae": 1.6601637543213628,
+    "tracking_xy_mae": 4.8124823321279475,
+    "tracking_xy_max_error": 24.589096588221448
+  }
+}

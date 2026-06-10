@@ -1,0 +1,11 @@
+analysis_scope,aggregation,trajectory,pair_count,off_mean_mm,on_mean_mm,absolute_improvement_mm,improvement_percent,improved_pair_count,improved_trajectory_count
+official_absolute,trajectory,cross_pm30,3,5.600339,5.985360,-0.385022,-6.874970,1,
+official_absolute,trajectory,reverse_grid_3x3_pm40,3,7.984567,7.066310,0.918257,11.500402,3,
+official_absolute,trajectory,diamond_pm35,3,5.641018,4.870165,0.770853,13.665144,3,
+official_absolute,trajectory,circle_r40,3,6.206851,7.767023,-1.560172,-25.136287,0,
+official_absolute,overall_equal_trajectory_weight,all,12,6.358194,6.422214,-0.064021,-1.006902,7,2
+home_normalized,trajectory,cross_pm30,3,4.213837,5.172491,-0.958653,-22.750124,1,
+home_normalized,trajectory,reverse_grid_3x3_pm40,3,7.146115,6.901933,0.244182,3.416990,3,
+home_normalized,trajectory,diamond_pm35,3,4.868019,4.139853,0.728167,14.958173,3,
+home_normalized,trajectory,circle_r40,3,5.486398,7.352748,-1.866350,-34.017761,0,
+home_normalized,overall_equal_trajectory_weight,all,12,5.428593,5.891756,-0.463164,-8.531927,7,2

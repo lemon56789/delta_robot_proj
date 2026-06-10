@@ -1,0 +1,81 @@
+{
+  "run_id": "2026-06-06_run02_cross_pm30_off_r01",
+  "trajectory": "cross_pm30",
+  "correction": "off",
+  "repetition": "r01",
+  "method": "step_first_jump_offset_with_all_transition_validation",
+  "main_csv": "data/real/raw/main_2026-06-06_run02_cross_pm30_off_r01.csv",
+  "vision_csv": "data/vision/raw/vision_2026-06-06_run02_cross_pm30_off_r01.csv",
+  "correction_csv": "data/real/raw/correction_2026-06-06_run02_cross_pm30_off_r01.csv",
+  "simscape_csv": "data/simulation/raw/simscape_run02_nominal_cross_pm30.csv",
+  "measured_position_csv": "data/real/derived/measured_position_2026-06-06_run02_cross_pm30_off_r01.csv",
+  "merged_csv": "data/processed/merged_2026-06-06_run02_cross_pm30_off_r01.csv",
+  "source_total_vision_rows": 381,
+  "source_valid_vision_rows": 369,
+  "aligned_vision_rows": 369,
+  "main_rows": 450,
+  "merged_rows": 450,
+  "merged_coverage_ratio": 1.0,
+  "max_interpolation_gap_ms": 500.0,
+  "anchors": [
+    {
+      "vision_time_ms": 1780797023309.905,
+      "main_time_ms": 5000.0
+    }
+  ],
+  "diagnostics": {
+    "jump_threshold_mm": 10.0,
+    "event_count": 8,
+    "main_transition_times_ms": [
+      5000.0,
+      10000.0,
+      15000.0,
+      20000.0,
+      25000.0,
+      30000.0,
+      35000.0,
+      40000.0
+    ],
+    "vision_event_times_ms": [
+      1780797023309.905,
+      1780797028417.102,
+      1780797033376.1401,
+      1780797038321.329,
+      1780797043422.086,
+      1780797048382.574,
+      1780797053345.4312,
+      1780797058303.0889
+    ],
+    "vision_jump_distances_mm": [
+      29.435222183635716,
+      27.884875506266834,
+      32.27787163057688,
+      25.14477480511607,
+      29.29444083781085,
+      26.41793211059488,
+      33.592904756808394,
+      28.19649455162822
+    ],
+    "anchor_residuals_ms": [
+      0.0,
+      107.197021484375,
+      66.235107421875,
+      11.424072265625,
+      112.180908203125,
+      72.6689453125,
+      35.526123046875,
+      -6.816162109375
+    ],
+    "max_abs_anchor_residual_ms": 112.180908203125
+  },
+  "tracking_metrics": {
+    "row_count": 450,
+    "tracking_x_rmse": 4.620171391559725,
+    "tracking_y_rmse": 2.349346000487912,
+    "tracking_xy_rmse": 5.183185344688677,
+    "tracking_x_mae": 4.109754627302394,
+    "tracking_y_mae": 1.4833686304030753,
+    "tracking_xy_mae": 4.576078401060483,
+    "tracking_xy_max_error": 21.00050353500394
+  }
+}

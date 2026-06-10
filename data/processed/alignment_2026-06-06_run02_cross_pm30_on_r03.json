@@ -1,0 +1,81 @@
+{
+  "run_id": "2026-06-06_run02_cross_pm30_on_r03",
+  "trajectory": "cross_pm30",
+  "correction": "on",
+  "repetition": "r03",
+  "method": "step_first_jump_offset_with_all_transition_validation",
+  "main_csv": "data/real/raw/main_2026-06-06_run02_cross_pm30_on_r03.csv",
+  "vision_csv": "data/vision/raw/vision_2026-06-06_run02_cross_pm30_on_r03.csv",
+  "correction_csv": "data/real/raw/correction_2026-06-06_run02_cross_pm30_on_r03.csv",
+  "simscape_csv": "data/simulation/raw/simscape_run02_nominal_cross_pm30.csv",
+  "measured_position_csv": "data/real/derived/measured_position_2026-06-06_run02_cross_pm30_on_r03.csv",
+  "merged_csv": "data/processed/merged_2026-06-06_run02_cross_pm30_on_r03.csv",
+  "source_total_vision_rows": 365,
+  "source_valid_vision_rows": 351,
+  "aligned_vision_rows": 351,
+  "main_rows": 450,
+  "merged_rows": 450,
+  "merged_coverage_ratio": 1.0,
+  "max_interpolation_gap_ms": 500.0,
+  "anchors": [
+    {
+      "vision_time_ms": 1780797420225.056,
+      "main_time_ms": 5000.0
+    }
+  ],
+  "diagnostics": {
+    "jump_threshold_mm": 10.0,
+    "event_count": 8,
+    "main_transition_times_ms": [
+      5000.0,
+      10000.0,
+      15000.0,
+      20000.0,
+      25000.0,
+      30000.0,
+      35000.0,
+      40000.0
+    ],
+    "vision_event_times_ms": [
+      1780797420225.056,
+      1780797425185.219,
+      1780797430289.4438,
+      1780797435251.517,
+      1780797440212.791,
+      1780797445317.2659,
+      1780797450256.624,
+      1780797455222.002
+    ],
+    "vision_jump_distances_mm": [
+      29.453040182636496,
+      26.318214928068354,
+      32.067836425303156,
+      26.09689828312936,
+      29.015376216757897,
+      26.790555444036617,
+      31.424499391398427,
+      26.47143838177291
+    ],
+    "anchor_residuals_ms": [
+      0.0,
+      -39.8369140625,
+      64.387939453125,
+      26.461181640625,
+      -12.264892578125,
+      92.2099609375,
+      31.568115234375,
+      -3.053955078125
+    ],
+    "max_abs_anchor_residual_ms": 92.2099609375
+  },
+  "tracking_metrics": {
+    "row_count": 450,
+    "tracking_x_rmse": 4.6983419053372115,
+    "tracking_y_rmse": 2.765879596971257,
+    "tracking_xy_rmse": 5.452018580708395,
+    "tracking_x_mae": 3.9797937867515514,
+    "tracking_y_mae": 1.5109209840031472,
+    "tracking_xy_mae": 4.577257645107661,
+    "tracking_xy_max_error": 24.343301705581847
+  }
+}

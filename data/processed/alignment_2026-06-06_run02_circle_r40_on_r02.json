@@ -1,0 +1,54 @@
+{
+  "run_id": "2026-06-06_run02_circle_r40_on_r02",
+  "trajectory": "circle_r40",
+  "correction": "on",
+  "repetition": "r02",
+  "method": "circle_start_hold_departure_offset",
+  "main_csv": "data/real/raw/main_2026-06-06_run02_circle_r40_on_r02.csv",
+  "vision_csv": "data/vision/raw/vision_2026-06-06_run02_circle_r40_on_r02.csv",
+  "correction_csv": "data/real/raw/correction_2026-06-06_run02_circle_r40_on_r02.csv",
+  "simscape_csv": "data/simulation/raw/simscape_run02_nominal_circle_r40.csv",
+  "measured_position_csv": "data/real/derived/measured_position_2026-06-06_run02_circle_r40_on_r02.csv",
+  "merged_csv": "data/processed/merged_2026-06-06_run02_circle_r40_on_r02.csv",
+  "source_total_vision_rows": 329,
+  "source_valid_vision_rows": 311,
+  "aligned_vision_rows": 311,
+  "main_rows": 500,
+  "merged_rows": 473,
+  "merged_coverage_ratio": 0.946,
+  "max_interpolation_gap_ms": 500.0,
+  "anchors": [
+    {
+      "vision_time_ms": 1780798739657.48,
+      "main_time_ms": 7000.0
+    }
+  ],
+  "diagnostics": {
+    "home_jump_threshold_mm": 15.0,
+    "departure_threshold_mm": 5.0,
+    "start_hold_baseline_x_mm": 33.758,
+    "start_hold_baseline_y_mm": -0.921,
+    "home_jump_event_times_ms": [
+      1780798737114.553,
+      1780798771117.94
+    ],
+    "home_jump_distances_mm": [
+      35.61528382590823,
+      36.42419614761594
+    ],
+    "departure_vision_time_ms": 1780798739657.48,
+    "motion_main_time_ms": 7000.0,
+    "end_hold_start_vision_time_ms": 1780798768570.8088,
+    "end_hold_duration_s": 2.128129005432129
+  },
+  "tracking_metrics": {
+    "row_count": 473,
+    "tracking_x_rmse": 7.571190408442644,
+    "tracking_y_rmse": 2.3394261033714283,
+    "tracking_xy_rmse": 7.924382543392861,
+    "tracking_x_mae": 4.723923194503645,
+    "tracking_y_mae": 1.9136316383406147,
+    "tracking_xy_mae": 5.4437094871370695,
+    "tracking_xy_max_error": 41.282066481706075
+  }
+}

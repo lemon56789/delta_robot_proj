@@ -1,7 +1,7 @@
 # Delta Robot Virtual Sensing - Full Context
 
 문서 목적: 외부 AI 모델이 이 리포지토리를 빠르게 이해하고, 분석/코드 지원을 수행할 수 있도록 프로젝트 전반을 한 파일로 요약한다.
-갱신일: 2026-06-06
+갱신일: 2026-06-10
 
 주의: 이 파일은 요약본이다. 상충 시 Source of Truth는 `docs/*` -> `AGENTS.md` -> `README.md` -> 코드 순서를 따른다.
 
@@ -47,13 +47,14 @@ Target Trajectory
 - `docs/hardware_experiment_index.md`: 하드웨어 실험 문서 인덱스
 - `docs/hardware_experiment_base_config.md`: 하드웨어/제어/전원/비전/로그 공통 설정
 - `docs/hardware_experiment_run_*.md`: 커미셔닝, baseline 수집, 보정 비교, 최종 시연용 run protocol
-- `kinematics/`: 역기구학/순기구학 구현 및 검증 예정 위치
-- `simulation/`: RecurDyn, Nastran, Simscape 기반 시뮬레이션 자산 예정 위치
+- `kinematics/`: 역기구학/순기구학 구현, 왕복 검증 및 workspace 분석
+- `simulation/`: RecurDyn, Nastran, Simscape 기반 시뮬레이션 자산
 - `hardware/`: 실물 제작, 배선, BOM, 조립 자료
 - `control/`: Arduino 제어 로직 및 파라미터
 - `virtual_sensor/`: 가상 센서 학습/추론 코드
 - `data/`: 실험/시뮬레이션 원본 및 가공 데이터
-- `data/real/raw/`: Run 01 main logger CSV/JSON/TXT 저장 경로
+- `data/real/raw/`: Run 01/02 main, correction, metadata, serial raw
+  artifact 저장 경로
 - `data/real/derived/`: angle-derived measured position CSV 저장 경로
 - `data/vision/raw/`: 비전 기반 raw ground-truth 로그 저장 기준 경로
 - `data/vision/calibration/`: calibration/homography artifact 저장 경로
@@ -187,7 +188,11 @@ Correction:
 - correction unavailable fallback: uncorrected target position 사용
 - SoT 의미는 `measured_position - sim_position`이며, 현재 `Simscape` CSV의 `target_position - sim_position` 값은 임시 diagnostic으로만 해석한다.
 - `error_*`는 raw Simscape export에서 확정하지 않고, measured data 구조가 정렬된 processed merged dataset 단계에서 생성한다.
-- safety clamp 범위는 아직 미정이다.
+- 현재 Run 02 실행값은 XY gain `0.25`, XY vector norm clamp `2 mm`,
+  Z correction off다.
+- 현재 제어 분류는 encoder feedback closed loop가 아니라
+  `theta*_meas=command_echo_no_encoder` 기반 PC-side feedforward
+  correction이다.
 
 ## 7) 비전 기반 Ground-Truth 측정계
 현재 기준 문서: `docs/vision_tracking.md`
@@ -331,16 +336,24 @@ Run 00 상태:
 
 Arduino command mapping:
 - 입력 command는 raw servo angle이 아니라 SoT 기준 `theta_cmd` [deg]다.
-- 기본 변환식은 `servo_angle_i = center_cmd_i + sign_i * theta_cmd_i + fine_offset_i`다.
+- 기본 변환식은
+  `servo_angle_i = center_cmd_i + sign_i * theta_cmd_i * theta_gain_i + fine_offset_i`다.
 - 현재 기록값:
   - `center_cmd_1 = 84 deg`
   - `center_cmd_2 = 86 deg`
   - `center_cmd_3 = 88 deg`
-  - `sign_i = +1`
+  - base config 문서 기록: `sign_i = +1`
   - `fine_offset_i = 0 deg`
+- 실제 Run 02에 사용한
+  `control/pick_place_state_machine_GRID.ino`의 effective mapping은
+  `sign_i = -1`, `theta_gain_i = 1.25`이며 최종
+  `servo.write()` 전에 integer servo angle로 반올림한다.
+- 따라서 base config의 sign 기록과 Run 02 firmware effective mapping은
+  후속 문서 정합성 확인이 필요하다. Run 02 actuator 분석은 실제 firmware
+  mapping을 기준으로 수행했다.
 - `center_cmd_i`는 SoT 기준 `theta_i = 0 deg`가 실제 servo command angle 몇 도에 해당하는지 나타내는 값이다.
-- 현재 확인 기준에서는 `+90 deg` command가 실제 `+90 deg`만큼 이동하므로 추가 fine offset은 없는 것으로 둔다.
-- firmware 예정 경로는 `control/motor_test.ino`, `control/pick_place_state_machine.ino`지만 아직 repo에는 추가되지 않았다.
+- 현재 실행 firmware는 `control/pick_place_state_machine_GRID.ino`이며
+  보조 시험 firmware로 `control/motor_test_IK.ino`가 있다.
 
 Run 00 기본 확인 순서:
 - 모든 arm을 `theta_i = 0 deg`에서 시작한다.
@@ -360,7 +373,121 @@ Run 01-pre 상태:
   - `data/processed/merged_2026-06-05_run01_pre_*.csv`
 - `virtual_sensor/check_dataset.py` 검증에서 static/cross/square merged CSV 모두 16-column shape와 `has_nan=False`를 확인했다.
 - 한계: cross marker/valid ratio는 약 `92.98%`, square는 약 `93.21%`였고, 현재 `theta*_meas`는 실제 encoder가 아니라 `command_echo_no_encoder`다. 따라서 Run 01-pre artifact는 최종 학습 데이터가 아니다.
-- 현재 `experiments/run01_main_logger.py`는 pre trajectory만 지원한다. Run 01-main/holdout 실행 전 main/holdout trajectory 지원 추가가 필요하다.
+
+Run 01-main 및 holdout 상태:
+- Run 01-main은 static center, cross `±40 mm`, square `±40 mm`, circle
+  `r=40 mm`, grid `3x3 ±40 mm`를 각각 3회 수행한 총 15개 run이다.
+- Run 01-main 15개는 trajectory-aware alignment와 phase-boundary
+  realignment를 거쳐 총 `5,158` processed row로 확정되었다.
+- complete holdout은 static center, cross `±30 mm`, square `±30 mm`,
+  grid `3x3 ±40 mm` 4개이며 fitting과 tuning에서 제외했다.
+- cross/square/grid는 stable position에서 `5 mm` departure event를
+  검출해 main phase boundary와 대응시킨다. 이 수정으로 다음 setpoint
+  이동이 이전 phase 끝에 포함되던 alignment 오류를 제거했다.
+- processed dataset은 fixed 16-column schema, finite value, strictly
+  increasing timestamp와 `has_nan=False` 검증을 통과했다.
+
+Run 01 Ridge 가상센서:
+- 첫 모델은 NumPy 기반 standardized Ridge regression이다.
+- feature는 `theta*_cmd`, `theta*_meas`, `sim_x/y/z`, target은
+  `error_x/y/z`다.
+- repetition 단위 run-level 3-fold CV로 alpha를 선택하고 main 15개
+  전체로 최종 모델을 재학습했다.
+- 최종 모델:
+  `virtual_sensor/models/ridge_run01_main_2026-06-06.npz`
+- 선택 alpha: `100`
+- main OOF macro XY RMSE: `4.887 mm`
+- complete holdout 4개 macro XY RMSE:
+  - zero prediction: `4.533 mm`
+  - Ridge: `2.848 mm`
+  - improvement: `37.174%`
+- holdout run별 개선율은 static `43.427%`, cross `16.933%`, square
+  `36.110%`, grid `45.895%`다.
+- holdout alignment 결함을 진단하고 수정한 뒤 얻은 retrospective
+  결과이므로 fresh Run 02를 독립 성능 gate로 사용했다.
+
+Run 02 correction 비교:
+- 실행일은 `2026-06-07`이며 기존 준비 식별자와의 연속성을 위해 raw
+  run ID의 날짜 문자열은 `2026-06-06`을 유지했다.
+- trajectory는 cross `±30 mm`, reverse grid `3x3 ±40 mm`, diamond
+  `±35 mm`, circle `r=40 mm`다.
+- 각 trajectory에서 OFF/ON을 repetition별 3회 수행해 총 24개 run,
+  12개 paired comparison을 확보했다.
+- correction 설정은 gain `0.25`, XY clamp `2 mm`, Z correction off다.
+- generated artifact:
+  - measured-position CSV 24개
+  - fixed 16-column merged CSV 24개
+  - alignment sidecar JSON 24개
+  - comparison report 1개
+- 공식 trajectory별 `tracking_xy_rmse` 3회 평균이다. 표의
+  `improvement`는 repetition별 개선율을 계산한 뒤 3회 평균한 값이다.
+
+| trajectory | OFF mean | ON mean | improvement | improved pairs |
+|---|---:|---:|---:|---:|
+| cross | `5.6003 mm` | `5.9854 mm` | `-7.73%` | `1/3` |
+| reverse grid | `7.9846 mm` | `7.0663 mm` | `+11.05%` | `3/3` |
+| diamond | `5.6410 mm` | `4.8702 mm` | `+13.67%` | `3/3` |
+| circle | `6.2069 mm` | `7.7670 mm` | `-25.41%` | `0/3` |
+
+- 네 trajectory 동일가중 공식 결과는 OFF `6.3582 mm`, ON
+  `6.4222 mm`다. 평균 RMSE를 직접 비교하면 `1.01%` 악화이며,
+  repetition별 개선율을 먼저 계산해 평균하면 `2.10%` 악화다. 어느
+  정의에서도 전체 개선으로 판단하지 않았다.
+- 모델 predicted error와 OFF 실제 tracking error 방향은
+  `95.6~100%` 일치해 correction sign 자체는 정상으로 판단했다.
+
+Run 02 기존 데이터 재분석:
+- 구현: `experiments/run02_reanalyze.py`
+- 결과:
+  `experiments/results/run02_reanalysis_2026-06-07.json`
+- 12개 absolute RMSE는 공식 comparison report와 차이 `0`으로
+  재현됐다.
+- 각 run 초기 `home_1`의 `vision-target` 중앙값을 제거한
+  home-normalized 결과:
+
+| trajectory | OFF mean | ON mean | improvement | improved pairs |
+|---|---:|---:|---:|---:|
+| cross | `4.2138 mm` | `5.1725 mm` | `-22.75%` | `1/3` |
+| reverse grid | `7.1461 mm` | `6.9019 mm` | `+3.42%` | `3/3` |
+| diamond | `4.8680 mm` | `4.1399 mm` | `+14.96%` | `3/3` |
+| circle | `5.4864 mm` | `7.3527 mm` | `-34.02%` | `0/3` |
+
+- Diamond만 absolute와 home-normalized에서 모두 세 repetition 개선됐다.
+- main CSV의 실제 전송 theta를 Arduino integer servo mapping으로
+  변환했을 때 nominal command와 달라진 비율:
+  - cross `11.1%`
+  - reverse grid `45.5%`
+  - diamond `27.1%`
+  - circle `33.0%`
+- cross에서는 correction 대부분이 실제 integer actuator command
+  변화로 이어지지 않아 actuator resolution 제한이 크다.
+- Diamond는 transition/stable의 absolute와 normalized 네 조건에서
+  모두 개선됐다.
+- Circle은 radial RMSE가 `3.319 -> 2.843 mm`로 감소했지만 tangential
+  RMSE가 `3.593 -> 4.442 mm`, 평균 tangential error가
+  `0.048 -> 3.037 mm`로 증가했다.
+- Circle equivalent median phase lag는 OFF `2.2 ms`, ON `361.7 ms`였고
+  ON 세 repetition의 diagnostic best shift는 모두 `350 ms`였다.
+- best-shift RMSE는 OFF `4.791 mm`, ON `4.220 mm`지만 실제 동적 lag를
+  제거하는 diagnostic이므로 공식 time-domain metric을 대체하지 않는다.
+
+최소 home repeatability 후속 실험 준비:
+- +X 이동은 -X 이동보다 부하와 진동이 큰 것으로 관찰됐다.
+- `(+60, 0)`에서 home으로 복귀하면 원점에 더 가까워지는 경향이
+  관찰되어, 동일 방향 접근 효과를 최소 실험으로 확인하기로 했다.
+- 확정 run ID:
+  - `2026-06-07_home_repeat_xp40_r01-r03`
+  - `2026-06-07_home_repeat_xp60_r01-r03`
+- 공통 순서는 `+X preload -> 2 s hold -> home -> 5 s stabilization`이다.
+- xp40 세 run을 먼저 수행하고 안전 확인 후 xp60으로 진행한다.
+- Computer 2 Codex 인수인계:
+  `experiments/home_repeatability_computer2_codex_handoff.md`
+- Windows Vision Codex 인수인계:
+  `experiments/home_repeatability_vision_windows_codex_handoff.md`
+- 두 컴퓨터는 같은 run ID와 `VISION READY`/`RUN END` handshake를
+  사용한다.
+- run별 vision zero 또는 homography 재설정은 실제 home shift를
+  제거하므로 금지한다.
 
 ## 10) 프로젝트 로드맵
 현재 기준 문서: `docs/roadmap.md`
@@ -381,12 +508,17 @@ Run 01-pre 상태:
 - Stage 1 설계 기준 확정: 완료
 - Stage 2 운동학 정의 및 구현: nominal geometry, IK, workspace/angle range 진단까지 1차 완료
 - Stage 3 FK 검증 및 기본 해석: FK 최소 구현 및 round-trip/workspace 검증 진행 중
-- Stage 4 시뮬레이션 및 데이터 경로 정리: Run 01-pre 기준 부분 완료
-- Stage 5 외부 ground-truth 측정계 구축: Run 00/Run 01-pre 기준 초기 구현 완료, 품질 개선 필요
+- Stage 4 시뮬레이션 및 데이터 경로 정리: Run 01/02 Simscape 및
+  alignment/merge 경로 구현 완료
+- Stage 5 외부 ground-truth 측정계 구축: Run 00/01/02 vision XY 수집과
+  후처리 검증 완료, home 반복성 품질 확인 예정
 - Stage 6 fake pipeline 구성: 최소 경로 완료
-- Stage 7 실제 데이터 수집: Run 00 통과, Run 01-pre pipeline validation 완료, Run 01-main 준비 중
-- Stage 8 가상센서 학습 및 보정: 미착수, 첫 모델은 linear regression/Ridge baseline으로 계획
-- Stage 9 폐루프 적용 및 성능 검증: 미착수
+- Stage 7 실제 데이터 수집: Run 00 통과, Run 01-pre, Run 01-main,
+  holdout 및 Run 02 24개 run 수집 완료
+- Stage 8 가상센서 학습 및 보정: Ridge baseline 학습, holdout 평가,
+  correction engine 구현 완료
+- Stage 9 폐루프 적용 및 성능 검증: PC-side feedforward Run 02 검증 및
+  재분석 완료, 전체 개선은 미확인
 - Stage 10 외부 측정계 제거 후 운영 검증: 미착수
 
 현재 구현 기준 핵심 상태:
@@ -401,9 +533,25 @@ Run 01-pre 상태:
 - `experiments/run01_preprocess.py`가 Run 01 raw main, vision, Simscape CSV를 읽어 angle-derived measured position과 processed merged dataset을 생성한다.
 - Run 01-pre static/cross/square processed merged dataset은 생성 및 shape/NaN 검증을 통과했다.
 - Run 01-pre artifact는 pipeline validation용이며 final training dataset으로 채택하지 않는다.
-- 시간 제약상 첫 virtual sensor model은 PyTorch neural network가 아니라 linear regression 또는 Ridge regression으로 진행한다. PyTorch MLP는 linear/Ridge baseline 이후 필요성이 확인될 때의 후속 확장으로 둔다.
+- Run 01-main 15개 processed dataset은 phase-boundary realignment 후
+  총 `5,158` row이며 Ridge training dataset으로 사용했다.
+- 첫 virtual sensor model은 NumPy 기반 standardized Ridge regression으로
+  구현되었고 최종 `alpha=100` 모델이 저장되어 있다. PyTorch MLP는
+  Ridge baseline보다 명확한 개선 필요성이 확인될 때의 후속 확장이다.
 - 초기 모델의 기본 feature는 `theta1_cmd`, `theta2_cmd`, `theta3_cmd`, `theta1_meas`, `theta2_meas`, `theta3_meas`, `sim_x`, `sim_y`, `sim_z`이고 target은 processed merged dataset의 `error_x`, `error_y`, `error_z`다.
 - Ridge regularization strength와 feature 선택은 validation split에서만 결정하고, Run 01-holdout은 fitting/tuning에 사용하지 않는다.
+- Run 01 complete holdout 4개에서 frozen Ridge macro XY RMSE는
+  `4.533 -> 2.848 mm`, `37.174%` 개선됐다.
+- `virtual_sensor/correction_engine.py`가 error prediction을 XY target
+  correction, vector clamp, corrected-target IK와 nominal fallback으로
+  변환한다.
+- Run 02는 gain `0.25`, clamp `2 mm`로 24개 fresh hardware run을
+  완료했다. 전체 동일가중 absolute XY RMSE는 개선되지 않았지만
+  Diamond는 세 pair 모두 일관된 개선을 보였다.
+- `experiments/run02_preprocess.py`가 24개 Run 02 merged dataset과 12개
+  OFF/ON comparison을 생성한다.
+- `experiments/run02_reanalyze.py`가 home normalization, integer servo
+  command, step segment와 circle phase diagnostic을 산출한다.
 - `wB = 46.0 mm` 기준 Python fake pipeline CSV/JSON과 workspace sweep artifact가 다시 생성되었다.
 - Simulink/Simscape에서 새 `sim_*` CSV를 받아 비교한 결과, header/row/time/input field는 일치했고 `sim_*`는 예상대로 약 `1 sample = 20 ms` lag를 보였다.
 - 현재 Simscape CSV의 `error_*`는 `target_position - sim_position` diagnostic 값이므로 SoT correction field인 `measured_position - sim_position`으로 직접 사용하지 않는다.
@@ -414,6 +562,13 @@ Run 01-pre 상태:
 - base config에는 `wB=46 mm`, `H=285 mm`, 전원 구조, `STOP` 미구현/물리 차단 우선, `center_cmd_i=84/86/88 deg`, Run 00 단계적 theta test range, vision 위치 확인 기준이 반영되었다.
 - Run 00 문서는 A/B/C gate 구조로 작성되었고, A/B/C gate는 통과 상태로 정리되었다.
 - Run 01 문서는 pre/main/holdout 구조로 작성되었고, main은 training/validation, holdout은 Run 02 comparison baseline으로 분리한다.
+- Run 02 공식 비교와 재분석 결과는
+  `docs/hardware_experiment_run_02_corrected_comparison.md`,
+  `experiments/results/run02_comparison_2026-06-07.json`,
+  `experiments/results/run02_reanalysis_2026-06-07.json`에 기록되어 있다.
+- 최소 후속 하드웨어 실험은 xp40/xp60 preload 후 home 반복성 6개
+  run이며 Computer 2와 Windows Vision Codex용 독립 인수인계 문서가
+  준비되어 있다.
 - 실제 역할 기준으로 S/T/N은 하드웨어 제작/조립을 수행했고, S는 팀장 역할을 맡았으며, N은 프로파일 주문제작 요청을 담당했다. Y는 Arduino 제어와 함께 회로 구성/배선 및 전원/구동계 연결을 담당했다. L은 시스템 통합, 가상센싱, 데이터 처리/학습, 비전 기반 측정을 담당한다.
 
 ## 11) 개발 및 변경 원칙
@@ -436,20 +591,42 @@ AGENTS.md 기준 핵심 원칙:
 
 ## 13) 바로 다음 작업
 우선순위:
-1. `experiments/run01_main_logger.py`에 Run 01-main/holdout trajectory 지원을 추가한다.
-2. Run 01-main을 correction off, 동일 gain/camera/marker/calibration 조건으로 수집한다.
-3. 각 Run 01-main `run_id`에 대해 Simscape output을 생성한다.
-4. `experiments/run01_preprocess.py --run-id <run_id>`로 measured position과 processed merged dataset을 생성한다.
-5. `virtual_sensor/check_dataset.py`로 processed dataset의 16-column shape, NaN, timestamp, marker valid ratio를 검증한다.
-6. Run 01-main processed CSV로 linear/Ridge baseline을 학습하고 validation에서만 alpha/feature 선택을 수행한다.
-7. Run 01-holdout은 같은 처리 흐름으로 생성하되 fitting/tuning에 사용하지 않고 최종 일반화 평가에만 사용한다.
-8. Run 02에서 holdout 대응 trajectory를 correction on 상태로 다시 실행해 baseline 대비 성능을 비교한다.
+1. Computer 2와 Windows vision에서 xp40 home repeatability
+   `r01-r03`을 수집한다.
+2. xp40 세 run이 진동/간섭/stall 없이 끝난 경우에만 xp60
+   `r01-r03`을 수집한다.
+3. 각 run의 마지막 home stabilization 구간에서 XY 중앙값, X/Y
+   표준편차, 반복 간 최대 pairwise 거리와 초기 대비 drift를 계산한다.
+4. xp40과 xp60 반복성이 비슷하면 부하가 작은 xp40을 공통 preload로
+   선택한다. xp60은 반복성이 더 좋아도 strong vibration 또는 간섭이
+   있으면 선택하지 않는다.
+5. 선택된 preload를 각 run 전에 독립 적용할 수 있도록 Diamond 최소
+   OFF/ON 실행 절차를 확정한다.
+6. 시간이 허용되면 Diamond OFF/ON 1 pair를 동일 preload, camera,
+   marker, calibration, model, gain과 clamp로 수집한다.
+7. 추가 Diamond pair는 absolute/home-normalized 및 transition/stable
+   metric으로 기존 Run 02 결과와 비교한다.
+8. Cross는 현재 실제 integer command 변화율 `11.1%`이므로 actuator
+   resolution 개선 전 재실험 우선순위를 낮게 둔다.
+9. Circle은 정적 error correction과 약 `350 ms` 동적 phase lag를
+   분리하는 정책이 없으므로 전체 재수집보다 모델/제어 정책 검토를
+   우선한다.
 
 BLOCKER 가능성이 있는 항목:
-- Run 01-main/holdout trajectory가 logger에 추가되지 않으면 main/holdout 수집을 시작할 수 없다.
-- marker valid ratio가 Run 01-main/holdout에서 `>=95%`에 미달하면 rerun 또는 rejection note가 필요하다.
+- xp40에서 진동 증가, servo stall, link interference 또는 home 복귀
+  실패가 발생하면 xp60을 진행하지 않는다.
+- Computer 2 Serial Monitor를 run 사이에 다시 열면 Arduino reset으로
+  접근 이력이 바뀌므로 해당 실험 세션을 중단한다.
+- vision 기록이 preload 명령 전에 시작되지 않거나 마지막 home
+  stabilization `5 s`를 포함하지 않으면 해당 run은 반복성 분석에
+  사용할 수 없다.
+- run별 vision zero, homography 또는 calibration 재설정은 실제 home
+  shift를 제거하므로 금지한다.
+- marker가 `1 s` 넘게 연속 소실되면 해당 run은 invalid 후보로
+  기록한다.
 - 현재 `theta*_meas`가 `command_echo_no_encoder` 상태로 유지되면 `error_z`는 계속 diagnostic으로만 해석해야 한다.
-- Simscape output이 같은 target/command trajectory와 time axis로 생성되지 않으면 processed merge를 학습 데이터로 사용할 수 없다.
+- current servo API가 integer command resolution을 유지하면 작은
+  correction은 실제 actuator 변화로 이어지지 않을 수 있다.
 
 ## 14) 유지보수 규칙
 - 이 파일은 외부 AI 분석용 요약본이다.
