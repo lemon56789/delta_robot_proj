@@ -1,7 +1,7 @@
 # Delta Robot Virtual Sensing - Full Context
 
 문서 목적: 외부 AI 모델이 이 리포지토리를 빠르게 이해하고, 분석/코드 지원을 수행할 수 있도록 프로젝트 전반을 한 파일로 요약한다.
-갱신일: 2026-06-07
+갱신일: 2026-06-10
 
 주의: 이 파일은 요약본이다. 상충 시 Source of Truth는 `docs/*` -> `AGENTS.md` -> `README.md` -> 코드 순서를 따른다.
 
@@ -47,8 +47,8 @@ Target Trajectory
 - `docs/hardware_experiment_index.md`: 하드웨어 실험 문서 인덱스
 - `docs/hardware_experiment_base_config.md`: 하드웨어/제어/전원/비전/로그 공통 설정
 - `docs/hardware_experiment_run_*.md`: 커미셔닝, baseline 수집, 보정 비교, 최종 시연용 run protocol
-- `kinematics/`: 역기구학/순기구학 구현 및 검증 예정 위치
-- `simulation/`: RecurDyn, Nastran, Simscape 기반 시뮬레이션 자산 예정 위치
+- `kinematics/`: 역기구학/순기구학 구현, 왕복 검증 및 workspace 분석
+- `simulation/`: RecurDyn, Nastran, Simscape 기반 시뮬레이션 자산
 - `hardware/`: 실물 제작, 배선, BOM, 조립 자료
 - `control/`: Arduino 제어 로직 및 파라미터
 - `virtual_sensor/`: 가상 센서 학습/추론 코드
@@ -419,7 +419,8 @@ Run 02 correction 비교:
   - fixed 16-column merged CSV 24개
   - alignment sidecar JSON 24개
   - comparison report 1개
-- 공식 trajectory별 `tracking_xy_rmse` 3회 평균:
+- 공식 trajectory별 `tracking_xy_rmse` 3회 평균이다. 표의
+  `improvement`는 repetition별 개선율을 계산한 뒤 3회 평균한 값이다.
 
 | trajectory | OFF mean | ON mean | improvement | improved pairs |
 |---|---:|---:|---:|---:|
@@ -429,7 +430,9 @@ Run 02 correction 비교:
 | circle | `6.2069 mm` | `7.7670 mm` | `-25.41%` | `0/3` |
 
 - 네 trajectory 동일가중 공식 결과는 OFF `6.3582 mm`, ON
-  `6.4222 mm`로 전체 개선으로 판단하지 않았다.
+  `6.4222 mm`다. 평균 RMSE를 직접 비교하면 `1.01%` 악화이며,
+  repetition별 개선율을 먼저 계산해 평균하면 `2.10%` 악화다. 어느
+  정의에서도 전체 개선으로 판단하지 않았다.
 - 모델 predicted error와 OFF 실제 tracking error 방향은
   `95.6~100%` 일치해 correction sign 자체는 정상으로 판단했다.
 

@@ -32,16 +32,21 @@
 10. 외부 측정계 제거 후 운영 검증
 
 ## 4-A. Current Status Snapshot
-- 기준일: `2026-06-06`
+- 기준일: `2026-06-10`
 - Stage 1 설계 기준 확정: 완료
 - Stage 2 운동학 정의 및 구현: 진행 중
 - Stage 3 FK 검증 및 기본 해석: 진행 중
-- Stage 4 시뮬레이션 및 데이터 경로 정리: Run 01-pre 기준 부분 완료
-- Stage 5 외부 ground-truth 측정계 구축: Run 00/Run 01-pre 기준 초기 구현 완료, 품질 개선 필요
+- Stage 4 시뮬레이션 및 데이터 경로 정리: Run 01/02 Simscape 및
+  alignment/merge 경로 구현 완료
+- Stage 5 외부 ground-truth 측정계 구축: Run 00/01/02 vision XY 수집과
+  후처리 검증 완료, home 반복성 품질 확인 필요
 - Stage 6 fake pipeline 구성: 최소 경로 완료
-- Stage 7 실제 데이터 수집: Run 00 통과, Run 01-pre pipeline validation 완료, Run 01-main 준비 중
-- Stage 8 가상센서 학습 및 보정: 미착수, 첫 모델은 linear regression/Ridge baseline으로 계획
-- Stage 9 폐루프 적용 및 성능 검증: 미착수
+- Stage 7 실제 데이터 수집: Run 00, Run 01-pre, Run 01-main, holdout 및
+  Run 02 24개 run 수집 완료
+- Stage 8 가상센서 학습 및 보정: Ridge baseline 학습, holdout 평가 및
+  correction engine 구현 완료
+- Stage 9 폐루프 적용 및 성능 검증: PC-side feedforward Run 02 검증과
+  재분석 완료, 전체 개선은 확인되지 않음
 - Stage 10 외부 측정계 제거 후 운영 검증: 미착수
 
 현재 구현 기준 핵심 상태:
@@ -56,6 +61,15 @@
 - Run 00 A/B/C gate는 통과 상태로 정리되었다.
 - Run 01-pre static/cross/square raw main, vision, Simscape CSV가 확보되었고, `experiments/run01_preprocess.py`로 angle-derived measured position과 processed merged dataset을 생성했다.
 - Run 01-pre merged dataset은 `virtual_sensor/check_dataset.py`에서 16-column shape와 `has_nan=False`를 확인했다. 다만 pre 산출물은 pipeline validation용이며 최종 학습 데이터로 채택하지 않는다.
+- Run 01-main 15개 processed dataset은 phase-boundary realignment 후
+  총 `5,158` row로 확정되었고 Ridge 학습에 사용했다.
+- Run 01 complete holdout 4개에서 frozen Ridge macro XY RMSE는
+  `4.533 -> 2.848 mm`, `37.174%` 개선됐다.
+- Run 02는 gain `0.25`, XY clamp `2 mm`로 24개 fresh hardware run과
+  12개 OFF/ON pair를 수집했다.
+- Run 02 네 trajectory 동일가중 absolute XY RMSE는 OFF `6.3582 mm`,
+  ON `6.4222 mm`로 평균 RMSE 직접 비교 기준 `1.01%` 악화됐다.
+  Diamond는 세 pair 모두 개선됐지만 전체 개선으로 판단하지 않는다.
 
 ## 5. Stage 1. 설계 기준 확정
 ### Goal
@@ -169,7 +183,10 @@ FK를 정리하고, IK↔FK 왕복 검증으로 운동학 일관성을 확인한
 - 다만 현재 `Simscape` CSV의 `error_x`, `error_y`, `error_z`는 `target_position - sim_position` diagnostic 값이며, SoT correction field 의미인 `measured_position - sim_position`과 다르다.
 - 하드웨어 또는 estimator 경로에서 `measured_position`을 확보한 뒤 `Simulink/Simscape` export의 `error_*` 계산을 SoT 기준으로 수정해야 한다.
 - Run 01-pre real/sim/vision 로그 기준으로 `data/real/derived/measured_position_<run_id>.csv`와 `data/processed/merged_<run_id>.csv` 생성 경로가 실제 파일로 검증되었다.
-- 현재 Run 01-pre alignment는 vision 로그 시작 시각을 main 첫 timestamp에 맞추는 provisional relative-time alignment다. Run 01-main에서는 marker valid ratio와 alignment 품질을 다시 검증해야 한다.
+- Run 01-main과 Run 02에서는 trajectory-aware alignment와 phase-boundary
+  realignment를 적용해 processed merged dataset을 생성했다.
+- Run 02 전처리는 24개 measured-position CSV, fixed 16-column merged
+  CSV와 alignment sidecar JSON을 생성하고 12개 OFF/ON pair를 비교한다.
 
 ## 9. Stage 5. 외부 Ground-Truth 측정계 구축
 ### Goal
@@ -194,7 +211,10 @@ FK를 정리하고, IK↔FK 왕복 검증으로 운동학 일관성을 확인한
 ### Current Status
 - Run 00-C stopcheck와 Run 01-pre static/cross/square에서 `data/vision/raw/vision_<run_id>.csv` 형식의 vision raw log가 생성되었다.
 - Run 01-pre 기준 static은 marker/valid ratio `100%`, cross는 약 `92.98%`, square는 약 `93.21%`로 확인되었다.
-- Run 01-main/holdout에서는 marker valid ratio `>=95%`를 권장하며, motion blur, occlusion, lighting 문제를 줄여야 한다.
+- Run 01-main, holdout과 Run 02에서 vision XY 수집 및 후처리 경로를
+  사용했다.
+- 초기 home 위치 차이가 correction 크기와 비슷하거나 더 크게 나타난
+  pair가 있어 preload 기반 home 반복성 품질 확인이 후속 과제다.
 
 ## 10. Stage 6. Fake Pipeline 구성
 ### Goal
@@ -224,7 +244,8 @@ FK를 정리하고, IK↔FK 왕복 검증으로 운동학 일관성을 확인한
 - 결과는 `data/fake_pipeline/fake_pipeline_sample_2026-05-04.csv`와 sidecar JSON으로 저장된다.
 - 현재 목적은 realistic sensor model이 아니라 CSV 계약과 end-to-end wiring 검증이다.
 - `virtual_sensor/dataset.py`와 `virtual_sensor/check_dataset.py`로 해당 CSV를 읽어 feature/target shape, NaN 여부, 기초 통계를 확인할 수 있다.
-- correction model 자체는 아직 없으므로 Stage 6은 최소 데이터 경로 확보까지 진행된 상태다.
+- Stage 6의 fake pipeline 목적은 달성됐으며, 실제 모델과 correction
+  검증은 Stage 8~9 경로로 확장되었다.
 
 ## 11. Stage 7. 실제 데이터 수집
 ### Goal
@@ -256,7 +277,12 @@ FK를 정리하고, IK↔FK 왕복 검증으로 운동학 일관성을 확인한
   - `data/simulation/raw/simscape_2026-06-05_run01_pre_*.csv`
   - `data/real/derived/measured_position_2026-06-05_run01_pre_*.csv`
   - `data/processed/merged_2026-06-05_run01_pre_*.csv`
-- 다음 단계는 `run01_main_logger.py`에 Run 01-main/holdout trajectory 지원을 추가한 뒤 Run 01-main baseline dataset을 수집하는 것이다.
+- Run 01-main은 5개 trajectory를 각 3회 수행한 총 15개 run이며,
+  phase-boundary realignment 후 `5,158` processed row로 확정되었다.
+- complete holdout 4개는 fitting과 tuning에서 제외하고 최종 일반화
+  평가에 사용했다.
+- Run 02는 4개 trajectory의 OFF/ON을 각 3회 수행해 총 24개 run과
+  12개 paired comparison을 확보했다.
 
 ## 12. Stage 8. 가상센서 학습 및 보정
 ### Goal
@@ -280,11 +306,20 @@ FK를 정리하고, IK↔FK 왕복 검증으로 운동학 일관성을 확인한
 - 모델 입출력이 현재 시스템 계약과 맞는다
 
 ### Current Status
-- 아직 baseline model, training code, evaluation metric 구현은 없다.
-- 다만 `virtual_sensor/`에는 fake pipeline CSV를 읽는 최소 loader와 shape check 경로가 추가되어 모델 입력 구조는 선행 검증 가능하다.
-- 시간 제약상 첫 모델은 PyTorch neural network가 아니라 linear regression 또는 Ridge regression으로 진행한다. PyTorch MLP는 linear/Ridge baseline 이후 필요성이 확인될 때의 후속 확장으로 둔다.
-- 기본 feature는 `theta*_cmd`, `theta*_meas`, `sim_x/y/z`이고 target은 processed merged dataset의 `error_x/y/z`다.
-- Ridge alpha와 feature 선택은 validation split에서만 결정하고, Run 01-holdout은 최종 비교 전까지 fitting/tuning에 사용하지 않는다.
+- 첫 모델은 NumPy 기반 standardized Ridge regression으로 구현했다.
+- 기본 feature는 `theta*_cmd`, `theta*_meas`, `sim_x/y/z`이고 target은
+  processed merged dataset의 `error_x/y/z`다.
+- repetition 단위 run-level 3-fold CV로 `alpha=100`을 선택하고 Run
+  01-main 15개 전체로 최종 모델을 재학습했다.
+- 최종 모델은
+  `virtual_sensor/models/ridge_run01_main_2026-06-06.npz`다.
+- complete holdout 4개의 macro XY RMSE는 zero prediction `4.533 mm`,
+  Ridge residual `2.848 mm`로 `37.174%` 개선됐다.
+- `virtual_sensor/correction_engine.py`는 predicted error를 XY target
+  correction, vector clamp, corrected-target IK와 nominal fallback으로
+  변환한다.
+- PyTorch MLP는 Ridge baseline보다 명확한 개선 필요성이 확인될 때의
+  후속 확장으로 둔다.
 
 ## 13. Stage 9. 폐루프 적용 및 성능 검증
 ### Goal
@@ -306,6 +341,20 @@ FK를 정리하고, IK↔FK 왕복 검증으로 운동학 일관성을 확인한
 - baseline 대비 유의미한 성능 개선이 있다
 - correction failure 시 fallback 동작이 가능하다
 
+### Current Status
+- 현재 제어는 encoder feedback closed loop가 아니라
+  `theta*_meas=command_echo_no_encoder` 기반 PC-side feedforward
+  correction이다.
+- Run 02는 gain `0.25`, XY vector norm clamp `2 mm`, Z correction off로
+  24개 fresh hardware run을 완료했다.
+- 네 trajectory 동일가중 absolute XY RMSE는 OFF `6.3582 mm`, ON
+  `6.4222 mm`로 평균 RMSE 직접 비교 기준 `1.01%` 악화됐다.
+- Diamond는 absolute와 home-normalized 기준 모두 세 pair가 개선됐지만,
+  Cross는 actuator integer resolution, reverse grid는 home offset,
+  Circle은 tangential error와 약 `350 ms` phase lag 영향이 확인됐다.
+- correction fallback 경로는 구현됐지만 전체 trajectory에서 일관된
+  성능 개선이라는 Stage 9 exit criterion은 충족하지 못했다.
+
 ## 14. Stage 10. 외부 측정계 제거 후 운영 검증
 ### Goal
 외부 비전 시스템 없이도 운영 가능한 가상센싱 기반 보정 시스템으로 전환한다.
@@ -326,23 +375,28 @@ FK를 정리하고, IK↔FK 왕복 검증으로 운동학 일관성을 확인한
 - 프로젝트 최종 목표와 일치하는 운용 구조가 된다
 
 ## 15. Immediate Priorities
-1. `experiments/run01_main_logger.py`에 Run 01-main/holdout trajectory 지원을 추가한다.
-2. Run 01-main을 correction off, 동일 gain/camera/marker/calibration 조건으로 수집한다.
-3. 각 Run 01-main `run_id`에 대해 Simscape output을 생성한다.
-4. `experiments/run01_preprocess.py --run-id <run_id>`로 measured position과 processed merged dataset을 생성한다.
-5. `virtual_sensor/check_dataset.py`로 processed dataset의 16-column shape, NaN, timestamp, marker valid ratio를 검증한다.
-6. Run 01-main processed CSV로 linear/Ridge baseline을 학습하고 validation에서만 alpha/feature 선택을 수행한다.
-7. Run 01-holdout은 같은 처리 흐름으로 생성하되 fitting/tuning에 사용하지 않고 최종 일반화 평가에만 사용한다.
+1. xp40 preload 후 home repeatability `r01-r03`을 수집한다.
+2. xp40이 진동, 간섭, stall 없이 끝난 경우에만 xp60 `r01-r03`을
+   수집한다.
+3. 마지막 home stabilization 구간의 XY 중앙값, 표준편차, 반복 간
+   최대 거리와 drift를 비교해 공통 preload를 선택한다.
+4. 선택한 preload로 Diamond 최소 OFF/ON 1 pair 실행 절차를 확정한다.
+5. 추가 Diamond 결과를 absolute, home-normalized, transition/stable
+   metric으로 기존 Run 02와 비교한다.
+6. Cross는 actuator command resolution 개선 전 재실험 우선순위를
+   낮게 두고, Circle은 정적 correction과 dynamic lag 분리 정책을 먼저
+   검토한다.
 
 ## 16. Open Items
 - `theta_cmd`와 실제 구동축의 정확한 연결
 - 최종 `theta_min`, `theta_max`
-- FK 구현 범위와 검증 기준
-- Run 01-main/holdout trajectory logger 구현
-- Run 01-main marker valid ratio와 alignment 품질
-- linear/Ridge baseline 학습/평가 스크립트
-- correction safety limits
-- Run 02 correction 적용 방식과 safety clamp
+- FK 경계 및 특이점 근처 검증
+- base config의 `sign_i=+1` 기록과 Run 02 firmware effective
+  `sign_i=-1`, `theta_gain_i=1.25` 간 정합성
+- preload 기반 home 반복성
+- integer servo command resolution 개선
+- Circle의 정적 오차와 동적 phase lag 분리
+- encoder 또는 별도 motor angle measurement 확보
 
 ## 17. Document Relation
 - 시스템 인터페이스 기준: `docs/system_data_flow.md`
